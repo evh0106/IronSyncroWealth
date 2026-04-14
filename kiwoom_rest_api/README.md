@@ -28,6 +28,13 @@ python --version
 python -m pip install --upgrade pip
 ```
 
+### 1. python 가상환경 구성
+```
+python -m venv .venv
+
+.\.venv\Scripts\activate
+```
+
 ### 2. 필수 라이브러리 설치
 ```
 pip install requests asyncio websockets 

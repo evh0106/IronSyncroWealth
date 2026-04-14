@@ -6,22 +6,28 @@
 import asyncio
 import websockets
 import json
+from contextlib import suppress
+from oauth2 import get_access_token, load_api_keys, revoke_access_token
 
 # ============================================================
 # 서버 설정
 # ============================================================
 SOCKET_URL = 'wss://api.kiwoom.com:10000/api/dostk/websocket'
 
-# TODO: 토큰 발급 후 실제 액세스 토큰으로 교체하세요.
-ACCESS_TOKEN = 'YOUR_ACCESS_TOKEN'
+
+def get_rest_host_from_socket_url(socket_url: str) -> str:
+    if 'mockapi.kiwoom.com' in socket_url:
+        return 'https://mockapi.kiwoom.com'
+    return 'https://api.kiwoom.com'
 
 
 # ============================================================
 # WebSocket 클라이언트
 # ============================================================
 class WebSocketClient:
-    def __init__(self, uri: str):
+    def __init__(self, uri: str, access_token: str):
         self.uri = uri
+        self.access_token = access_token
         self.websocket = None
         self.connected = False
         self.keep_running = True
@@ -39,7 +45,7 @@ class WebSocketClient:
             # 로그인 패킷 전송
             login_packet = {
                 'trnm': 'LOGIN',
-                'token': ACCESS_TOKEN,
+                'token': self.access_token,
             }
             print('실시간 시세 서버로 로그인 패킷을 전송합니다.')
             await self.send_message(login_packet)
@@ -156,27 +162,82 @@ async def register_realtime(client: WebSocketClient, stock_codes: list, realtime
     })
 
 
+async def command_loop(client: WebSocketClient):
+    """실행 중 사용자 명령을 받아 제어합니다. (r: 토큰 폐기, q: 종료)"""
+    while client.keep_running:
+        try:
+            command = (await asyncio.to_thread(input, '\n명령 입력 [r:토큰폐기, q:종료] > ')).strip().lower()
+        except EOFError:
+            # 입력 스트림이 없는 환경에서는 명령 루프를 종료합니다.
+            return 'eof'
+
+        if command == 'r':
+            return 'revoke'
+        if command == 'q':
+            return 'quit'
+
+
 # ============================================================
 # 메인 실행
 # ============================================================
 async def main():
-    client = WebSocketClient(SOCKET_URL)
+    rest_host = get_rest_host_from_socket_url(SOCKET_URL)
+    app_key, app_secret = load_api_keys(rest_host)
+    access_token = get_access_token(app_key, app_secret, rest_host)
+    token_revoked = False
 
-    # WebSocket 수신 태스크를 백그라운드로 실행
+    def revoke_once():
+        nonlocal token_revoked
+        if token_revoked:
+            print('토큰은 이미 폐기되었습니다.')
+            return
+        revoke_access_token(app_key, app_secret, access_token, rest_host)
+        token_revoked = True
+
+    client = WebSocketClient(SOCKET_URL, access_token)
     receive_task = asyncio.create_task(client.run())
+    command_task = asyncio.create_task(command_loop(client))
 
-    # 연결 및 로그인 완료 대기
-    await asyncio.sleep(1)
+    try:
+        # 연결 및 로그인 완료 대기
+        await asyncio.sleep(1)
 
-    # 실시간 시세 등록: 키움증권(039490) 주식 체결(0B)
-    await register_realtime(
-        client=client,
-        stock_codes=['039490'],
-        realtime_types=['0B'],
-    )
+        # 실시간 시세 등록: 키움증권(039490) 주식 체결(0B)
+        await register_realtime(
+            client=client,
+            stock_codes=['039490'],
+            realtime_types=['0B'],
+        )
 
-    # 수신 태스크 종료 대기
-    await receive_task
+        while client.keep_running:
+            done, _ = await asyncio.wait({receive_task, command_task}, return_when=asyncio.FIRST_COMPLETED)
+
+            if command_task in done:
+                command_result = command_task.result()
+                if command_result == 'revoke':
+                    revoke_once()
+                    command_task = asyncio.create_task(command_loop(client))
+                    continue
+                if command_result in ('quit', 'eof'):
+                    await client.disconnect()
+                    break
+
+            if receive_task in done:
+                break
+    finally:
+        await client.disconnect()
+
+        if not command_task.done():
+            command_task.cancel()
+            with suppress(asyncio.CancelledError):
+                await command_task
+
+        if not receive_task.done():
+            receive_task.cancel()
+            with suppress(asyncio.CancelledError):
+                await receive_task
+
+        revoke_once()
 
 
 if __name__ == '__main__':

@@ -5,60 +5,7 @@
 
 import requests
 import json
-
-# ============================================================
-# 서버 설정
-# ============================================================
-HOST = 'https://api.kiwoom.com'           # 실전투자 서버
-# HOST = 'https://mockapi.kiwoom.com'      # 모의투자 서버 (KRX만 지원)
-
-
-# ============================================================
-# 1. 액세스 토큰 발급
-# ============================================================
-def get_access_token(app_key: str, app_secret: str) -> str:
-    """
-    OAuth 2.0 방식으로 액세스 토큰을 발급받습니다.
-
-    Parameters
-    ----------
-    app_key : str
-        키움증권 OpenAPI 앱 키
-    app_secret : str
-        키움증권 OpenAPI 앱 시크릿
-
-    Returns
-    -------
-    str
-        발급된 액세스 토큰
-    """
-    url = HOST + '/oauth2/token'
-
-    headers = {
-        'Content-Type': 'application/json;charset=UTF-8',
-    }
-
-    data = {
-        'grant_type': 'client_credentials',
-        'appkey': app_key,
-        'secretkey': app_secret,
-    }
-
-    response = requests.post(url, headers=headers, json=data)
-
-    print('Code:', response.status_code)
-    print('Header:', json.dumps({key: response.headers.get(key) for key in ['next-key', 'cont-yn', 'api-id']}, indent=4, ensure_ascii=False))
-    print('Body:', json.dumps(response.json(), indent=4, ensure_ascii=False))
-
-    result = response.json()
-    if result.get('return_code') == 0:
-        access_token = result.get('token')
-        print(f'토큰 발급 성공 (만료일: {result.get("expires_dt")})')
-        return access_token
-    else:
-        print(f'토큰 발급 실패: {result.get("return_msg")}')
-        raise Exception('토큰 발급에 실패했습니다.')
-
+from oauth2 import HOST, get_access_token, load_api_keys, revoke_access_token
 
 # ============================================================
 # 2. 주식 매수 주문
@@ -172,55 +119,10 @@ def sell_order(token: str, stock_code: str, order_qty: int, order_price: str = '
 
 
 # ============================================================
-# 4. 접근토큰 폐기
-# ============================================================
-def revoke_access_token(app_key: str, app_secret: str, token: str):
-    """
-    발급된 접근토큰을 폐기합니다. [au10002]
-
-    Parameters
-    ----------
-    app_key : str
-        키움증권 OpenAPI 앱 키
-    app_secret : str
-        키움증권 OpenAPI 앱 시크릿
-    token : str
-        폐기할 접근토큰
-    """
-    url = HOST + '/oauth2/revoke'
-
-    headers = {
-        'Content-Type': 'application/json;charset=UTF-8',
-    }
-
-    data = {
-        'appkey': app_key,
-        'secretkey': app_secret,
-        'token': token,
-    }
-
-    response = requests.post(url, headers=headers, json=data)
-
-    print('Code:', response.status_code)
-    print('Header:', json.dumps({key: response.headers.get(key) for key in ['next-key', 'cont-yn', 'api-id']}, indent=4, ensure_ascii=False))
-    print('Body:', json.dumps(response.json(), indent=4, ensure_ascii=False))
-
-    result = response.json()
-    if result.get('return_code') == 0:
-        print('토큰 폐기 성공')
-    else:
-        print(f'토큰 폐기 실패: {result.get("return_msg")}')
-
-    return response
-
-
-# ============================================================
 # 메인 실행
 # ============================================================
 if __name__ == '__main__':
-    # TODO: 실제 앱 키와 앱 시크릿으로 교체하세요.
-    APP_KEY = 'YOUR_APP_KEY'
-    APP_SECRET = 'YOUR_APP_SECRET'
+    APP_KEY, APP_SECRET = load_api_keys()
 
     # 1. 토큰 발급
     token = get_access_token(APP_KEY, APP_SECRET)
