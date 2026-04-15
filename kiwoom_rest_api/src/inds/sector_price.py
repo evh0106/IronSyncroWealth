@@ -83,15 +83,9 @@ def print_sector_price(token: str):
 
     print('\n[업종현재가요청 (ka20001)]')
     print('─' * 40)
-    print('  시장구분:')
-    for k, v in MRKT_TP_MAP.items():
-        print(f'    {k}: {v}')
-    mrkt_tp = input('  선택 (기본값 0·코스피): ').strip() or '0'
-    if mrkt_tp not in MRKT_TP_MAP:
-        print(f'  잘못된 시장구분: {mrkt_tp}')
-        return
+    mrkt_tp = '0'
 
-    print('\n  업종코드:')
+    print('  업종코드:')
     for k, v in INDS_CODE_MAP.items():
         print(f'    {k}: {v}')
     inds_cd = input('  선택 (기본값 001·종합KOSPI): ').strip() or '001'
