@@ -31,6 +31,16 @@ MRKT_TP_MAP = {
     '101': '코스닥',
 }
 
+
+def _get_market_label(item: dict, selected_mrkt_tp: str = '000') -> str:
+    market_code = item.get('mrkt_tp', '')
+    if market_code in MRKT_TP_MAP and market_code != '000':
+        return MRKT_TP_MAP[market_code]
+    if selected_mrkt_tp in MRKT_TP_MAP and selected_mrkt_tp != '000':
+        return MRKT_TP_MAP[selected_mrkt_tp]
+    return ''
+
+
 _RKINFO_URL = HOST + '/api/dostk/rkinfo'
 
 
@@ -135,12 +145,13 @@ def print_volume_surge(token: str):
         return
 
     print()
-    print(f'  {_rjust("순위", 4)}  {_rjust("종목코드", 12)}  {_ljust("종목명", 24)}  {_rjust("현재가", 10)}  '
+    print(f'  {_rjust("순위", 4)}  {_rjust("종목코드", 12)}  {_ljust("시장", 6)}  {_ljust("종목명", 24)}  {_rjust("현재가", 10)}  '
           f'{_rjust("등락률", 8)}  {_rjust("이전거래량", 12)}  {_rjust("현재거래량", 12)}  {_rjust("급증량", 12)}  {_rjust("급증률", 8)}')
-    print(f'  {"─"*4}  {"─"*12}  {"─"*24}  {"─"*10}  '
+    print(f'  {"─"*4}  {"─"*12}  {"─"*6}  {"─"*24}  {"─"*10}  '
           f'{"─"*8}  {"─"*12}  {"─"*12}  {"─"*12}  {"─"*8}')
     for i, item in enumerate(items, 1):
-        print(f'  {_rjust(i, 4)}  {_rjust(item.get("stk_cd", ""), 12)}  {_ljust(item.get("stk_nm", ""), 24)}  '
+        market = _get_market_label(item, mrkt_tp)
+        print(f'  {_rjust(i, 4)}  {_rjust(item.get("stk_cd", ""), 12)}  {_ljust(market, 6)}  {_ljust(item.get("stk_nm", ""), 24)}  '
               f'{_rjust(item.get("cur_prc", ""), 10)}  {_rjust(item.get("flu_rt", ""), 8)}  '
               f'{_rjust(item.get("prev_trde_qty", ""), 12)}  {_rjust(item.get("now_trde_qty", ""), 12)}  '
               f'{_rjust(item.get("sdnin_qty", ""), 12)}  {_rjust(item.get("sdnin_rt", ""), 8)}')
@@ -219,12 +230,13 @@ def print_today_volume_rank(token: str):
         return
 
     print()
-    print(f'  {_rjust("순위", 4)}  {_rjust("종목코드", 12)}  {_ljust("종목명", 24)}  {_rjust("현재가", 10)}  '
+    print(f'  {_rjust("순위", 4)}  {_rjust("종목코드", 12)}  {_ljust("시장", 6)}  {_ljust("종목명", 24)}  {_rjust("현재가", 10)}  '
           f'{_rjust("등락률", 8)}  {_rjust("거래량", 14)}  {_rjust("전일비", 8)}  {_rjust("거래금액(백만)", 14)}')
-    print(f'  {"─"*4}  {"─"*12}  {"─"*24}  {"─"*10}  '
+    print(f'  {"─"*4}  {"─"*12}  {"─"*6}  {"─"*24}  {"─"*10}  '
           f'{"─"*8}  {"─"*14}  {"─"*8}  {"─"*14}')
     for i, item in enumerate(items, 1):
-        print(f'  {_rjust(i, 4)}  {_rjust(item.get("stk_cd", ""), 12)}  {_ljust(item.get("stk_nm", ""), 24)}  '
+        market = _get_market_label(item, mrkt_tp)
+        print(f'  {_rjust(i, 4)}  {_rjust(item.get("stk_cd", ""), 12)}  {_ljust(market, 6)}  {_ljust(item.get("stk_nm", ""), 24)}  '
               f'{_rjust(item.get("cur_prc", ""), 10)}  {_rjust(item.get("flu_rt", ""), 8)}  '
               f'{_rjust(item.get("trde_qty", ""), 14)}  {_rjust(item.get("pred_rt", ""), 8)}  '
               f'{_rjust(item.get("trde_amt", ""), 14)}')
@@ -287,13 +299,14 @@ def print_prev_volume_rank(token: str):
         return
 
     print()
-    print(f'  {_rjust("순위", 4)}  {_rjust("종목코드", 12)}  {_ljust("종목명", 24)}  {_rjust("현재가", 10)}  '
+    print(f'  {_rjust("순위", 4)}  {_rjust("종목코드", 12)}  {_ljust("시장", 6)}  {_ljust("종목명", 24)}  {_rjust("현재가", 10)}  '
           f'{_rjust("전일대비", 16)}  {_rjust("거래량", 14)}')
-    print(f'  {"─"*4}  {"─"*12}  {"─"*24}  {"─"*10}  '
+    print(f'  {"─"*4}  {"─"*12}  {"─"*6}  {"─"*24}  {"─"*10}  '
           f'{"─"*16}  {"─"*14}')
     for i, item in enumerate(items, 1):
         sig = PRE_SIG_MAP.get(item.get('pred_pre_sig', ''), '')
-        print(f'  {_rjust(i, 4)}  {_rjust(item.get("stk_cd", ""), 12)}  {_ljust(item.get("stk_nm", ""), 24)}  '
+        market = _get_market_label(item, mrkt_tp)
+        print(f'  {_rjust(i, 4)}  {_rjust(item.get("stk_cd", ""), 12)}  {_ljust(market, 6)}  {_ljust(item.get("stk_nm", ""), 24)}  '
               f'{_rjust(item.get("cur_prc", ""), 10)}  {_rjust(item.get("pred_pre", ""), 10)}({sig})  '
               f'{_rjust(item.get("trde_qty", ""), 14)}')
 
@@ -350,13 +363,14 @@ def print_trade_amount_rank(token: str):
         return
 
     print()
-    print(f'  {_rjust("현재순위", 8)}  {_rjust("전일순위", 8)}  {_rjust("종목코드", 12)}  {_ljust("종목명", 24)}  '
+    print(f'  {_rjust("현재순위", 8)}  {_rjust("전일순위", 8)}  {_rjust("종목코드", 12)}  {_ljust("시장", 6)}  {_ljust("종목명", 24)}  '
           f'{_rjust("현재가", 10)}  {_rjust("등락률", 8)}  {_rjust("현재거래량", 12)}  {_rjust("거래대금(백만)", 14)}')
-    print(f'  {"─"*8}  {"─"*8}  {"─"*12}  {"─"*24}  '
+    print(f'  {"─"*8}  {"─"*8}  {"─"*12}  {"─"*6}  {"─"*24}  '
           f'{"─"*10}  {"─"*8}  {"─"*12}  {"─"*14}')
     for item in items:
+        market = _get_market_label(item, mrkt_tp)
         print(f'  {_rjust(item.get("now_rank", ""), 8)}  {_rjust(item.get("pred_rank", ""), 8)}  '
-              f'{_rjust(item.get("stk_cd", ""), 12)}  {_ljust(item.get("stk_nm", ""), 24)}  '
+              f'{_rjust(item.get("stk_cd", ""), 12)}  {_ljust(market, 6)}  {_ljust(item.get("stk_nm", ""), 24)}  '
               f'{_rjust(item.get("cur_prc", ""), 10)}  {_rjust(item.get("flu_rt", ""), 8)}  '
               f'{_rjust(item.get("now_trde_qty", ""), 12)}  {_rjust(item.get("trde_prica", ""), 14)}')
 

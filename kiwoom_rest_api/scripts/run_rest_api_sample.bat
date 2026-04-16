@@ -12,7 +12,7 @@ REM Set the Python path
 set PYTHONPATH=%BASE_DIR%\src
 
 REM Run the Python app
-python %BASE_DIR%\src\sample\rest_api_sample.py
+python %BASE_DIR%\src\_sample\rest_api_sample.py
 
 REM Deactivate the virtual environment
 deactivate

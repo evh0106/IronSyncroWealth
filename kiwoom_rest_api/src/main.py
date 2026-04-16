@@ -7,6 +7,7 @@
 """
 
 import sys
+from acnt import run_account_api_menu
 from oauth2 import get_access_token, load_api_keys, revoke_access_token
 from inds.sector_price import print_sector_price
 from volume import (
@@ -19,6 +20,7 @@ from volume import (
     print_today_prev_contracts,
 )
 from volume._fmt import _ljust
+from websocket.menu import run_realtime_quote, run_account_realtime, run_condition_search
 
 # ─────────────────────────────────────────────
 # 메뉴 항목 정의 (카테고리 → 하위 메뉴)
@@ -27,7 +29,8 @@ MENU_CATEGORIES = [
     ('1', '업종', [
         ('1', '업종현재가 조회       (ka20001)', print_sector_price),
     ]),
-    ('2', '거래량', [
+    ('2', '계좌', run_account_api_menu),
+    ('3', '거래량', [
         ('1', '거래량급증 조회       (ka10023)', print_volume_surge),
         ('2', '거래량갱신 조회       (ka10024)', print_volume_update),
         ('3', '당일거래량상위 조회   (ka10030)', print_today_volume_rank),
@@ -35,6 +38,11 @@ MENU_CATEGORIES = [
         ('5', '거래대금상위 조회     (ka10032)', print_trade_amount_rank),
         ('6', '거래원순간거래량 조회 (ka10052)', print_broker_instant_volume),
         ('7', '당일전일체결량 조회   (ka10055)', print_today_prev_contracts),
+    ]),
+    ('4', '웹소켓 (실시간)', [
+        ('1', '종목 실시간 시세      (0A/0B/0C/...)', run_realtime_quote),
+        ('2', '계좌/기타 실시간      (00/04/0J/...)', run_account_realtime),
+        ('3', '조건검색              (ka10171~74)',   run_condition_search),
     ]),
 ]
 
@@ -91,6 +99,14 @@ def main():
                 continue
 
             cat_label, sub_items = cat_map[choice]
+
+            if callable(sub_items):
+                try:
+                    sub_items(token)
+                except Exception as e:
+                    print(f'\n[오류] 기능 실행 중 문제가 발생했습니다: {e}')
+                continue
+
             sub_map = {k: fn for k, _, fn in sub_items}
 
             # 하위 메뉴 루프

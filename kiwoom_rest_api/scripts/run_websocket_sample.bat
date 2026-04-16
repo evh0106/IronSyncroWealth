@@ -11,9 +11,8 @@ call %BASE_DIR%\.venv\Scripts\activate
 REM Set the Python path
 set PYTHONPATH=%BASE_DIR%\src
 
-
 REM Run the Python app
-python %BASE_DIR%\src\sample\websocket_sample.py
+python %BASE_DIR%\src\_sample\websocket_sample.py
 
 REM Deactivate the virtual environment
 deactivate

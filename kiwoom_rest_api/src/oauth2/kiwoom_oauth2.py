@@ -9,8 +9,8 @@ import json
 
 import requests
 
-# HOST = 'https://api.kiwoom.com'           # 실전투자 서버
-HOST = 'https://mockapi.kiwoom.com'         # 모의투자 서버 (KRX만 지원)
+HOST = 'https://api.kiwoom.com'           # 실전투자 서버
+# HOST = 'https://mockapi.kiwoom.com'         # 모의투자 서버 (KRX만 지원)
 
 
 def load_api_keys(host: str = HOST) -> tuple[str, str]:
