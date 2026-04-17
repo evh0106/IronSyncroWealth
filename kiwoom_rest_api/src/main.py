@@ -1,5 +1,5 @@
 """
-키움증권 REST API – 메인 진입점
+키움증권 REST API - 메인 진입점
 
 실행:
     (프로젝트루트)/kiwoom_rest_api/src 경로에서
@@ -9,7 +9,7 @@
 import sys
 from acnt import run_account_api_menu
 from oauth2 import get_access_token, load_api_keys, revoke_access_token
-from inds.sector_price import print_sector_price
+from sect.sector_price import print_sector_price
 from volume import (
     print_volume_surge,
     print_today_volume_rank,
