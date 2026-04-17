@@ -7,17 +7,21 @@ URL: /api/dostk/rkinfo
   - 당일거래량상위  (ka10030)
   - 전일거래량상위  (ka10031)
   - 거래대금상위    (ka10032)
+
+입력 파라미터 선택지와 한글 라벨은 specs_request_rank / specs_response_rank 에서 참조합니다.
 """
 
 import json
 import requests
 from oauth2 import HOST
-from ._fmt import _ljust, _rjust
+from ._fmt import _ljust, _rjust, _wcslen
+from .specs_request_rank import RKINFO_API_SPECS
+from .specs_response_rank import RKINFO_RESPONSE_SPECS
 
 # ─────────────────────────────────────────────
-# 공통 코드표
+# 전일대비기호 표시용 (응답 스펙에는 없는 표현)
 # ─────────────────────────────────────────────
-PRE_SIG_MAP = {
+_PRE_SIG_MAP = {
     '1': '상한',
     '2': '상승',
     '3': '보합',
@@ -25,24 +29,125 @@ PRE_SIG_MAP = {
     '5': '하락',
 }
 
-MRKT_TP_MAP = {
-    '000': '전체',
-    '001': '코스피',
-    '101': '코스닥',
-}
-
-
-def _get_market_label(item: dict, selected_mrkt_tp: str = '000') -> str:
-    market_code = item.get('mrkt_tp', '')
-    if market_code in MRKT_TP_MAP and market_code != '000':
-        return MRKT_TP_MAP[market_code]
-    if selected_mrkt_tp in MRKT_TP_MAP and selected_mrkt_tp != '000':
-        return MRKT_TP_MAP[selected_mrkt_tp]
-    return ''
-
-
 _RKINFO_URL = HOST + '/api/dostk/rkinfo'
 
+
+# ─────────────────────────────────────────────
+# specs 조회 헬퍼
+# ─────────────────────────────────────────────
+
+def _req_spec(api_id: str) -> dict:
+    """api_id 에 해당하는 요청 스펙 반환"""
+    for s in RKINFO_API_SPECS:
+        if s['api_id'] == api_id:
+            return s
+    return {}
+
+
+def _field(api_id: str, element: str) -> dict:
+    """요청 스펙에서 특정 element 의 필드 정보 반환"""
+    for f in _req_spec(api_id).get('fields', []):
+        if f['element'] == element:
+            return f
+    return {}
+
+
+def _parse_choices(description: str) -> dict:
+    """'k1:v1, k2:v2' 형식 description 을 {key: label} 딕셔너리로 파싱"""
+    choices = {}
+    for part in description.split(','):
+        part = part.strip()
+        if ':' in part:
+            k, v = part.split(':', 1)
+            choices[k.strip()] = v.strip()
+    return choices
+
+
+def _prompt_choice(api_id: str, element: str, default: str) -> str:
+    """스펙에 정의된 선택지를 출력하고 사용자 입력을 받아 반환"""
+    f = _field(api_id, element)
+    label = f.get('label', element)
+    choices = _parse_choices(f.get('description', ''))
+    default_label = choices.get(default, default)
+    print(f'  {label}: ', end='')
+    for k, v in choices.items():
+        print(f'{k}:{v}', end='  ')
+    val = input(f'\n  선택 (기본값 {default}·{default_label}): ').strip() or default
+    return val
+
+
+def _resp_cols(api_id: str, skip: set = None) -> tuple:
+    """응답 스펙에서 (list_key, [{key, label}, ...]) 반환.
+    skip 에 포함된 element(접두 '- ' 제거 후)는 제외."""
+    if skip is None:
+        skip = set()
+    rows = RKINFO_RESPONSE_SPECS.get(api_id, [])
+    list_key = ''
+    cols = []
+    for row in rows:
+        elem = row['element']
+        if row['type'] == 'LIST':
+            list_key = elem
+        elif elem.startswith('- '):
+            key = elem[2:]
+            if key not in skip:
+                cols.append({'key': key, 'label': row['label']})
+    return list_key, cols
+
+
+def _print_table(items: list, cols: list, widths: list, left_cols: set,
+                 row_num: bool = False, row_fn=None):
+    """specs 컬럼 목록으로 테이블 헤더·구분선·데이터를 출력.
+
+    Args:
+        items: 응답 리스트
+        cols: [{'key': str, 'label': str}, ...]
+        widths: 각 컬럼의 표시 너비 (cols 와 동일 순서)
+        left_cols: 왼쪽 정렬할 key 집합
+        row_num: True 이면 맨 앞에 순번 열 추가
+        row_fn: item → dict 변환 함수 (가상 컬럼 생성 등)
+    """
+    def _cell(key, val):
+        if key in left_cols:
+            return _ljust(str(val), widths[col_idx[key]])
+        return _rjust(str(val), widths[col_idx[key]])
+
+    col_idx = {c['key']: i for i, c in enumerate(cols)}
+
+    # 헤더
+    hdr_parts = []
+    sep_parts = []
+    if row_num:
+        hdr_parts.append(_rjust('순위', 4))
+        sep_parts.append('─' * 4)
+    for c, w in zip(cols, widths):
+        if c['key'] in left_cols:
+            hdr_parts.append(_ljust(c['label'], w))
+        else:
+            hdr_parts.append(_rjust(c['label'], w))
+        sep_parts.append('─' * w)
+
+    print()
+    print('  ' + '  '.join(hdr_parts))
+    print('  ' + '  '.join(sep_parts))
+
+    for idx, item in enumerate(items, 1):
+        row = row_fn(item) if row_fn else item
+        parts = []
+        if row_num:
+            parts.append(_rjust(idx, 4))
+        for c, w in zip(cols, widths):
+            val = row.get(c['key'], '')
+            if c['key'] in left_cols:
+                parts.append(_ljust(str(val), w))
+            else:
+                parts.append(_rjust(str(val), w))
+        print('  ' + '  '.join(parts))
+
+
+# ─────────────────────────────────────────────
+# 공통 HTTP 요청
+# ─────────────────────────────────────────────
 
 def _post(token: str, api_id: str, body: dict) -> dict:
     headers = {
@@ -57,32 +162,24 @@ def _post(token: str, api_id: str, body: dict) -> dict:
     return resp.json()
 
 
+# ─────────────────────────────────────────────
+# 시장구분 디코드 헬퍼
+# ─────────────────────────────────────────────
+_MRKT_TP_CHOICES = _parse_choices(_field('ka10023', 'mrkt_tp').get('description', ''))
+
+
+def _market_label(item: dict, selected_mrkt_tp: str = '000') -> str:
+    code = item.get('mrkt_tp', '')
+    if code in _MRKT_TP_CHOICES and code != '000':
+        return _MRKT_TP_CHOICES[code]
+    if selected_mrkt_tp in _MRKT_TP_CHOICES and selected_mrkt_tp != '000':
+        return _MRKT_TP_CHOICES[selected_mrkt_tp]
+    return ''
+
+
 # ═══════════════════════════════════════════════════════
 # ka10023 – 거래량급증요청
 # ═══════════════════════════════════════════════════════
-SORT_TP_MAP_10023 = {
-    '1': '급증량',
-    '2': '급증률',
-    '3': '급감량',
-    '4': '급감률',
-}
-
-TM_TP_MAP = {
-    '1': '분',
-    '2': '전일',
-}
-
-TRDE_QTY_TP_MAP = {
-    '5':    '5천주 이상',
-    '10':   '1만주 이상',
-    '50':   '5만주 이상',
-    '100':  '10만주 이상',
-    '200':  '20만주 이상',
-    '300':  '30만주 이상',
-    '500':  '50만주 이상',
-    '1000': '100만주 이상',
-}
-
 
 def get_volume_surge(token: str, mrkt_tp: str = '000', sort_tp: str = '1',
                      tm_tp: str = '2', trde_qty_tp: str = '5',
@@ -104,34 +201,22 @@ def get_volume_surge(token: str, mrkt_tp: str = '000', sort_tp: str = '1',
 
 def print_volume_surge(token: str):
     """대화형 거래량급증 조회 (ka10023)"""
-    print('\n[거래량급증요청 (ka10023)]')
+    api_id = 'ka10023'
+    spec = _req_spec(api_id)
+    print(f'\n[{spec["name"]} ({api_id})]')
     print('─' * 60)
 
-    print('  시장구분: ', end='')
-    for k, v in MRKT_TP_MAP.items():
-        print(f'{k}:{v}', end='  ')
-    mrkt_tp = input('\n  선택 (기본값 000·전체): ').strip() or '000'
-
-    print('  정렬구분: ', end='')
-    for k, v in SORT_TP_MAP_10023.items():
-        print(f'{k}:{v}', end='  ')
-    sort_tp = input('\n  선택 (기본값 1·급증량): ').strip() or '1'
-
-    print('  시간구분: ', end='')
-    for k, v in TM_TP_MAP.items():
-        print(f'{k}:{v}', end='  ')
-    tm_tp = input('\n  선택 (기본값 2·전일): ').strip() or '2'
+    mrkt_tp    = _prompt_choice(api_id, 'mrkt_tp',    '000')
+    sort_tp    = _prompt_choice(api_id, 'sort_tp',    '1')
+    tm_tp      = _prompt_choice(api_id, 'tm_tp',      '2')
 
     tm = ''
     if tm_tp == '1':
         tm = input('  분 입력 (예: 30): ').strip()
 
-    print('  거래량구분: ', end='')
-    for k, v in TRDE_QTY_TP_MAP.items():
-        print(f'{k}:{v}', end='  ')
-    trde_qty_tp = input('\n  선택 (기본값 5): ').strip() or '5'
+    trde_qty_tp = _prompt_choice(api_id, 'trde_qty_tp', '5')
 
-    print(f'\n  → 조회 중...')
+    print('\n  → 조회 중...')
     result = get_volume_surge(token, mrkt_tp=mrkt_tp, sort_tp=sort_tp,
                               tm_tp=tm_tp, trde_qty_tp=trde_qty_tp, tm=tm)
 
@@ -139,42 +224,34 @@ def print_volume_surge(token: str):
         print(f'  [오류] {result.get("return_msg")}')
         return
 
-    items = result.get('trde_qty_sdnin', [])
+    list_key, cols = _resp_cols(api_id, skip={'mrkt_tp'})
+    items = result.get(list_key, [])
     if not items:
         print('  조회 결과가 없습니다.')
         return
 
-    print()
-    print(f'  {_rjust("순위", 4)}  {_rjust("종목코드", 12)}  {_ljust("시장", 6)}  {_ljust("종목명", 24)}  {_rjust("현재가", 10)}  '
-          f'{_rjust("등락률", 8)}  {_rjust("이전거래량", 12)}  {_rjust("현재거래량", 12)}  {_rjust("급증량", 12)}  {_rjust("급증률", 8)}')
-    print(f'  {"─"*4}  {"─"*12}  {"─"*6}  {"─"*24}  {"─"*10}  '
-          f'{"─"*8}  {"─"*12}  {"─"*12}  {"─"*12}  {"─"*8}')
-    for i, item in enumerate(items, 1):
-        market = _get_market_label(item, mrkt_tp)
-        print(f'  {_rjust(i, 4)}  {_rjust(item.get("stk_cd", ""), 12)}  {_ljust(market, 6)}  {_ljust(item.get("stk_nm", ""), 24)}  '
-              f'{_rjust(item.get("cur_prc", ""), 10)}  {_rjust(item.get("flu_rt", ""), 8)}  '
-              f'{_rjust(item.get("prev_trde_qty", ""), 12)}  {_rjust(item.get("now_trde_qty", ""), 12)}  '
-              f'{_rjust(item.get("sdnin_qty", ""), 12)}  {_rjust(item.get("sdnin_rt", ""), 8)}')
+    # 시장 가상 컬럼 삽입 (stk_cd 뒤)
+    cols_disp = []
+    for c in cols:
+        cols_disp.append(c)
+        if c['key'] == 'stk_cd':
+            cols_disp.append({'key': '_market', 'label': '시장'})
 
+    widths   = [12, 6, 24, 10, 8, 12, 12, 12, 8]
+    left_set = {'stk_nm', '_market'}
+
+    def _row(item):
+        r = dict(item)
+        r['_market'] = _market_label(item, mrkt_tp)
+        return r
+
+    _print_table(items, cols_disp, widths, left_set, row_num=True, row_fn=_row)
     _ask_raw(result)
 
 
 # ═══════════════════════════════════════════════════════
 # ka10030 – 당일거래량상위요청
 # ═══════════════════════════════════════════════════════
-SORT_TP_MAP_10030 = {
-    '1': '거래량',
-    '2': '거래회전율',
-    '3': '거래대금',
-}
-
-MRKT_OPEN_TP_MAP = {
-    '0': '전체조회',
-    '1': '장중',
-    '2': '장전시간외',
-    '3': '장후시간외',
-}
-
 
 def get_today_volume_rank(token: str, mrkt_tp: str = '000', sort_tp: str = '1',
                           mang_stk_incls: str = '0', crd_tp: str = '0',
@@ -198,25 +275,16 @@ def get_today_volume_rank(token: str, mrkt_tp: str = '000', sort_tp: str = '1',
 
 def print_today_volume_rank(token: str):
     """대화형 당일거래량상위 조회 (ka10030)"""
-    print('\n[당일거래량상위요청 (ka10030)]')
+    api_id = 'ka10030'
+    spec = _req_spec(api_id)
+    print(f'\n[{spec["name"]} ({api_id})]')
     print('─' * 60)
 
-    print('  시장구분: ', end='')
-    for k, v in MRKT_TP_MAP.items():
-        print(f'{k}:{v}', end='  ')
-    mrkt_tp = input('\n  선택 (기본값 000·전체): ').strip() or '000'
+    mrkt_tp     = _prompt_choice(api_id, 'mrkt_tp',     '000')
+    sort_tp     = _prompt_choice(api_id, 'sort_tp',     '1')
+    mrkt_open_tp = _prompt_choice(api_id, 'mrkt_open_tp', '0')
 
-    print('  정렬구분: ', end='')
-    for k, v in SORT_TP_MAP_10030.items():
-        print(f'{k}:{v}', end='  ')
-    sort_tp = input('\n  선택 (기본값 1·거래량): ').strip() or '1'
-
-    print('  장운영구분: ', end='')
-    for k, v in MRKT_OPEN_TP_MAP.items():
-        print(f'{k}:{v}', end='  ')
-    mrkt_open_tp = input('\n  선택 (기본값 0·전체): ').strip() or '0'
-
-    print(f'\n  → 조회 중...')
+    print('\n  → 조회 중...')
     result = get_today_volume_rank(token, mrkt_tp=mrkt_tp, sort_tp=sort_tp,
                                    mrkt_open_tp=mrkt_open_tp)
 
@@ -224,34 +292,33 @@ def print_today_volume_rank(token: str):
         print(f'  [오류] {result.get("return_msg")}')
         return
 
-    items = result.get('tdy_trde_qty_upper', [])
+    list_key, cols = _resp_cols(api_id, skip={'mrkt_tp'})
+    items = result.get(list_key, [])
     if not items:
         print('  조회 결과가 없습니다.')
         return
 
-    print()
-    print(f'  {_rjust("순위", 4)}  {_rjust("종목코드", 12)}  {_ljust("시장", 6)}  {_ljust("종목명", 24)}  {_rjust("현재가", 10)}  '
-          f'{_rjust("등락률", 8)}  {_rjust("거래량", 14)}  {_rjust("전일비", 8)}  {_rjust("거래금액(백만)", 14)}')
-    print(f'  {"─"*4}  {"─"*12}  {"─"*6}  {"─"*24}  {"─"*10}  '
-          f'{"─"*8}  {"─"*14}  {"─"*8}  {"─"*14}')
-    for i, item in enumerate(items, 1):
-        market = _get_market_label(item, mrkt_tp)
-        print(f'  {_rjust(i, 4)}  {_rjust(item.get("stk_cd", ""), 12)}  {_ljust(market, 6)}  {_ljust(item.get("stk_nm", ""), 24)}  '
-              f'{_rjust(item.get("cur_prc", ""), 10)}  {_rjust(item.get("flu_rt", ""), 8)}  '
-              f'{_rjust(item.get("trde_qty", ""), 14)}  {_rjust(item.get("pred_rt", ""), 8)}  '
-              f'{_rjust(item.get("trde_amt", ""), 14)}')
+    cols_disp = []
+    for c in cols:
+        cols_disp.append(c)
+        if c['key'] == 'stk_cd':
+            cols_disp.append({'key': '_market', 'label': '시장'})
 
+    widths   = [12, 6, 24, 10, 8, 14, 8, 14]
+    left_set = {'stk_nm', '_market'}
+
+    def _row(item):
+        r = dict(item)
+        r['_market'] = _market_label(item, mrkt_tp)
+        return r
+
+    _print_table(items, cols_disp, widths, left_set, row_num=True, row_fn=_row)
     _ask_raw(result)
 
 
 # ═══════════════════════════════════════════════════════
 # ka10031 – 전일거래량상위요청
 # ═══════════════════════════════════════════════════════
-QRY_TP_MAP = {
-    '1': '전일거래량 상위100종목',
-    '2': '전일거래대금 상위100종목',
-}
-
 
 def get_prev_volume_rank(token: str, mrkt_tp: str = '000', qry_tp: str = '1',
                          rank_strt: str = '0', rank_end: str = '20',
@@ -269,23 +336,17 @@ def get_prev_volume_rank(token: str, mrkt_tp: str = '000', qry_tp: str = '1',
 
 def print_prev_volume_rank(token: str):
     """대화형 전일거래량상위 조회 (ka10031)"""
-    print('\n[전일거래량상위요청 (ka10031)]')
+    api_id = 'ka10031'
+    spec = _req_spec(api_id)
+    print(f'\n[{spec["name"]} ({api_id})]')
     print('─' * 60)
 
-    print('  시장구분: ', end='')
-    for k, v in MRKT_TP_MAP.items():
-        print(f'{k}:{v}', end='  ')
-    mrkt_tp = input('\n  선택 (기본값 000·전체): ').strip() or '000'
-
-    print('  조회구분: ', end='')
-    for k, v in QRY_TP_MAP.items():
-        print(f'{k}:{v}', end='  ')
-    qry_tp = input('\n  선택 (기본값 1·거래량): ').strip() or '1'
-
+    mrkt_tp  = _prompt_choice(api_id, 'mrkt_tp', '000')
+    qry_tp   = _prompt_choice(api_id, 'qry_tp',  '1')
     rank_strt = input('  순위 시작 (0~100, 기본값 0): ').strip() or '0'
     rank_end  = input('  순위 끝   (0~100, 기본값 20): ').strip() or '20'
 
-    print(f'\n  → 조회 중...')
+    print('\n  → 조회 중...')
     result = get_prev_volume_rank(token, mrkt_tp=mrkt_tp, qry_tp=qry_tp,
                                   rank_strt=rank_strt, rank_end=rank_end)
 
@@ -293,34 +354,38 @@ def print_prev_volume_rank(token: str):
         print(f'  [오류] {result.get("return_msg")}')
         return
 
-    items = result.get('pred_trde_qty_upper', [])
+    list_key, cols = _resp_cols(api_id, skip={'mrkt_tp', 'pred_pre_sig'})
+    items = result.get(list_key, [])
     if not items:
         print('  조회 결과가 없습니다.')
         return
 
-    print()
-    print(f'  {_rjust("순위", 4)}  {_rjust("종목코드", 12)}  {_ljust("시장", 6)}  {_ljust("종목명", 24)}  {_rjust("현재가", 10)}  '
-          f'{_rjust("전일대비", 16)}  {_rjust("거래량", 14)}')
-    print(f'  {"─"*4}  {"─"*12}  {"─"*6}  {"─"*24}  {"─"*10}  '
-          f'{"─"*16}  {"─"*14}')
-    for i, item in enumerate(items, 1):
-        sig = PRE_SIG_MAP.get(item.get('pred_pre_sig', ''), '')
-        market = _get_market_label(item, mrkt_tp)
-        print(f'  {_rjust(i, 4)}  {_rjust(item.get("stk_cd", ""), 12)}  {_ljust(market, 6)}  {_ljust(item.get("stk_nm", ""), 24)}  '
-              f'{_rjust(item.get("cur_prc", ""), 10)}  {_rjust(item.get("pred_pre", ""), 10)}({sig})  '
-              f'{_rjust(item.get("trde_qty", ""), 14)}')
+    # pred_pre → 전일대비기호 결합 표시
+    cols_disp = []
+    for c in cols:
+        cols_disp.append(c)
+        if c['key'] == 'stk_cd':
+            cols_disp.append({'key': '_market', 'label': '시장'})
+        if c['key'] == 'pred_pre':
+            cols_disp[-1] = {'key': '_pred_pre_fmt', 'label': '전일대비'}
 
+    widths   = [12, 6, 24, 10, 16, 14]
+    left_set = {'stk_nm', '_market'}
+
+    def _row(item):
+        r = dict(item)
+        r['_market'] = _market_label(item, mrkt_tp)
+        sig = _PRE_SIG_MAP.get(item.get('pred_pre_sig', ''), '')
+        r['_pred_pre_fmt'] = f'{item.get("pred_pre", "")}({sig})'
+        return r
+
+    _print_table(items, cols_disp, widths, left_set, row_num=True, row_fn=_row)
     _ask_raw(result)
 
 
 # ═══════════════════════════════════════════════════════
 # ka10032 – 거래대금상위요청
 # ═══════════════════════════════════════════════════════
-MANG_STK_MAP = {
-    '0': '관리종목 미포함',
-    '1': '관리종목 포함',
-}
-
 
 def get_trade_amount_rank(token: str, mrkt_tp: str = '001',
                           mang_stk_incls: str = '1',
@@ -336,20 +401,15 @@ def get_trade_amount_rank(token: str, mrkt_tp: str = '001',
 
 def print_trade_amount_rank(token: str):
     """대화형 거래대금상위 조회 (ka10032)"""
-    print('\n[거래대금상위요청 (ka10032)]')
+    api_id = 'ka10032'
+    spec = _req_spec(api_id)
+    print(f'\n[{spec["name"]} ({api_id})]')
     print('─' * 60)
 
-    print('  시장구분: ', end='')
-    for k, v in MRKT_TP_MAP.items():
-        print(f'{k}:{v}', end='  ')
-    mrkt_tp = input('\n  선택 (기본값 001·코스피): ').strip() or '001'
+    mrkt_tp      = _prompt_choice(api_id, 'mrkt_tp',      '001')
+    mang_stk_incls = _prompt_choice(api_id, 'mang_stk_incls', '1')
 
-    print('  관리종목포함: ', end='')
-    for k, v in MANG_STK_MAP.items():
-        print(f'{k}:{v}', end='  ')
-    mang_stk_incls = input('\n  선택 (기본값 1·포함): ').strip() or '1'
-
-    print(f'\n  → 조회 중...')
+    print('\n  → 조회 중...')
     result = get_trade_amount_rank(token, mrkt_tp=mrkt_tp,
                                    mang_stk_incls=mang_stk_incls)
 
@@ -357,23 +417,27 @@ def print_trade_amount_rank(token: str):
         print(f'  [오류] {result.get("return_msg")}')
         return
 
-    items = result.get('trde_prica_upper', [])
+    list_key, cols = _resp_cols(api_id, skip={'mrkt_tp'})
+    items = result.get(list_key, [])
     if not items:
         print('  조회 결과가 없습니다.')
         return
 
-    print()
-    print(f'  {_rjust("현재순위", 8)}  {_rjust("전일순위", 8)}  {_rjust("종목코드", 12)}  {_ljust("시장", 6)}  {_ljust("종목명", 24)}  '
-          f'{_rjust("현재가", 10)}  {_rjust("등락률", 8)}  {_rjust("현재거래량", 12)}  {_rjust("거래대금(백만)", 14)}')
-    print(f'  {"─"*8}  {"─"*8}  {"─"*12}  {"─"*6}  {"─"*24}  '
-          f'{"─"*10}  {"─"*8}  {"─"*12}  {"─"*14}')
-    for item in items:
-        market = _get_market_label(item, mrkt_tp)
-        print(f'  {_rjust(item.get("now_rank", ""), 8)}  {_rjust(item.get("pred_rank", ""), 8)}  '
-              f'{_rjust(item.get("stk_cd", ""), 12)}  {_ljust(market, 6)}  {_ljust(item.get("stk_nm", ""), 24)}  '
-              f'{_rjust(item.get("cur_prc", ""), 10)}  {_rjust(item.get("flu_rt", ""), 8)}  '
-              f'{_rjust(item.get("now_trde_qty", ""), 12)}  {_rjust(item.get("trde_prica", ""), 14)}')
+    cols_disp = []
+    for c in cols:
+        cols_disp.append(c)
+        if c['key'] == 'stk_cd':
+            cols_disp.append({'key': '_market', 'label': '시장'})
 
+    widths   = [8, 8, 12, 6, 24, 10, 8, 12, 14]
+    left_set = {'stk_nm', '_market'}
+
+    def _row(item):
+        r = dict(item)
+        r['_market'] = _market_label(item, mrkt_tp)
+        return r
+
+    _print_table(items, cols_disp, widths, left_set, row_num=False, row_fn=_row)
     _ask_raw(result)
 
 
