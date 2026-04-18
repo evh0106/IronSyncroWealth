@@ -9,8 +9,35 @@ import json
 
 import requests
 
+from .specs_request import OAUTH2_API_SPECS
+from .specs_response import OAUTH2_RESPONSE_SPECS
+
+# api_id → 스펙 빠른 조회용 딕셔너리
+_REQ_SPEC: dict = {s['api_id']: s for s in OAUTH2_API_SPECS}
+_RES_SPEC: dict = OAUTH2_RESPONSE_SPECS
+
 HOST = 'https://api.kiwoom.com'           # 실전투자 서버
 # HOST = 'https://mockapi.kiwoom.com'         # 모의투자 서버 (KRX만 지원)
+
+
+def _build_request_body(api_id: str, values: dict) -> dict:
+    """specs_request의 fields 순서·키 기준으로 요청 body를 조립합니다."""
+    spec = _REQ_SPEC[api_id]
+    return {field['element']: values[field['element']] for field in spec['fields']}
+
+
+def _print_response(response: requests.Response, api_id: str):
+    """응답 코드·헤더·body를 출력합니다. specs_response의 한글 라벨을 참조합니다."""
+    print('Code:', response.status_code)
+    print('Header:', json.dumps(
+        {key: response.headers.get(key) for key in ['next-key', 'cont-yn', 'api-id']},
+        indent=4, ensure_ascii=False,
+    ))
+
+    body = response.json()
+    res_fields = {f['element']: f['label'] for f in _RES_SPEC.get(api_id, [])}
+    labeled = {res_fields.get(k, k): v for k, v in body.items()}
+    print('Body:', json.dumps(labeled, indent=4, ensure_ascii=False))
 
 
 def load_api_keys(host: str = HOST) -> tuple[str, str]:
@@ -38,23 +65,21 @@ def load_api_keys(host: str = HOST) -> tuple[str, str]:
 
 def get_access_token(app_key: str, app_secret: str, host: str = HOST) -> str:
     """OAuth 2.0 방식으로 액세스 토큰을 발급받습니다."""
-    url = host + '/oauth2/token'
+    spec = _REQ_SPEC['au10001']
+    url = host + spec['url']
 
     headers = {
         'Content-Type': 'application/json;charset=UTF-8',
     }
 
-    data = {
+    data = _build_request_body('au10001', {
         'grant_type': 'client_credentials',
         'appkey': app_key,
         'secretkey': app_secret,
-    }
+    })
 
     response = requests.post(url, headers=headers, json=data)
-
-    print('Code:', response.status_code)
-    print('Header:', json.dumps({key: response.headers.get(key) for key in ['next-key', 'cont-yn', 'api-id']}, indent=4, ensure_ascii=False))
-    print('Body:', json.dumps(response.json(), indent=4, ensure_ascii=False))
+    _print_response(response, 'au10001')
 
     result = response.json()
     if result.get('return_code') == 0:
@@ -68,23 +93,21 @@ def get_access_token(app_key: str, app_secret: str, host: str = HOST) -> str:
 
 def revoke_access_token(app_key: str, app_secret: str, token: str, host: str = HOST):
     """발급된 접근토큰을 폐기합니다. [au10002]"""
-    url = host + '/oauth2/revoke'
+    spec = _REQ_SPEC['au10002']
+    url = host + spec['url']
 
     headers = {
         'Content-Type': 'application/json;charset=UTF-8',
     }
 
-    data = {
+    data = _build_request_body('au10002', {
         'appkey': app_key,
         'secretkey': app_secret,
         'token': token,
-    }
+    })
 
     response = requests.post(url, headers=headers, json=data)
-
-    print('Code:', response.status_code)
-    print('Header:', json.dumps({key: response.headers.get(key) for key in ['next-key', 'cont-yn', 'api-id']}, indent=4, ensure_ascii=False))
-    print('Body:', json.dumps(response.json(), indent=4, ensure_ascii=False))
+    _print_response(response, 'au10002')
 
     result = response.json()
     if result.get('return_code') == 0:

@@ -3,25 +3,25 @@
 URL: /api/dostk/websocket
 
 실시간 항목 타입:
-  00 – 주문체결      (item 불필요)
-  04 – 잔고          (item 불필요)
-  0A – 주식기세
-  0B – 주식체결
-  0C – 주식우선호가
-  0D – 주식호가잔량
-  0E – 주식시간외호가
-  0F – 주식당일거래원
-  0G – ETF NAV
-  0H – 주식예상체결
-  0I – 국제금환산가격
-  0J – 업종지수
-  0U – 업종등락
-  0g – 주식종목정보
-  0m – ELW 이론가
-  0s – 장시작시간
-  0u – ELW 지표
-  0w – 종목프로그램매매
-  1h – VI발동/해제
+  00 - 주문체결      (item 불필요)
+  04 - 잔고          (item 불필요)
+  0A - 주식기세
+  0B - 주식체결
+  0C - 주식우선호가
+  0D - 주식호가잔량
+  0E - 주식시간외호가
+  0F - 주식당일거래원
+  0G - ETF NAV
+  0H - 주식예상체결
+  0I - 국제금환산가격
+  0J - 업종지수
+  0U - 업종등락
+  0g - 주식종목정보
+  0m - ELW 이론가
+  0s - 장시작시간
+  0u - ELW 지표
+  0w - 종목프로그램매매
+  1h - VI발동/해제
 """
 
 from .client import WebSocketClient
@@ -126,12 +126,12 @@ async def remove(
 # ─────────────────────────────────────────────
 
 async def register_order_execution(client: WebSocketClient, group_no: str = '1', refresh: str = '1'):
-    """주문체결(00) 실시간 등록 – 종목코드 불필요"""
+    """주문체결(00) 실시간 등록 - 종목코드 불필요"""
     await register(client, [TYPE_ORDER_EXECUTION], items=None, group_no=group_no, refresh=refresh)
 
 
 async def register_balance(client: WebSocketClient, group_no: str = '1', refresh: str = '1'):
-    """잔고(04) 실시간 등록 – 종목코드 불필요"""
+    """잔고(04) 실시간 등록 - 종목코드 불필요"""
     await register(client, [TYPE_BALANCE], items=None, group_no=group_no, refresh=refresh)
 
 
@@ -201,7 +201,7 @@ async def register_elw_theory(client: WebSocketClient, items: list[str], group_n
 
 
 async def register_market_open(client: WebSocketClient, group_no: str = '1', refresh: str = '1'):
-    """장시작시간(0s) 실시간 등록 – 종목코드 불필요"""
+    """장시작시간(0s) 실시간 등록 - 종목코드 불필요"""
     await register(client, [TYPE_MARKET_OPEN], items=None, group_no=group_no, refresh=refresh)
 
 

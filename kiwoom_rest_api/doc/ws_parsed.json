@@ -1,0 +1,4576 @@
+{
+  "00": {
+    "overview": "실시간 항목 00(주문체결)은 종목코드(item) 등록과 상관 없이 ACCESS TOKEN을 발급한 계좌에 주문 접수, 체결, 정정, 취소 등 매매가 발생할 경우 데이터가 수신됩니다. \n\nACCESS TOKEN 발급과 상관없이 해당 종목의 체결내역을 보고싶으신 경우에 0B를 이용 부탁드립니다.",
+    "request": [
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- type",
+        "label": "실시간 항목",
+        "type": "String",
+        "required": true,
+        "description": "TR 명(0A,0B....)"
+      }
+    ],
+    "response": [
+      {
+        "element": "- type",
+        "label": "실시간항목",
+        "type": "String",
+        "required": false,
+        "description": "TR 명(0A,0B....)"
+      },
+      {
+        "element": "- name",
+        "label": "실시간 항목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "종목코드"
+      },
+      {
+        "element": "- values",
+        "label": "실시간 값 리스트",
+        "type": "LIST",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 9201",
+        "label": "계좌번호",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 9203",
+        "label": "주문번호",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 9205",
+        "label": "관리자사번",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 9001",
+        "label": "종목코드,업종코드",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 912",
+        "label": "주문업무분류",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 913",
+        "label": "주문상태",
+        "type": "String",
+        "required": false,
+        "description": "접수, 체결, 확인, 취소, 거부"
+      },
+      {
+        "element": "- - 302",
+        "label": "종목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 900",
+        "label": "주문수량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 901",
+        "label": "주문가격",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 902",
+        "label": "미체결수량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 903",
+        "label": "체결누계금액",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 904",
+        "label": "원주문번호",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 905",
+        "label": "주문구분",
+        "type": "String",
+        "required": false,
+        "description": "\"+/-\", 매도, 매수, 매도정정, 매수정정, 매수취소, 매도취소\n\n\n※ 영웅문4에서 적색으로 표기되어있으면 +가, 청색으로 표기되어있으면 -가 앞에 기재됩니다"
+      },
+      {
+        "element": "- - 906",
+        "label": "매매구분",
+        "type": "String",
+        "required": false,
+        "description": "보통, 시장가, 조건부지정가, 최유리지정가, 최우선지정가, 보통(IOC), 시장가(IOC), 최유리(IOC), 보통(FOK), 시장가(FOK), 최유리(FOK), 스톰지정가, 중간가, 중간가(IOC), 중간가(FOK), 장전시간외, 장후시간외, 시간외대량, 시간외바스켓, 시간외자사주, 시간외단일가"
+      },
+      {
+        "element": "- - 907",
+        "label": "매도수구분",
+        "type": "String",
+        "required": false,
+        "description": "1:매도, 2:매수"
+      },
+      {
+        "element": "- - 908",
+        "label": "주문/체결시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 909",
+        "label": "체결번호",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 910",
+        "label": "체결가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 911",
+        "label": "체결량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 10",
+        "label": "현재가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 27",
+        "label": "(최우선)매도호가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 28",
+        "label": "(최우선)매수호가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 914",
+        "label": "단위체결가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 915",
+        "label": "단위체결량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 938",
+        "label": "당일매매수수료",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 939",
+        "label": "당일매매세금",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 919",
+        "label": "거부사유",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 920",
+        "label": "화면번호",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 921",
+        "label": "터미널번호",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 922",
+        "label": "신용구분",
+        "type": "String",
+        "required": false,
+        "description": "실시간 체결용"
+      },
+      {
+        "element": "- - 923",
+        "label": "대출일",
+        "type": "String",
+        "required": false,
+        "description": "실시간 체결용"
+      },
+      {
+        "element": "- - 10010",
+        "label": "시간외단일가_현재가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 2134",
+        "label": "거래소구분",
+        "type": "String",
+        "required": false,
+        "description": "0:통합,1:KRX,2:NXT"
+      },
+      {
+        "element": "- - 2135",
+        "label": "거래소구분명",
+        "type": "String",
+        "required": false,
+        "description": "통합,KRX,NXT"
+      },
+      {
+        "element": "- - 2136",
+        "label": "SOR여부",
+        "type": "String",
+        "required": false,
+        "description": "Y,N"
+      }
+    ],
+    "request_example": {
+      "trnm": "REG",
+      "grp_no": "1",
+      "refresh": "1",
+      "data": [
+        {
+          "item": [
+            ""
+          ],
+          "type": [
+            "00"
+          ]
+        }
+      ]
+    }
+  },
+  "04": {
+    "overview": "실시간 항목 04(잔고)는 종목코드(item) 등록과 상관 없이 ACCESS TOKEN을 발급한 계좌에 주문 체결이 발생할 경우 데이터가 수신됩니다.",
+    "request": [
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- type",
+        "label": "실시간 항목",
+        "type": "String",
+        "required": true,
+        "description": "TR 명(0A,0B....)"
+      }
+    ],
+    "response": [
+      {
+        "element": "- type",
+        "label": "실시간항목",
+        "type": "String",
+        "required": false,
+        "description": "TR 명(0A,0B....)"
+      },
+      {
+        "element": "- name",
+        "label": "실시간 항목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "종목코드"
+      },
+      {
+        "element": "- values",
+        "label": "실시간 값 리스트",
+        "type": "LIST",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 9201",
+        "label": "계좌번호",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 9001",
+        "label": "종목코드,업종코드",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 917",
+        "label": "신용구분",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 916",
+        "label": "대출일",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 302",
+        "label": "종목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 10",
+        "label": "현재가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 930",
+        "label": "보유수량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 931",
+        "label": "매입단가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 932",
+        "label": "총매입가(당일누적)",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 933",
+        "label": "주문가능수량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 945",
+        "label": "당일순매수량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 946",
+        "label": "매도/매수구분",
+        "type": "String",
+        "required": false,
+        "description": "계약,주"
+      },
+      {
+        "element": "- - 950",
+        "label": "당일총매도손익",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 951",
+        "label": "Extra Item",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 27",
+        "label": "(최우선)매도호가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 28",
+        "label": "(최우선)매수호가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 307",
+        "label": "기준가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 8019",
+        "label": "손익률(실현손익)",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 957",
+        "label": "신용금액",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 958",
+        "label": "신용이자",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 918",
+        "label": "만기일",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 990",
+        "label": "당일실현손익(유가)",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 991",
+        "label": "당일실현손익율(유가)",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 992",
+        "label": "당일실현손익(신용)",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 993",
+        "label": "당일실현손익율(신용)",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 959",
+        "label": "담보대출수량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 924",
+        "label": "Extra Item",
+        "type": "String",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "request_example": {
+      "trnm": "REG",
+      "grp_no": "1",
+      "refresh": "1",
+      "data": [
+        {
+          "item": [
+            ""
+          ],
+          "type": [
+            "04"
+          ]
+        }
+      ]
+    }
+  },
+  "0A": {
+    "overview": "특정 종목이 기세일때 발생하는 데이터로 시장에서 체결없이 현재가가 변경되는 대량매매나 거래소에서 종목 종가데이터 보정시 발생하는 실시간 입니다.",
+    "request": [
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "거래소별 종목코드, 업종코드\n(KRX:039490,NXT:039490_NX,SOR:039490_AL)"
+      },
+      {
+        "element": "- type",
+        "label": "실시간 항목",
+        "type": "String",
+        "required": true,
+        "description": "TR 명(0A,0B....)"
+      }
+    ],
+    "response": [
+      {
+        "element": "- type",
+        "label": "실시간항목",
+        "type": "String",
+        "required": false,
+        "description": "TR 명(0A,0B....)"
+      },
+      {
+        "element": "- name",
+        "label": "실시간 항목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "종목코드"
+      },
+      {
+        "element": "- values",
+        "label": "실시간 값 리스트",
+        "type": "LIST",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 10",
+        "label": "현재가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 11",
+        "label": "전일대비",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 12",
+        "label": "등락율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 27",
+        "label": "(최우선)매도호가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 28",
+        "label": "(최우선)매수호가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 13",
+        "label": "누적거래량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 14",
+        "label": "누적거래대금",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 16",
+        "label": "시가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 17",
+        "label": "고가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 18",
+        "label": "저가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 25",
+        "label": "전일대비기호",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 26",
+        "label": "전일거래량대비(계약,주)",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 29",
+        "label": "거래대금증감",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 30",
+        "label": "전일거래량대비(비율)",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 31",
+        "label": "거래회전율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 32",
+        "label": "거래비용",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 311",
+        "label": "시가총액(억)",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 567",
+        "label": "상한가발생시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 568",
+        "label": "하한가발생시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "request_example": {
+      "trnm": "REG",
+      "grp_no": "1",
+      "refresh": "1",
+      "data": [
+        {
+          "item": [
+            "005930"
+          ],
+          "type": [
+            "0A"
+          ]
+        }
+      ]
+    }
+  },
+  "0B": {
+    "overview": "",
+    "request": [
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "거래소별 종목코드, 업종코드\n(KRX:039490,NXT:039490_NX,SOR:039490_AL)"
+      },
+      {
+        "element": "- type",
+        "label": "실시간 항목",
+        "type": "String",
+        "required": true,
+        "description": "TR 명(0A,0B....)"
+      }
+    ],
+    "response": [
+      {
+        "element": "- type",
+        "label": "실시간항목",
+        "type": "String",
+        "required": false,
+        "description": "TR 명(0B,0B....)"
+      },
+      {
+        "element": "- name",
+        "label": "실시간 항목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "종목코드"
+      },
+      {
+        "element": "- values",
+        "label": "실시간 값 리스트",
+        "type": "LIST",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 20",
+        "label": "체결시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 10",
+        "label": "현재가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 11",
+        "label": "전일대비",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 12",
+        "label": "등락율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 27",
+        "label": "(최우선)매도호가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 28",
+        "label": "(최우선)매수호가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 15",
+        "label": "거래량",
+        "type": "String",
+        "required": false,
+        "description": "+는 매수체결,-는 매도체결"
+      },
+      {
+        "element": "- - 13",
+        "label": "누적거래량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 14",
+        "label": "누적거래대금",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 16",
+        "label": "시가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 17",
+        "label": "고가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 18",
+        "label": "저가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 25",
+        "label": "전일대비기호",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 26",
+        "label": "전일거래량대비(계약,주)",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 29",
+        "label": "거래대금증감",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 30",
+        "label": "전일거래량대비(비율)",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 31",
+        "label": "거래회전율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 32",
+        "label": "거래비용",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 228",
+        "label": "체결강도",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 311",
+        "label": "시가총액(억)",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 290",
+        "label": "장구분",
+        "type": "String",
+        "required": false,
+        "description": "1: 장전 시간외 , 2: 장중 , 3: 장후 시간외"
+      },
+      {
+        "element": "- - 691",
+        "label": "K.O 접근도",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 567",
+        "label": "상한가발생시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 568",
+        "label": "하한가발생시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 851",
+        "label": "전일 동시간 거래량 비율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 1890",
+        "label": "시가시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 1891",
+        "label": "고가시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 1892",
+        "label": "저가시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 1030",
+        "label": "매도체결량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 1031",
+        "label": "매수체결량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 1032",
+        "label": "매수비율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 1071",
+        "label": "매도체결건수",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 1072",
+        "label": "매수체결건수",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 1313",
+        "label": "순간거래대금",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 1315",
+        "label": "매도체결량_단건",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 1316",
+        "label": "매수체결량_단건",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 1314",
+        "label": "순매수체결량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 1497",
+        "label": "CFD증거금",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 1498",
+        "label": "유지증거금",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 620",
+        "label": "당일거래평균가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 732",
+        "label": "CFD거래비용",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 852",
+        "label": "대주거래비용",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 9081",
+        "label": "거래소구분",
+        "type": "String",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "request_example": {
+      "trnm": "REG",
+      "grp_no": "1",
+      "refresh": "1",
+      "data": [
+        {
+          "item": [
+            "005930"
+          ],
+          "type": [
+            "0B"
+          ]
+        }
+      ]
+    }
+  },
+  "0C": {
+    "overview": "",
+    "request": [
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "거래소별 종목코드, 업종코드\n(KRX:039490,NXT:039490_NX,SOR:039490_AL)"
+      },
+      {
+        "element": "- type",
+        "label": "실시간 항목",
+        "type": "String",
+        "required": true,
+        "description": "TR 명(0A,0B....)"
+      }
+    ],
+    "response": [
+      {
+        "element": "- type",
+        "label": "실시간항목",
+        "type": "String",
+        "required": false,
+        "description": "TR 명(0A,0B....)"
+      },
+      {
+        "element": "- name",
+        "label": "실시간 항목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "종목코드"
+      },
+      {
+        "element": "- values",
+        "label": "실시간 값 리스트",
+        "type": "LIST",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 27",
+        "label": "(최우선)매도호가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 28",
+        "label": "(최우선)매수호가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "request_example": {
+      "trnm": "REG",
+      "grp_no": "1",
+      "refresh": "1",
+      "data": [
+        {
+          "item": [
+            "005930"
+          ],
+          "type": [
+            "0C"
+          ]
+        }
+      ]
+    }
+  },
+  "0D": {
+    "overview": "",
+    "request": [
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "거래소별 종목코드, 업종코드\n(KRX:039490,NXT:039490_NX,SOR:039490_AL)"
+      },
+      {
+        "element": "- type",
+        "label": "실시간 항목",
+        "type": "String",
+        "required": true,
+        "description": "TR 명(0A,0B....)"
+      }
+    ],
+    "response": [
+      {
+        "element": "- type",
+        "label": "실시간항목",
+        "type": "String",
+        "required": false,
+        "description": "TR 명(0A,0B....)"
+      },
+      {
+        "element": "- name",
+        "label": "실시간 항목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "종목코드"
+      },
+      {
+        "element": "- values",
+        "label": "실시간 값 리스트",
+        "type": "LIST",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 21",
+        "label": "호가시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 41",
+        "label": "매도호가1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 61",
+        "label": "매도호가수량1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 81",
+        "label": "매도호가직전대비1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 51",
+        "label": "매수호가1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 71",
+        "label": "매수호가수량1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 91",
+        "label": "매수호가직전대비1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 42",
+        "label": "매도호가2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 62",
+        "label": "매도호가수량2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 82",
+        "label": "매도호가직전대비2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 52",
+        "label": "매수호가2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 72",
+        "label": "매수호가수량2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 92",
+        "label": "매수호가직전대비2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 43",
+        "label": "매도호가3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 63",
+        "label": "매도호가수량3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 83",
+        "label": "매도호가직전대비3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 53",
+        "label": "매수호가3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 73",
+        "label": "매수호가수량3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 93",
+        "label": "매수호가직전대비3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 44",
+        "label": "매도호가4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 64",
+        "label": "매도호가수량4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 84",
+        "label": "매도호가직전대비4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 54",
+        "label": "매수호가4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 74",
+        "label": "매수호가수량4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 94",
+        "label": "매수호가직전대비4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 45",
+        "label": "매도호가5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 65",
+        "label": "매도호가수량5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 85",
+        "label": "매도호가직전대비5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 55",
+        "label": "매수호가5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 75",
+        "label": "매수호가수량5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 95",
+        "label": "매수호가직전대비5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 46",
+        "label": "매도호가6",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 66",
+        "label": "매도호가수량6",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 86",
+        "label": "매도호가직전대비6",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 56",
+        "label": "매수호가6",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 76",
+        "label": "매수호가수량6",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 96",
+        "label": "매수호가직전대비6",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 47",
+        "label": "매도호가7",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 67",
+        "label": "매도호가수량7",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 87",
+        "label": "매도호가직전대비7",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 57",
+        "label": "매수호가7",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 77",
+        "label": "매수호가수량7",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 97",
+        "label": "매수호가직전대비7",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 48",
+        "label": "매도호가8",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 68",
+        "label": "매도호가수량8",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 88",
+        "label": "매도호가직전대비8",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 58",
+        "label": "매수호가8",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 78",
+        "label": "매수호가수량8",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 98",
+        "label": "매수호가직전대비8",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 49",
+        "label": "매도호가9",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 69",
+        "label": "매도호가수량9",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 89",
+        "label": "매도호가직전대비9",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 59",
+        "label": "매수호가9",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 79",
+        "label": "매수호가수량9",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 99",
+        "label": "매수호가직전대비9",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 50",
+        "label": "매도호가10",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 70",
+        "label": "매도호가수량10",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 60",
+        "label": "매수호가10",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 90",
+        "label": "매도호가직전대비10",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 80",
+        "label": "매수호가수량10",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 100",
+        "label": "매수호가직전대비10",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 121",
+        "label": "매도호가총잔량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 122",
+        "label": "매도호가총잔량직전대비",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 125",
+        "label": "매수호가총잔량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 126",
+        "label": "매수호가총잔량직전대비",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 23",
+        "label": "예상체결가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 24",
+        "label": "예상체결수량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 128",
+        "label": "순매수잔량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 129",
+        "label": "매수비율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 138",
+        "label": "순매도잔량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 139",
+        "label": "매도비율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 200",
+        "label": "예상체결가전일종가대비",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 201",
+        "label": "예상체결가전일종가대비등락율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 238",
+        "label": "예상체결가전일종가대비기호",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 291",
+        "label": "예상체결가",
+        "type": "String",
+        "required": false,
+        "description": "예상체결 시간동안에만 유효한 값"
+      },
+      {
+        "element": "- - 292",
+        "label": "예상체결량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 293",
+        "label": "예상체결가전일대비기호",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 294",
+        "label": "예상체결가전일대비",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 295",
+        "label": "예상체결가전일대비등락율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 621",
+        "label": "LP매도호가수량1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 631",
+        "label": "LP매수호가수량1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 622",
+        "label": "LP매도호가수량2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 632",
+        "label": "LP매수호가수량2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 623",
+        "label": "LP매도호가수량3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 633",
+        "label": "LP매수호가수량3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 624",
+        "label": "LP매도호가수량4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 634",
+        "label": "LP매수호가수량4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 625",
+        "label": "LP매도호가수량5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 635",
+        "label": "LP매수호가수량5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 626",
+        "label": "LP매도호가수량6",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 636",
+        "label": "LP매수호가수량6",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 627",
+        "label": "LP매도호가수량7",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 637",
+        "label": "LP매수호가수량7",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 628",
+        "label": "LP매도호가수량8",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 638",
+        "label": "LP매수호가수량8",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 629",
+        "label": "LP매도호가수량9",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 639",
+        "label": "LP매수호가수량9",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 630",
+        "label": "LP매도호가수량10",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 640",
+        "label": "LP매수호가수량10",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 13",
+        "label": "누적거래량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 299",
+        "label": "전일거래량대비예상체결율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 215",
+        "label": "장운영구분",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 216",
+        "label": "투자자별ticker",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6044",
+        "label": "KRX 매도호가잔량1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6045",
+        "label": "KRX 매도호가잔량2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6046",
+        "label": "KRX 매도호가잔량3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6047",
+        "label": "KRX 매도호가잔량4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6048",
+        "label": "KRX 매도호가잔량5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6049",
+        "label": "KRX 매도호가잔량6",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6050",
+        "label": "KRX 매도호가잔량7",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6051",
+        "label": "KRX 매도호가잔량8",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6052",
+        "label": "KRX 매도호가잔량9",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6053",
+        "label": "KRX 매도호가잔량10",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6054",
+        "label": "KRX 매수호가잔량1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6055",
+        "label": "KRX 매수호가잔량2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6056",
+        "label": "KRX 매수호가잔량3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6057",
+        "label": "KRX 매수호가잔량4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6058",
+        "label": "KRX 매수호가잔량5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6059",
+        "label": "KRX 매수호가잔량6",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6060",
+        "label": "KRX 매수호가잔량7",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6061",
+        "label": "KRX 매수호가잔량8",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6062",
+        "label": "KRX 매수호가잔량9",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6063",
+        "label": "KRX 매수호가잔량10",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6064",
+        "label": "KRX 매도호가총잔량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6065",
+        "label": "KRX 매수호가총잔량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6066",
+        "label": "NXT 매도호가잔량1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6067",
+        "label": "NXT 매도호가잔량2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6068",
+        "label": "NXT 매도호가잔량3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6069",
+        "label": "NXT 매도호가잔량4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6070",
+        "label": "NXT 매도호가잔량5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6071",
+        "label": "NXT 매도호가잔량6",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6072",
+        "label": "NXT 매도호가잔량7",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6073",
+        "label": "NXT 매도호가잔량8",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6074",
+        "label": "NXT 매도호가잔량9",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6075",
+        "label": "NXT 매도호가잔량10",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6076",
+        "label": "NXT 매수호가잔량1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6077",
+        "label": "NXT 매수호가잔량2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6078",
+        "label": "NXT 매수호가잔량3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6079",
+        "label": "NXT 매수호가잔량4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6080",
+        "label": "NXT 매수호가잔량5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6081",
+        "label": "NXT 매수호가잔량6",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6082",
+        "label": "NXT 매수호가잔량7",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6083",
+        "label": "NXT 매수호가잔량8",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6084",
+        "label": "NXT 매수호가잔량9",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6085",
+        "label": "NXT 매수호가잔량10",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6086",
+        "label": "NXT 매도호가총잔량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6087",
+        "label": "NXT 매수호가총잔량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6100",
+        "label": "KRX 중간가 매도 총잔량 증감",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6101",
+        "label": "KRX 중간가 매도 총잔량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6102",
+        "label": "KRX 중간가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6103",
+        "label": "KRX 중간가 매수 총잔량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6104",
+        "label": "KRX 중간가 매수 총잔량 증감",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6105",
+        "label": "NXT중간가 매도 총잔량 증감",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6106",
+        "label": "NXT중간가 매도 총잔량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6107",
+        "label": "NXT중간가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6108",
+        "label": "NXT중간가 매수 총잔량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6109",
+        "label": "NXT중간가 매수 총잔량 증감",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 6110",
+        "label": "KRX중간가대비",
+        "type": "String",
+        "required": false,
+        "description": "기준가대비"
+      },
+      {
+        "element": "- - 6111",
+        "label": "KRX중간가대비 기호",
+        "type": "String",
+        "required": false,
+        "description": "기준가대비"
+      },
+      {
+        "element": "- - 6112",
+        "label": "KRX중간가대비등락율",
+        "type": "String",
+        "required": false,
+        "description": "기준가대비"
+      },
+      {
+        "element": "- - 6113",
+        "label": "NXT중간가대비",
+        "type": "String",
+        "required": false,
+        "description": "기준가대비"
+      },
+      {
+        "element": "- - 6114",
+        "label": "NXT중간가대비 기호",
+        "type": "String",
+        "required": false,
+        "description": "기준가대비"
+      },
+      {
+        "element": "- - 6115",
+        "label": "NXT중간가대비등락율",
+        "type": "String",
+        "required": false,
+        "description": "기준가대비"
+      }
+    ],
+    "request_example": {
+      "trnm": "REG",
+      "grp_no": "1",
+      "refresh": "1",
+      "data": [
+        {
+          "item": [
+            "005930"
+          ],
+          "type": [
+            "0D"
+          ]
+        }
+      ]
+    }
+  },
+  "0E": {
+    "overview": "",
+    "request": [
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "거래소별 종목코드, 업종코드\n(KRX:039490,NXT:039490_NX,SOR:039490_AL)"
+      },
+      {
+        "element": "- type",
+        "label": "실시간 항목",
+        "type": "String",
+        "required": true,
+        "description": "TR 명(0A,0B....)"
+      }
+    ],
+    "response": [
+      {
+        "element": "- type",
+        "label": "실시간항목",
+        "type": "String",
+        "required": false,
+        "description": "TR 명(0A,0B....)"
+      },
+      {
+        "element": "- name",
+        "label": "실시간 항목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "거래소별 종목코드\n(KRX:039490,NXT:039490_NX,SOR:039490_AL)"
+      },
+      {
+        "element": "- values",
+        "label": "실시간 값 리스트",
+        "type": "LIST",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 21",
+        "label": "호가시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 131",
+        "label": "시간외매도호가총잔량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 132",
+        "label": "시간외매도호가총잔량직전대비",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 135",
+        "label": "시간외매수호가총잔량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 136",
+        "label": "시간외매수호가총잔량직전대비",
+        "type": "String",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "request_example": {
+      "trnm": "REG",
+      "grp_no": "1",
+      "refresh": "1",
+      "data": [
+        {
+          "item": [
+            "005930"
+          ],
+          "type": [
+            "0E"
+          ]
+        }
+      ]
+    }
+  },
+  "0F": {
+    "overview": "",
+    "request": [
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "거래소별 종목코드, 업종코드\n(KRX:039490,NXT:039490_NX,SOR:039490_AL)"
+      },
+      {
+        "element": "- type",
+        "label": "실시간 항목",
+        "type": "String",
+        "required": true,
+        "description": "TR 명(0A,0B....)"
+      }
+    ],
+    "response": [
+      {
+        "element": "- type",
+        "label": "실시간항목",
+        "type": "String",
+        "required": false,
+        "description": "TR 명(0A,0B....)"
+      },
+      {
+        "element": "- name",
+        "label": "실시간 항목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "종목코드"
+      },
+      {
+        "element": "- values",
+        "label": "실시간 값 리스트",
+        "type": "LIST",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 141",
+        "label": "매도거래원1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 161",
+        "label": "매도거래원수량1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 166",
+        "label": "매도거래원별증감1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 146",
+        "label": "매도거래원코드1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 271",
+        "label": "매도거래원색깔1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 151",
+        "label": "매수거래원1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 171",
+        "label": "매수거래원수량1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 176",
+        "label": "매수거래원별증감1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 156",
+        "label": "매수거래원코드1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 281",
+        "label": "매수거래원색깔1",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 142",
+        "label": "매도거래원2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 162",
+        "label": "매도거래원수량2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 167",
+        "label": "매도거래원별증감2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 147",
+        "label": "매도거래원코드2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 272",
+        "label": "매도거래원색깔2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 152",
+        "label": "매수거래원2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 172",
+        "label": "매수거래원수량2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 177",
+        "label": "매수거래원별증감2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 157",
+        "label": "매수거래원코드2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 282",
+        "label": "매수거래원색깔2",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 143",
+        "label": "매도거래원3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 163",
+        "label": "매도거래원수량3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 168",
+        "label": "매도거래원별증감3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 148",
+        "label": "매도거래원코드3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 273",
+        "label": "매도거래원색깔3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 153",
+        "label": "매수거래원3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 173",
+        "label": "매수거래원수량3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 178",
+        "label": "매수거래원별증감3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 158",
+        "label": "매수거래원코드3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 283",
+        "label": "매수거래원색깔3",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 144",
+        "label": "매도거래원4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 164",
+        "label": "매도거래원수량4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 169",
+        "label": "매도거래원별증감4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 149",
+        "label": "매도거래원코드4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 274",
+        "label": "매도거래원색깔4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 154",
+        "label": "매수거래원4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 174",
+        "label": "매수거래원수량4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 179",
+        "label": "매수거래원별증감4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 159",
+        "label": "매수거래원코드4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 284",
+        "label": "매수거래원색깔4",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 145",
+        "label": "매도거래원5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 165",
+        "label": "매도거래원수량5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 170",
+        "label": "매도거래원별증감5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 150",
+        "label": "매도거래원코드5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 275",
+        "label": "매도거래원색깔5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 155",
+        "label": "매수거래원5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 175",
+        "label": "매수거래원수량5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 180",
+        "label": "매수거래원별증감5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 160",
+        "label": "매수거래원코드5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 285",
+        "label": "매수거래원색깔5",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 261",
+        "label": "외국계매도추정합",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 262",
+        "label": "외국계매도추정합변동",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 263",
+        "label": "외국계매수추정합",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 264",
+        "label": "외국계매수추정합변동",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 267",
+        "label": "외국계순매수추정합",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 268",
+        "label": "외국계순매수변동",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 337",
+        "label": "거래소구분",
+        "type": "String",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "request_example": {
+      "trnm": "REG",
+      "grp_no": "1",
+      "refresh": "1",
+      "data": [
+        {
+          "item": [
+            "005930"
+          ],
+          "type": [
+            "0F"
+          ]
+        }
+      ]
+    }
+  },
+  "0G": {
+    "overview": "",
+    "request": [
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "거래소별 종목코드, 업종코드\n(KRX:039490,NXT:039490_NX,SOR:039490_AL)"
+      },
+      {
+        "element": "- type",
+        "label": "실시간 항목",
+        "type": "String",
+        "required": true,
+        "description": "TR 명(0A,0B....)"
+      }
+    ],
+    "response": [
+      {
+        "element": "- type",
+        "label": "실시간항목",
+        "type": "String",
+        "required": false,
+        "description": "TR 명(0A,0B....)"
+      },
+      {
+        "element": "- name",
+        "label": "실시간 항목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "종목코드"
+      },
+      {
+        "element": "- values",
+        "label": "실시간 값 리스트",
+        "type": "LIST",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 36",
+        "label": "NAV",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 37",
+        "label": "NAV전일대비",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 38",
+        "label": "NAV등락율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 39",
+        "label": "추적오차율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 20",
+        "label": "체결시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 10",
+        "label": "현재가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 11",
+        "label": "전일대비",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 12",
+        "label": "등락율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 13",
+        "label": "누적거래량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 25",
+        "label": "전일대비기호",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 667",
+        "label": "ELW기어링비율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 668",
+        "label": "ELW손익분기율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 669",
+        "label": "ELW자본지지점",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 265",
+        "label": "NAV/지수괴리율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 266",
+        "label": "NAV/ETF괴리율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "request_example": {
+      "trnm": "REG",
+      "grp_no": "1",
+      "refresh": "1",
+      "data": [
+        {
+          "item": [
+            "069500"
+          ],
+          "type": [
+            "0G"
+          ]
+        }
+      ]
+    }
+  },
+  "0H": {
+    "overview": "",
+    "request": [
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "거래소별 종목코드, 업종코드\n(KRX:039490,NXT:039490_NX,SOR:039490_AL)"
+      },
+      {
+        "element": "- type",
+        "label": "실시간 항목",
+        "type": "String",
+        "required": true,
+        "description": "TR 명(0A,0B....)"
+      }
+    ],
+    "response": [
+      {
+        "element": "- type",
+        "label": "실시간항목",
+        "type": "String",
+        "required": false,
+        "description": "TR 명(0A,0B....)"
+      },
+      {
+        "element": "- name",
+        "label": "실시간 항목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "종목코드"
+      },
+      {
+        "element": "- values",
+        "label": "실시간 값 리스트",
+        "type": "LIST",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 20",
+        "label": "체결시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 10",
+        "label": "현재가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 11",
+        "label": "전일대비",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 12",
+        "label": "등락율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 15",
+        "label": "거래량",
+        "type": "String",
+        "required": false,
+        "description": "+는 매수체결, -는 매도체결"
+      },
+      {
+        "element": "- - 13",
+        "label": "누적거래량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 25",
+        "label": "전일대비기호",
+        "type": "String",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "request_example": {
+      "trnm": "REG",
+      "grp_no": "1",
+      "refresh": "1",
+      "data": [
+        {
+          "item": [
+            "005930"
+          ],
+          "type": [
+            "0H"
+          ]
+        }
+      ]
+    }
+  },
+  "0I": {
+    "overview": "",
+    "request": [
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "MGD: 원/g, MGU: $/온스,소수점2자리"
+      },
+      {
+        "element": "- type",
+        "label": "실시간 항목",
+        "type": "String",
+        "required": true,
+        "description": "TR 명(0A,0B....)"
+      }
+    ],
+    "response": [
+      {
+        "element": "- type",
+        "label": "실시간항목",
+        "type": "String",
+        "required": false,
+        "description": "TR 명(0B,0B....)"
+      },
+      {
+        "element": "- name",
+        "label": "실시간 항목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "종목코드"
+      },
+      {
+        "element": "- values",
+        "label": "실시간 값 리스트",
+        "type": "LIST",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 10",
+        "label": "현재가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 25",
+        "label": "전일대비기호",
+        "type": "String",
+        "required": false,
+        "description": "1:상한, 2:상승, 3:없음, 4:하한, 5:하락"
+      },
+      {
+        "element": "- - 11",
+        "label": "전일대비",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 12",
+        "label": "등락율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "request_example": {
+      "trnm": "REG",
+      "grp_no": "1",
+      "refresh": "1",
+      "data": [
+        {
+          "item": [
+            "MGD"
+          ],
+          "type": [
+            "0I"
+          ]
+        }
+      ]
+    }
+  },
+  "0J": {
+    "overview": "",
+    "request": [
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "거래소별 종목코드, 업종코드\n(KRX:039490,NXT:039490_NX,SOR:039490_AL)"
+      },
+      {
+        "element": "- type",
+        "label": "실시간 항목",
+        "type": "String",
+        "required": true,
+        "description": "TR 명(0A,0B....)"
+      }
+    ],
+    "response": [
+      {
+        "element": "- type",
+        "label": "실시간항목",
+        "type": "String",
+        "required": false,
+        "description": "TR 명(0A,0B....)"
+      },
+      {
+        "element": "- name",
+        "label": "실시간 항목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "종목코드"
+      },
+      {
+        "element": "- values",
+        "label": "실시간 값 리스트",
+        "type": "LIST",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 20",
+        "label": "체결시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 10",
+        "label": "현재가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 11",
+        "label": "전일대비",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 12",
+        "label": "등락율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 15",
+        "label": "거래량",
+        "type": "String",
+        "required": false,
+        "description": "+는 매수체결,-는 매도체결"
+      },
+      {
+        "element": "- - 13",
+        "label": "누적거래량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 14",
+        "label": "누적거래대금",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 16",
+        "label": "시가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 17",
+        "label": "고가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 18",
+        "label": "저가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 25",
+        "label": "전일대비기호",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 26",
+        "label": "전일거래량대비",
+        "type": "String",
+        "required": false,
+        "description": "계약,주"
+      }
+    ],
+    "request_example": {
+      "trnm": "REG",
+      "grp_no": "1",
+      "refresh": "1",
+      "data": [
+        {
+          "item": [
+            "001"
+          ],
+          "type": [
+            "0J"
+          ]
+        }
+      ]
+    }
+  },
+  "0U": {
+    "overview": "",
+    "request": [
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "거래소별 종목코드, 업종코드\n(KRX:039490,NXT:039490_NX,SOR:039490_AL)"
+      },
+      {
+        "element": "- type",
+        "label": "실시간 항목",
+        "type": "String",
+        "required": true,
+        "description": "TR 명(0A,0B....)"
+      }
+    ],
+    "response": [
+      {
+        "element": "- type",
+        "label": "실시간항목",
+        "type": "String",
+        "required": false,
+        "description": "TR 명(0A,0B....)"
+      },
+      {
+        "element": "- name",
+        "label": "실시간 항목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "종목코드"
+      },
+      {
+        "element": "- values",
+        "label": "실시간 값 리스트",
+        "type": "LIST",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 20",
+        "label": "체결시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 252",
+        "label": "상승종목수",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 251",
+        "label": "상한종목수",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 253",
+        "label": "보합종목수",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 255",
+        "label": "하락종목수",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 254",
+        "label": "하한종목수",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 13",
+        "label": "누적거래량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 14",
+        "label": "누적거래대금",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 10",
+        "label": "현재가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 11",
+        "label": "전일대비",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 12",
+        "label": "등락율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 256",
+        "label": "거래형성종목수",
+        "type": "String",
+        "required": false,
+        "description": "계약,주"
+      },
+      {
+        "element": "- - 257",
+        "label": "거래형성비율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 25",
+        "label": "전일대비기호",
+        "type": "String",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "request_example": {
+      "trnm": "REG",
+      "grp_no": "1",
+      "refresh": "1",
+      "data": [
+        {
+          "item": [
+            "001"
+          ],
+          "type": [
+            "0U"
+          ]
+        }
+      ]
+    }
+  },
+  "0g": {
+    "overview": "",
+    "request": [
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "거래소별 종목코드, 업종코드\n(KRX:039490,NXT:039490_NX,SOR:039490_AL)"
+      },
+      {
+        "element": "- type",
+        "label": "실시간 항목",
+        "type": "String",
+        "required": true,
+        "description": "TR 명(0A,0B....)"
+      }
+    ],
+    "response": [
+      {
+        "element": "- type",
+        "label": "실시간항목",
+        "type": "String",
+        "required": false,
+        "description": "TR 명(0A,0B....)"
+      },
+      {
+        "element": "- name",
+        "label": "실시간 항목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "종목코드"
+      },
+      {
+        "element": "- values",
+        "label": "실시간 값 리스트",
+        "type": "LIST",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 297",
+        "label": "임의연장",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 592",
+        "label": "장전임의연장",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 593",
+        "label": "장후임의연장",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 305",
+        "label": "상한가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 306",
+        "label": "하한가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 307",
+        "label": "기준가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 689",
+        "label": "조기종료ELW발생",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 594",
+        "label": "통화단위",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 382",
+        "label": "증거금율표시",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 370",
+        "label": "종목정보",
+        "type": "String",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "request_example": {
+      "trnm": "REG",
+      "grp_no": "1",
+      "refresh": "1",
+      "data": [
+        {
+          "item": [
+            "005930"
+          ],
+          "type": [
+            "0g"
+          ]
+        }
+      ]
+    }
+  },
+  "0m": {
+    "overview": "",
+    "request": [
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "거래소별 종목코드, 업종코드\n(KRX:039490,NXT:039490_NX,SOR:039490_AL)"
+      },
+      {
+        "element": "- type",
+        "label": "실시간 항목",
+        "type": "String",
+        "required": true,
+        "description": "TR 명(0A,0B....)"
+      }
+    ],
+    "response": [
+      {
+        "element": "- type",
+        "label": "실시간항목",
+        "type": "String",
+        "required": false,
+        "description": "TR 명(0A,0B....)"
+      },
+      {
+        "element": "- name",
+        "label": "실시간 항목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "종목코드"
+      },
+      {
+        "element": "- values",
+        "label": "실시간 값 리스트",
+        "type": "LIST",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 20",
+        "label": "체결시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 10",
+        "label": "현재가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 670",
+        "label": "ELW이론가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 671",
+        "label": "ELW내재변동성",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 672",
+        "label": "ELW델타",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 673",
+        "label": "ELW감마",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 674",
+        "label": "ELW쎄타",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 675",
+        "label": "ELW베가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 676",
+        "label": "ELW로",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 706",
+        "label": "LP호가내재변동성",
+        "type": "String",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "request_example": {
+      "trnm": "REG",
+      "grp_no": "1",
+      "refresh": "1",
+      "data": [
+        {
+          "item": [
+            "57JBHH"
+          ],
+          "type": [
+            "0m"
+          ]
+        }
+      ]
+    }
+  },
+  "0s": {
+    "overview": "",
+    "request": [
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "거래소별 종목코드, 업종코드\n(KRX:039490,NXT:039490_NX,SOR:039490_AL)"
+      },
+      {
+        "element": "- type",
+        "label": "실시간 항목",
+        "type": "String",
+        "required": true,
+        "description": "TR 명(0A,0B....)"
+      }
+    ],
+    "response": [
+      {
+        "element": "- type",
+        "label": "실시간항목",
+        "type": "String",
+        "required": false,
+        "description": "TR 명(0A,0B....)"
+      },
+      {
+        "element": "- name",
+        "label": "실시간 항목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "종목코드"
+      },
+      {
+        "element": "- values",
+        "label": "실시간 값 리스트",
+        "type": "LIST",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 215",
+        "label": "장운영구분",
+        "type": "String",
+        "required": false,
+        "description": "0 : 장시작전 알림(8:40~),\n3 : 장시작(09:00),\n2 : 장마감 알림(15:20~),\n4 : 장마감(15:30),\n8 : 정규장마감(거래소 수신시 15:30 이후),\n9 : 전체장마감(거래소 수신시 18:00 이후),\na : 시간외 종가매매 시작(15:40),\nb : 시간외 종가매매 종료(16:00),\nc : 시간외 단일가 시작(16:00),\nd : 시간외 단일가 종료(18:00),\ne : 선옵 장마감전 동시호가 종료,\nf : 선물옵션 장운영시간 알림(조기개장 상품),\no : 선옵 장시작,\ns : 선옵 장마감전 동시호가 시작,\nP : NXT 프리마켓 시작 알림,\nQ : NXT 프리마켓 종료 알림,\nR : NXT 메인마켓 시작 알림,\nS : NXT 메인마켓 종료 알림,\nT : NXT 에프터마켓 단일가 시작 알림,\nU : NXT 에프터마켓 시작 알림,\nV : NXT 에프터마켓 종료 알림"
+      },
+      {
+        "element": "- - 20",
+        "label": "체결시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 214",
+        "label": "장시작예상잔여시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "request_example": {
+      "trnm": "REG",
+      "grp_no": "1",
+      "refresh": "1",
+      "data": [
+        {
+          "item": [
+            ""
+          ],
+          "type": [
+            "0s"
+          ]
+        }
+      ]
+    }
+  },
+  "0u": {
+    "overview": "",
+    "request": [
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "거래소별 종목코드, 업종코드\n(KRX:039490,NXT:039490_NX,SOR:039490_AL)"
+      },
+      {
+        "element": "- type",
+        "label": "실시간 항목",
+        "type": "String",
+        "required": true,
+        "description": "TR 명(0A,0B....)"
+      }
+    ],
+    "response": [
+      {
+        "element": "- type",
+        "label": "실시간항목",
+        "type": "String",
+        "required": false,
+        "description": "TR 명(0A,0B....)"
+      },
+      {
+        "element": "- name",
+        "label": "실시간 항목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "종목코드"
+      },
+      {
+        "element": "- values",
+        "label": "실시간 값 리스트",
+        "type": "LIST",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 20",
+        "label": "체결시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 666",
+        "label": "ELW패리티",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 1211",
+        "label": "ELW프리미엄",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 667",
+        "label": "ELW기어링비율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 668",
+        "label": "ELW손익분기율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 669",
+        "label": "ELW자본지지점",
+        "type": "String",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "request_example": {
+      "trnm": "REG",
+      "grp_no": "1",
+      "refresh": "1",
+      "data": [
+        {
+          "item": [
+            "57JBHH"
+          ],
+          "type": [
+            "0u"
+          ]
+        }
+      ]
+    }
+  },
+  "0w": {
+    "overview": "",
+    "request": [
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "거래소별 종목코드, 업종코드\n(KRX:039490,NXT:039490_NX,SOR:039490_AL)"
+      },
+      {
+        "element": "- type",
+        "label": "실시간 항목",
+        "type": "String",
+        "required": true,
+        "description": "TR 명(0A,0B....)"
+      }
+    ],
+    "response": [
+      {
+        "element": "- type",
+        "label": "실시간항목",
+        "type": "String",
+        "required": false,
+        "description": "TR 명(0A,0B....)"
+      },
+      {
+        "element": "- name",
+        "label": "실시간 항목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- item",
+        "label": "실시간 등록 요소",
+        "type": "String",
+        "required": false,
+        "description": "종목코드"
+      },
+      {
+        "element": "- values",
+        "label": "실시간 값 리스트",
+        "type": "LIST",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 20",
+        "label": "체결시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 10",
+        "label": "현재가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 25",
+        "label": "전일대비기호",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 11",
+        "label": "전일대비",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 12",
+        "label": "등락율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 13",
+        "label": "누적거래량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 202",
+        "label": "매도수량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 204",
+        "label": "매도금액",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 206",
+        "label": "매수수량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 208",
+        "label": "매수금액",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 210",
+        "label": "순매수수량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 211",
+        "label": "순매수수량증감",
+        "type": "String",
+        "required": false,
+        "description": "계약,주"
+      },
+      {
+        "element": "- - 212",
+        "label": "순매수금액",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 213",
+        "label": "순매수금액증감",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 214",
+        "label": "장시작예상잔여시간",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 215",
+        "label": "장운영구분",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- - 216",
+        "label": "투자자별ticker",
+        "type": "String",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "request_example": {
+      "trnm": "REG",
+      "grp_no": "1",
+      "refresh": "1",
+      "data": [
+        {
+          "item": [
+            "005930"
+          ],
+          "type": [
+            "0w"
+          ]
+        }
+      ]
+    }
+  },
+  "ka10171": {
+    "overview": "조건검색은 영웅문4에서 만드실 수 있습니다.",
+    "request": [],
+    "response": [
+      {
+        "element": "- seq",
+        "label": "조건검색식 일련번호",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- name",
+        "label": "조건검색식 명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "request_example": {
+      "trnm": "CNSRLST"
+    }
+  },
+  "ka10172": {
+    "overview": "조건검색은 영웅문4에서 만드실 수 있습니다.",
+    "request": [
+      {
+        "element": "seq",
+        "label": "조건검색식 일련번호",
+        "type": "String",
+        "required": true,
+        "description": ""
+      },
+      {
+        "element": "search_type",
+        "label": "조회타입",
+        "type": "String",
+        "required": true,
+        "description": "0:조건검색"
+      },
+      {
+        "element": "stex_tp",
+        "label": "거래소구분",
+        "type": "String",
+        "required": true,
+        "description": "K:KRX"
+      }
+    ],
+    "response": [
+      {
+        "element": "seq",
+        "label": "조건검색식 일련번호",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- 9001",
+        "label": "종목코드",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- 302",
+        "label": "종목명",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- 10",
+        "label": "현재가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- 25",
+        "label": "전일대비기호",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- 11",
+        "label": "전일대비",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- 12",
+        "label": "등락율",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- 13",
+        "label": "누적거래량",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- 16",
+        "label": "시가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- 17",
+        "label": "고가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- 18",
+        "label": "저가",
+        "type": "String",
+        "required": false,
+        "description": ""
+      }
+    ],
+    "request_example": {
+      "trnm": "CNSRREQ",
+      "seq": "4",
+      "search_type": "0",
+      "stex_tp": "K",
+      "cont_yn": "N",
+      "next_key": ""
+    }
+  },
+  "ka10173": {
+    "overview": "조건검색 실시간 조회는 시스템 내부구조상 조건검색 목록 조회를 먼저 진행한 후에 실시간 조회를 이용할 수 있습니다. \n조건검색은 영웅문4에서 만드실 수 있습니다.",
+    "request": [
+      {
+        "element": "seq",
+        "label": "조건검색식 일련번호",
+        "type": "String",
+        "required": true,
+        "description": ""
+      },
+      {
+        "element": "search_type",
+        "label": "조회타입",
+        "type": "String",
+        "required": true,
+        "description": "1: 조건검색+실시간조건검색"
+      },
+      {
+        "element": "stex_tp",
+        "label": "거래소구분",
+        "type": "String",
+        "required": true,
+        "description": "K:KRX"
+      }
+    ],
+    "response": [
+      {
+        "element": "조회 데이터",
+        "label": "",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "seq",
+        "label": "조건검색식 일련번호",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- jmcode",
+        "label": "종목코드",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "실시간 데이터",
+        "label": "",
+        "type": "String",
+        "required": false,
+        "description": ""
+      },
+      {
+        "element": "- type",
+        "label": "실시간 항목",
+        "type": "String",
+        "required": true,
+        "description": "TR 명(0A,0B....)"
+      },
+      {
+        "element": "- name",
+        "label": "실시간 항목명",
+        "type": "String",
+        "required": true,
+        "description": "종목코드"
+      },
+      {
+        "element": "- values",
+        "label": "실시간 수신 값",
+        "type": "Object",
+        "required": true,
+        "description": ""
+      },
+      {
+        "element": "- - 841",
+        "label": "일련번호",
+        "type": "String",
+        "required": true,
+        "description": ""
+      },
+      {
+        "element": "- - 9001",
+        "label": "종목코드",
+        "type": "String",
+        "required": true,
+        "description": ""
+      },
+      {
+        "element": "- - 843",
+        "label": "삽입삭제 구분",
+        "type": "String",
+        "required": true,
+        "description": "I: 삽입, D: 삭제"
+      },
+      {
+        "element": "- - 20",
+        "label": "체결시간",
+        "type": "String",
+        "required": true,
+        "description": ""
+      },
+      {
+        "element": "- - 907",
+        "label": "매도/수 구분",
+        "type": "String",
+        "required": true,
+        "description": ""
+      }
+    ],
+    "request_example": {
+      "trnm": "CNSRREQ",
+      "seq": "4",
+      "search_type": "1",
+      "stex_tp": "K"
+    }
+  },
+  "ka10174": {
+    "overview": "조건검색은 영웅문4에서 만드실 수 있습니다.",
+    "request": [
+      {
+        "element": "seq",
+        "label": "조건검색식 일련번호",
+        "type": "String",
+        "required": true,
+        "description": ""
+      }
+    ],
+    "response": [
+      {
+        "element": "seq",
+        "label": "조건검색식 일련번호",
+        "type": "String",
+        "required": true,
+        "description": ""
+      }
+    ],
+    "request_example": {
+      "trnm": "CNSRCLR",
+      "seq": "1"
+    }
+  }
+}
