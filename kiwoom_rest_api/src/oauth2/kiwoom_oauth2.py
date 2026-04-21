@@ -16,8 +16,8 @@ from .specs_response import OAUTH2_RESPONSE_SPECS
 _REQ_SPEC: dict = {s['api_id']: s for s in OAUTH2_API_SPECS}
 _RES_SPEC: dict = OAUTH2_RESPONSE_SPECS
 
-HOST = 'https://api.kiwoom.com'           # 실전투자 서버
-# HOST = 'https://mockapi.kiwoom.com'         # 모의투자 서버 (KRX만 지원)
+# HOST = 'https://api.kiwoom.com'           # 실전투자 서버
+HOST = 'https://mockapi.kiwoom.com'         # 모의투자 서버 (KRX만 지원)
 
 
 def _build_request_body(api_id: str, values: dict) -> dict:

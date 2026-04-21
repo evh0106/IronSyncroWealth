@@ -17,6 +17,7 @@ from oauth2 import HOST
 from ._fmt import _ljust, _rjust, _wcslen
 from .specs_request_rank import RKINFO_API_SPECS
 from .specs_response_rank import RKINFO_RESPONSE_SPECS
+import db
 
 # ─────────────────────────────────────────────
 # 전일대비기호 표시용 (응답 스펙에는 없는 표현)
@@ -315,6 +316,14 @@ def print_today_volume_rank(token: str):
     _print_table(items, cols_disp, widths, left_set, row_num=True, row_fn=_row)
     _ask_raw(result)
 
+    save_yn = input('\n  DB에 저장하시겠습니까? (y/N): ').strip().lower()
+    if save_yn == 'y':
+        try:
+            count = save_ka10030(items)
+            print(f'  → {count}건 저장 완료.')
+        except Exception as e:
+            print(f'  [DB 오류] {e}')
+
 
 # ═══════════════════════════════════════════════════════
 # ka10031 – 전일거래량상위요청
@@ -446,3 +455,57 @@ def _ask_raw(result: dict):
     show_raw = input('\n  원시 JSON 출력? (y/N): ').strip().lower()
     if show_raw == 'y':
         print(json.dumps(result, indent=4, ensure_ascii=False))
+
+
+# ═══════════════════════════════════════════════════════
+# DB 저장 – ka10030
+# ═══════════════════════════════════════════════════════
+
+_INSERT_KA10030 = """
+    INSERT INTO ka10030_tdy_trde_qty_upper
+        (header_id, stk_cd, stk_nm, mrkt_tp, cur_prc, flu_rt, trde_qty, pred_rt, trde_amt)
+    VALUES
+        (0, %(stk_cd)s, %(stk_nm)s, %(mrkt_tp)s, %(cur_prc)s,
+         %(flu_rt)s, %(trde_qty)s, %(pred_rt)s, %(trde_amt)s)
+"""
+
+
+def save_ka10030(items: list) -> int:
+    """당일거래량상위 리스트를 ka10030_tdy_trde_qty_upper 테이블에 저장합니다.
+
+    Args:
+        items: API 응답의 tdy_trde_qty_upper 리스트
+    Returns:
+        삽입된 행 수
+    """
+    if not items:
+        return 0
+
+    rows = []
+    for item in items:
+        rows.append({
+            'stk_cd':   item.get('stk_cd',   ''),
+            'stk_nm':   item.get('stk_nm',   ''),
+            'mrkt_tp':  item.get('mrkt_tp',  ''),
+            'cur_prc':  item.get('cur_prc',  ''),
+            'flu_rt':   item.get('flu_rt',   ''),
+            'trde_qty': item.get('trde_qty', ''),
+            'pred_rt':  item.get('pred_rt',  ''),
+            'trde_amt': item.get('trde_amt', ''),
+        })
+
+    print(f'\n  [SQL] {_INSERT_KA10030.strip()}')
+    print(f'  [파라미터 예시] {rows[0] if rows else {}}')
+
+    conn = db.get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.executemany(_INSERT_KA10030, rows)
+        conn.commit()
+        return len(rows)
+    except Exception as e:
+        conn.rollback()
+        print(f'  [DB 오류] {type(e).__name__}: {e}')
+        raise
+    finally:
+        conn.close()
