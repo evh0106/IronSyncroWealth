@@ -5,6 +5,50 @@
 -- 공통 메타 컬럼: acct_no (계좌번호), fetched_at (수신일시)
 
 -- ------------------------------------------------------------
+-- Drop existing tables if they exist (for development/testing purposes)
+-- ------------------------------------------------------------
+DROP TABLE IF EXISTS ka00001;
+DROP TABLE IF EXISTS ka01690_header;
+DROP TABLE IF EXISTS ka01690_day_bal_rt;
+DROP TABLE IF EXISTS ka10072;
+DROP TABLE IF EXISTS ka10073;
+DROP TABLE IF EXISTS ka10074_header;
+DROP TABLE IF EXISTS ka10074_dt_rlzt_pl;
+DROP TABLE IF EXISTS ka10075;
+DROP TABLE IF EXISTS ka10076;
+DROP TABLE IF EXISTS ka10077_header;
+DROP TABLE IF EXISTS ka10077_tdy_rlzt_pl_dtl;
+DROP TABLE IF EXISTS ka10085;
+DROP TABLE IF EXISTS ka10088;
+DROP TABLE IF EXISTS ka10170_header;
+DROP TABLE IF EXISTS ka10170_tdy_trde_diary;
+DROP TABLE IF EXISTS kt00001_header;
+DROP TABLE IF EXISTS kt00001_stk_entr_prst;
+DROP TABLE IF EXISTS kt00002;
+DROP TABLE IF EXISTS kt00003;
+DROP TABLE IF EXISTS kt00004_header;
+DROP TABLE IF EXISTS kt00004_stk_acnt_evlt_prst;
+DROP TABLE IF EXISTS kt00005_header;
+DROP TABLE IF EXISTS kt00005_stk_cntr_remn;
+DROP TABLE IF EXISTS kt00007;
+DROP TABLE IF EXISTS kt00008_header;
+DROP TABLE IF EXISTS kt00008_setl_prps;
+DROP TABLE IF EXISTS kt00009_header;
+DROP TABLE IF EXISTS kt00009_acnt_ord_cntr_prst;
+DROP TABLE IF EXISTS kt00015;
+DROP TABLE IF EXISTS kt00018_header;
+DROP TABLE IF EXISTS kt00018_acnt_evlt_remn;
+DROP TABLE IF EXISTS kt50020_header;
+DROP TABLE IF EXISTS kt50020_gold_acnt_evlt_prst;
+DROP TABLE IF EXISTS kt50021;
+DROP TABLE IF EXISTS kt50030;
+DROP TABLE IF EXISTS kt50031;
+DROP TABLE IF EXISTS kt50032_header;
+DROP TABLE IF EXISTS kt50032_gold_trde_hist;
+DROP TABLE IF EXISTS kt50075;
+
+
+-- ------------------------------------------------------------
 -- ka00001 : 계좌번호 조회
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS ka00001 (

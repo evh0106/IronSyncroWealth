@@ -6,6 +6,16 @@
 -- 공통 메타 컬럼: sect_cd (업종코드), fetched_at (수신일시)
 
 -- ------------------------------------------------------------
+-- Drop existing tables if they exist (for development/testing purposes)
+-- ------------------------------------------------------------
+DROP TABLE IF EXISTS ka20001_header;
+DROP TABLE IF EXISTS ka20001_inds_cur_prc_tm;
+DROP TABLE IF EXISTS ka20002;
+DROP TABLE IF EXISTS ka20003;
+DROP TABLE IF EXISTS ka20009_header;
+DROP TABLE IF EXISTS ka20009_inds_cur_prc_daly;
+
+-- ------------------------------------------------------------
 -- ka20001 : 업종현재가요청 (헤더 + 시간별 리스트)
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS ka20001_header (
