@@ -10,26 +10,12 @@ URL: /api/dostk/stkinfo
 입력 파라미터 선택지와 한글 라벨은 specs_request / specs_response 에서 참조합니다.
 """
 
-import json
-import os
 import requests
-from datetime import datetime
 from oauth2 import HOST
+from logger import log_http_request, log_http_response
 from ._fmt import _ljust, _rjust, _wcslen
 from .specs_request import STKINFO_API_SPECS
 from .specs_response import STKINFO_RESPONSE_SPECS
-
-_LOG_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '..', 'log'))
-
-
-def _save_log(result: dict):
-    """원시 JSON 응답을 log/YYYYMMDD_volume.log 에 추가 저장"""
-    os.makedirs(_LOG_DIR, exist_ok=True)
-    fname = datetime.now().strftime('%Y%m%d') + '_volume.log'
-    path = os.path.join(_LOG_DIR, fname)
-    with open(path, 'a', encoding='utf-8') as f:
-        f.write(json.dumps(result, ensure_ascii=False) + '\n')
-    print(f'  → 로그 저장: {path}')
 
 # ─────────────────────────────────────────────
 # 전일대비기호 표시용 (응답 스펙에는 없는 표현)
@@ -148,7 +134,26 @@ def _post(token: str, api_id: str, body: dict) -> dict:
         'next-key': '',
         'api-id': api_id,
     }
-    resp = requests.post(_STKINFO_URL, headers=headers, json=body)
+    session = requests.Session()
+    req = requests.Request('POST', _STKINFO_URL, headers=headers, json=body)
+    preq = session.prepare_request(req)
+
+    path, req_id = log_http_request(
+        api_id=api_id,
+        url=_STKINFO_URL,
+        request_headers=preq.headers,
+        request_body=preq.body,
+    )
+    print(f'  → 요청 로그 저장: {path}')
+
+    resp = session.send(preq)
+    path = log_http_response(
+        req_id=req_id,
+        response_status=resp.status_code,
+        response_headers=resp.headers,
+        response_body=resp.text,
+    )
+    print(f'  → 응답 로그 저장: {path}')
     resp.raise_for_status()
     return resp.json()
 
@@ -218,8 +223,6 @@ def print_volume_update(token: str):
         widths,
         left_cols={'stk_nm'},
     )
-
-    _save_log(result)
 
 
 # ═══════════════════════════════════════════════════════
@@ -294,8 +297,6 @@ def print_broker_instant_volume(token: str):
 
     print()
     _print_table(items, all_cols, widths, left_cols={'stk_nm', 'trde_ori_nm'})
-
-    _save_log(result)
 
 
 # ═══════════════════════════════════════════════════════
@@ -376,4 +377,4 @@ def print_today_prev_contracts(token: str):
     print()
     _print_table(enriched, display_cols, widths)
 
-    _save_log(result)
+    
