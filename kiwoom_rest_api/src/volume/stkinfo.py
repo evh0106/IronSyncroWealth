@@ -11,11 +11,25 @@ URL: /api/dostk/stkinfo
 """
 
 import json
+import os
 import requests
+from datetime import datetime
 from oauth2 import HOST
 from ._fmt import _ljust, _rjust, _wcslen
 from .specs_request import STKINFO_API_SPECS
 from .specs_response import STKINFO_RESPONSE_SPECS
+
+_LOG_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '..', 'log'))
+
+
+def _save_log(result: dict):
+    """원시 JSON 응답을 log/YYYYMMDD_volume.log 에 추가 저장"""
+    os.makedirs(_LOG_DIR, exist_ok=True)
+    fname = datetime.now().strftime('%Y%m%d') + '_volume.log'
+    path = os.path.join(_LOG_DIR, fname)
+    with open(path, 'a', encoding='utf-8') as f:
+        f.write(json.dumps(result, ensure_ascii=False) + '\n')
+    print(f'  → 로그 저장: {path}')
 
 # ─────────────────────────────────────────────
 # 전일대비기호 표시용 (응답 스펙에는 없는 표현)
@@ -139,11 +153,6 @@ def _post(token: str, api_id: str, body: dict) -> dict:
     return resp.json()
 
 
-def _ask_raw(result: dict):
-    show_raw = input('\n  원시 JSON 출력? (y/N): ').strip().lower()
-    if show_raw == 'y':
-        print(json.dumps(result, indent=4, ensure_ascii=False))
-
 
 # ═══════════════════════════════════════════════════════
 # ka10024 – 거래량갱신요청
@@ -210,7 +219,7 @@ def print_volume_update(token: str):
         left_cols={'stk_nm'},
     )
 
-    _ask_raw(result)
+    _save_log(result)
 
 
 # ═══════════════════════════════════════════════════════
@@ -286,7 +295,7 @@ def print_broker_instant_volume(token: str):
     print()
     _print_table(items, all_cols, widths, left_cols={'stk_nm', 'trde_ori_nm'})
 
-    _ask_raw(result)
+    _save_log(result)
 
 
 # ═══════════════════════════════════════════════════════
@@ -367,4 +376,4 @@ def print_today_prev_contracts(token: str):
     print()
     _print_table(enriched, display_cols, widths)
 
-    _ask_raw(result)
+    _save_log(result)

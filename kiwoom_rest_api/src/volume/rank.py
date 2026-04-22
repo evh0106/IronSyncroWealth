@@ -12,12 +12,26 @@ URL: /api/dostk/rkinfo
 """
 
 import json
+import os
 import requests
+from datetime import datetime
 from oauth2 import HOST
 from ._fmt import _ljust, _rjust, _wcslen
 from .specs_request_rank import RKINFO_API_SPECS
 from .specs_response_rank import RKINFO_RESPONSE_SPECS
 import db
+
+_LOG_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', '..', 'log'))
+
+
+def _save_log(result: dict):
+    """원시 JSON 응답을 log/YYYYMMDD_volume.log 에 추가 저장"""
+    os.makedirs(_LOG_DIR, exist_ok=True)
+    fname = datetime.now().strftime('%Y%m%d') + '_volume.log'
+    path = os.path.join(_LOG_DIR, fname)
+    with open(path, 'a', encoding='utf-8') as f:
+        f.write(json.dumps(result, ensure_ascii=False) + '\n')
+    print(f'  → 로그 저장: {path}')
 
 # ─────────────────────────────────────────────
 # 전일대비기호 표시용 (응답 스펙에는 없는 표현)
@@ -247,7 +261,7 @@ def print_volume_surge(token: str):
         return r
 
     _print_table(items, cols_disp, widths, left_set, row_num=True, row_fn=_row)
-    _ask_raw(result)
+    _save_log(result)
 
 
 # ═══════════════════════════════════════════════════════
@@ -285,9 +299,24 @@ def print_today_volume_rank(token: str):
     sort_tp     = _prompt_choice(api_id, 'sort_tp',     '1')
     mrkt_open_tp = _prompt_choice(api_id, 'mrkt_open_tp', '0')
 
+    today = datetime.now().strftime('%Y%m%d')
+    
+    request_params = {
+        'req_dt': today,
+        'mrkt_tp': mrkt_tp,
+        'sort_tp': sort_tp,
+        'mang_stk_incls': '0',
+        'crd_tp': '0',
+        'trde_qty_tp': '0',
+        'pric_tp': '0',
+        'trde_prica_tp': '0',
+        'mrkt_open_tp': mrkt_open_tp,
+        'stex_tp': '3',
+    }
+
+    api_params = {k: v for k, v in request_params.items() if k != 'req_dt'}
     print('\n  → 조회 중...')
-    result = get_today_volume_rank(token, mrkt_tp=mrkt_tp, sort_tp=sort_tp,
-                                   mrkt_open_tp=mrkt_open_tp)
+    result = get_today_volume_rank(token, **api_params)
 
     if result.get('return_code') != 0:
         print(f'  [오류] {result.get("return_msg")}')
@@ -314,15 +343,13 @@ def print_today_volume_rank(token: str):
         return r
 
     _print_table(items, cols_disp, widths, left_set, row_num=True, row_fn=_row)
-    _ask_raw(result)
+    _save_log(result)
 
-    save_yn = input('\n  DB에 저장하시겠습니까? (y/N): ').strip().lower()
-    if save_yn == 'y':
-        try:
-            count = save_ka10030(items)
-            print(f'  → {count}건 저장 완료.')
-        except Exception as e:
-            print(f'  [DB 오류] {e}')
+    try:
+        count = save_ka10030(items, request_params)
+        print(f'  → {count}건 저장 완료.')
+    except Exception as e:
+        print(f'  [DB 오류] {e}')
 
 
 # ═══════════════════════════════════════════════════════
@@ -389,7 +416,7 @@ def print_prev_volume_rank(token: str):
         return r
 
     _print_table(items, cols_disp, widths, left_set, row_num=True, row_fn=_row)
-    _ask_raw(result)
+    _save_log(result)
 
 
 # ═══════════════════════════════════════════════════════
@@ -447,14 +474,7 @@ def print_trade_amount_rank(token: str):
         return r
 
     _print_table(items, cols_disp, widths, left_set, row_num=False, row_fn=_row)
-    _ask_raw(result)
-
-
-# ─────────────────────────────────────────────
-def _ask_raw(result: dict):
-    show_raw = input('\n  원시 JSON 출력? (y/N): ').strip().lower()
-    if show_raw == 'y':
-        print(json.dumps(result, indent=4, ensure_ascii=False))
+    _save_log(result)
 
 
 # ═══════════════════════════════════════════════════════
@@ -463,14 +483,27 @@ def _ask_raw(result: dict):
 
 _INSERT_KA10030 = """
     INSERT INTO ka10030_tdy_trde_qty_upper
-        (header_id, stk_cd, stk_nm, mrkt_tp, cur_prc, flu_rt, trde_qty, pred_rt, trde_amt)
+        (req_dt, req_mrkt_tp, req_sort_tp, req_mang_stk_incls, req_crd_tp,
+         req_trde_qty_tp, req_pric_tp, req_trde_prica_tp, req_mrkt_open_tp, req_stex_tp,
+         rsp_rank, rsp_stk_cd, rsp_stk_nm, rsp_mrkt_tp, rsp_cur_prc, rsp_flu_rt, rsp_trde_qty, rsp_pred_rt, rsp_trde_amt)
     VALUES
-        (0, %(stk_cd)s, %(stk_nm)s, %(mrkt_tp)s, %(cur_prc)s,
-         %(flu_rt)s, %(trde_qty)s, %(pred_rt)s, %(trde_amt)s)
+        (%(req_dt)s, %(req_mrkt_tp)s, %(req_sort_tp)s, %(req_mang_stk_incls)s, %(req_crd_tp)s,
+         %(req_trde_qty_tp)s, %(req_pric_tp)s, %(req_trde_prica_tp)s, %(req_mrkt_open_tp)s, %(req_stex_tp)s,
+         %(rsp_rank)s, %(rsp_stk_cd)s, %(rsp_stk_nm)s, %(rsp_mrkt_tp)s, %(rsp_cur_prc)s,
+         %(rsp_flu_rt)s, %(rsp_trde_qty)s, %(rsp_pred_rt)s, %(rsp_trde_amt)s)
+    ON DUPLICATE KEY UPDATE
+        rsp_stk_nm = VALUES(rsp_stk_nm),
+        rsp_mrkt_tp = VALUES(rsp_mrkt_tp),
+        rsp_cur_prc = VALUES(rsp_cur_prc),
+        rsp_flu_rt = VALUES(rsp_flu_rt),
+        rsp_trde_qty = VALUES(rsp_trde_qty),
+        rsp_pred_rt = VALUES(rsp_pred_rt),
+        rsp_trde_amt = VALUES(rsp_trde_amt),
+        fetched_at = CURRENT_TIMESTAMP
 """
 
 
-def save_ka10030(items: list) -> int:
+def save_ka10030(items: list, request_params: dict = None) -> int:
     """당일거래량상위 리스트를 ka10030_tdy_trde_qty_upper 테이블에 저장합니다.
 
     Args:
@@ -481,17 +514,30 @@ def save_ka10030(items: list) -> int:
     if not items:
         return 0
 
+    request_params = request_params or {}
+
     rows = []
-    for item in items:
+    for idx, item in enumerate(items, 1):
         rows.append({
-            'stk_cd':   item.get('stk_cd',   ''),
-            'stk_nm':   item.get('stk_nm',   ''),
-            'mrkt_tp':  item.get('mrkt_tp',  ''),
-            'cur_prc':  item.get('cur_prc',  ''),
-            'flu_rt':   item.get('flu_rt',   ''),
-            'trde_qty': item.get('trde_qty', ''),
-            'pred_rt':  item.get('pred_rt',  ''),
-            'trde_amt': item.get('trde_amt', ''),
+            'req_dt': request_params.get('req_dt', ''),
+            'req_mrkt_tp': request_params.get('mrkt_tp', ''),
+            'req_sort_tp': request_params.get('sort_tp', ''),
+            'req_mang_stk_incls': request_params.get('mang_stk_incls', ''),
+            'req_crd_tp': request_params.get('crd_tp', ''),
+            'req_trde_qty_tp': request_params.get('trde_qty_tp', ''),
+            'req_pric_tp': request_params.get('pric_tp', ''),
+            'req_trde_prica_tp': request_params.get('trde_prica_tp', ''),
+            'req_mrkt_open_tp': request_params.get('mrkt_open_tp', ''),
+            'req_stex_tp': request_params.get('stex_tp', ''),
+            'rsp_rank': idx,
+            'rsp_stk_cd':   item.get('stk_cd',   ''),
+            'rsp_stk_nm':   item.get('stk_nm',   ''),
+            'rsp_mrkt_tp':  item.get('mrkt_tp',  ''),
+            'rsp_cur_prc':  item.get('cur_prc',  ''),
+            'rsp_flu_rt':   item.get('flu_rt',   ''),
+            'rsp_trde_qty': item.get('trde_qty', ''),
+            'rsp_pred_rt':  item.get('pred_rt',  ''),
+            'rsp_trde_amt': item.get('trde_amt', ''),
         })
 
     print(f'\n  [SQL] {_INSERT_KA10030.strip()}')

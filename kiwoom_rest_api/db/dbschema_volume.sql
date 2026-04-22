@@ -929,20 +929,29 @@ CREATE TABLE IF NOT EXISTS ka10023_trde_qty_sdnin (
 -- ka10030 – 당일거래량상위요청 (LIST only)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS ka10030_tdy_trde_qty_upper (
-    id          BIGINT       NOT NULL AUTO_INCREMENT COMMENT 'PK',
-    header_id   BIGINT       NOT NULL COMMENT '헤더 참조ID',
-    stk_cd      VARCHAR(12)  NOT NULL DEFAULT '' COMMENT '종목코드',
-    stk_nm      VARCHAR(100) NOT NULL DEFAULT '' COMMENT '종목명',
-    mrkt_tp     VARCHAR(10)  NOT NULL DEFAULT '' COMMENT '시장구분',
-    cur_prc     VARCHAR(20)  NOT NULL DEFAULT '' COMMENT '현재가',
-    flu_rt      VARCHAR(20)  NOT NULL DEFAULT '' COMMENT '등락률',
-    trde_qty    VARCHAR(30)  NOT NULL DEFAULT '' COMMENT '거래량',
-    pred_rt     VARCHAR(20)  NOT NULL DEFAULT '' COMMENT '전일비',
-    trde_amt    VARCHAR(30)  NOT NULL DEFAULT '' COMMENT '거래금액(백만)',
-    fetched_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수집일시',
-    PRIMARY KEY (id),
-    INDEX idx_header (header_id),
-    INDEX idx_stk_fetched (stk_cd, fetched_at)
+    req_dt              VARCHAR(8)   NOT NULL DEFAULT '' COMMENT '요청 일자',
+    req_mrkt_tp         VARCHAR(10)  NOT NULL DEFAULT '' COMMENT '요청 시장구분',
+    req_sort_tp         VARCHAR(10)  NOT NULL DEFAULT '' COMMENT '요청 정렬구분',
+    req_mang_stk_incls  VARCHAR(10)  NOT NULL DEFAULT '' COMMENT '요청 관리종목포함',
+    req_crd_tp          VARCHAR(10)  NOT NULL DEFAULT '' COMMENT '요청 신용구분',
+    req_trde_qty_tp     VARCHAR(10)  NOT NULL DEFAULT '' COMMENT '요청 거래량구분',
+    req_pric_tp         VARCHAR(10)  NOT NULL DEFAULT '' COMMENT '요청 가격구분',
+    req_trde_prica_tp   VARCHAR(10)  NOT NULL DEFAULT '' COMMENT '요청 거래대금구분',
+    req_mrkt_open_tp    VARCHAR(10)  NOT NULL DEFAULT '' COMMENT '요청 장운영구분',
+    req_stex_tp         VARCHAR(10)  NOT NULL DEFAULT '' COMMENT '요청 거래소구분',
+    rsp_rank        INT         NOT NULL DEFAULT 1   COMMENT '응답 순위',
+    rsp_stk_cd      VARCHAR(12)  NOT NULL DEFAULT '' COMMENT '응답 종목코드',
+    rsp_stk_nm      VARCHAR(100) NOT NULL DEFAULT '' COMMENT '응답 종목명',
+    rsp_mrkt_tp     VARCHAR(10)  NOT NULL DEFAULT '' COMMENT '응답 시장구분',
+    rsp_cur_prc     VARCHAR(20)  NOT NULL DEFAULT '' COMMENT '응답 현재가',
+    rsp_flu_rt      VARCHAR(20)  NOT NULL DEFAULT '' COMMENT '응답 등락률',
+    rsp_trde_qty    VARCHAR(30)  NOT NULL DEFAULT '' COMMENT '응답 거래량',
+    rsp_pred_rt     VARCHAR(20)  NOT NULL DEFAULT '' COMMENT '응답 전일비',
+    rsp_trde_amt    VARCHAR(30)  NOT NULL DEFAULT '' COMMENT '응답 거래금액(백만)',
+    fetched_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수집일시',
+    PRIMARY KEY (req_dt, req_mrkt_tp, req_sort_tp, req_mang_stk_incls, req_crd_tp, req_trde_qty_tp, req_pric_tp, req_trde_prica_tp, req_mrkt_open_tp, req_stex_tp, rsp_rank),
+    INDEX idx_dt_rank (req_dt, rsp_rank),
+    INDEX idx_dt_stk (req_dt, rsp_stk_cd)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='당일거래량상위';
 
 -- -------------------------------------------------------------
