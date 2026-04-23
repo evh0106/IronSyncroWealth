@@ -8,7 +8,8 @@
 
 import sys
 from acnt import run_account_api_menu
-from oauth2 import get_access_token, load_api_keys, revoke_access_token
+from ordr import run_order_api_menu
+from oauth2 import HOST, get_access_token, get_server_mode_label, load_api_keys, revoke_access_token
 from sect.sector_price import print_sector_price
 from volume import (
     print_volume_surge,
@@ -39,7 +40,8 @@ MENU_CATEGORIES = [
         ('6', '거래원순간거래량 조회 (ka10052)', print_broker_instant_volume),
         ('7', '당일전일체결량 조회   (ka10055)', print_today_prev_contracts),
     ]),
-    ('4', '웹소켓 (실시간)', [
+    ('4', '주문', run_order_api_menu),
+    ('5', '웹소켓 (실시간)', [
         ('1', '종목 실시간 시세      (0A/0B/0C/...)', run_realtime_quote),
         ('2', '계좌/기타 실시간      (00/04/0J/...)', run_account_realtime),
         ('3', '조건검색              (ka10171~74)',   run_condition_search),
@@ -71,6 +73,7 @@ def print_sub_menu(cat_label, sub_items):
 
 def main():
     print('\n키움증권 REST API 프로그램을 시작합니다.')
+    print(f'현재 서버 모드: {get_server_mode_label(HOST)} ({HOST})')
 
     # 토큰 발급
     try:

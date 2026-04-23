@@ -16,8 +16,19 @@ from .specs_response import OAUTH2_RESPONSE_SPECS
 _REQ_SPEC: dict = {s['api_id']: s for s in OAUTH2_API_SPECS}
 _RES_SPEC: dict = OAUTH2_RESPONSE_SPECS
 
-# HOST = 'https://api.kiwoom.com'           # 실전투자 서버
-HOST = 'https://mockapi.kiwoom.com'         # 모의투자 서버 (KRX만 지원)
+HOST_REAL = 'https://api.kiwoom.com'        # 실전투자 서버
+HOST_MOC = 'https://mockapi.kiwoom.com'     # 모의투자 서버 (KRX만 지원)
+HOST = HOST_MOC
+
+
+def is_mock_server(host: str = HOST) -> bool:
+    """현재 host가 모의투자 서버인지 여부를 반환합니다."""
+    return 'mockapi.kiwoom.com' in host
+
+
+def get_server_mode_label(host: str = HOST) -> str:
+    """현재 host에 대한 서버 모드 라벨을 반환합니다."""
+    return '모의투자 서버' if is_mock_server(host) else '실전투자 서버'
 
 
 def _build_request_body(api_id: str, values: dict) -> dict:
@@ -45,7 +56,7 @@ def load_api_keys(host: str = HOST) -> tuple[str, str]:
     base_dir = Path(__file__).resolve().parents[2]
     conf_dir = base_dir / 'conf'
 
-    if 'mockapi.kiwoom.com' in host:
+    if is_mock_server(host):
         account_no = '81241972'
     else:
         account_no = '65120003'
