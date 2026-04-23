@@ -88,11 +88,25 @@ from .condition import (
     remove_condition_realtime,
 )
 
-from .menu import (
-    run_realtime_quote,
-    run_account_realtime,
-    run_condition_search,
-)
+from .menu import run_websocket_menu
+
+
+def run_realtime_quote(token: str):
+    from .websocket import run_realtime_quote as _run_realtime_quote
+
+    return _run_realtime_quote(token)
+
+
+def run_account_realtime(token: str):
+    from .websocket import run_account_realtime as _run_account_realtime
+
+    return _run_account_realtime(token)
+
+
+def run_condition_search(token: str):
+    from .websocket import run_condition_search as _run_condition_search
+
+    return _run_condition_search(token)
 
 __all__ = [
     # client
@@ -152,4 +166,5 @@ __all__ = [
     'run_realtime_quote',
     'run_account_realtime',
     'run_condition_search',
+    'run_websocket_menu',
 ]

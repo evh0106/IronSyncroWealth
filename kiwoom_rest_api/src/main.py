@@ -21,7 +21,6 @@ from volume import (
     print_today_prev_contracts,
 )
 from volume._fmt import _ljust
-from websocket.menu import run_realtime_quote, run_account_realtime, run_condition_search
 
 # ─────────────────────────────────────────────
 # 메뉴 항목 정의 (카테고리 → 하위 메뉴)
@@ -41,11 +40,6 @@ MENU_CATEGORIES = [
         ('7', '당일전일체결량 조회   (ka10055)', print_today_prev_contracts),
     ]),
     ('4', '주문', run_order_api_menu),
-    ('5', '웹소켓 (실시간)', [
-        ('1', '종목 실시간 시세      (0A/0B/0C/...)', run_realtime_quote),
-        ('2', '계좌/기타 실시간      (00/04/0J/...)', run_account_realtime),
-        ('3', '조건검색              (ka10171~74)',   run_condition_search),
-    ]),
 ]
 
 
