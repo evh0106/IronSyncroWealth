@@ -18,7 +18,7 @@ from volume._fmt import _ljust, _wcslen
 _ORDR_URL = HOST + '/api/dostk/ordr'
 
 
-_UPSERT_ORDR_SQL = {
+_INSERT_ORDR_SQL = {
     'kt10000': """
         INSERT INTO kt10000_stk_buy_ord
             (req_dt, req_dmst_stex_tp, req_stk_cd, req_ord_qty, req_ord_uv, req_trde_tp, req_cond_uv,
@@ -26,15 +26,6 @@ _UPSERT_ORDR_SQL = {
         VALUES
             (%(req_dt)s, %(req_dmst_stex_tp)s, %(req_stk_cd)s, %(req_ord_qty)s, %(req_ord_uv)s, %(req_trde_tp)s, %(req_cond_uv)s,
              %(rsp_ord_no)s, %(rsp_dmst_stex_tp)s)
-        ON DUPLICATE KEY UPDATE
-            req_dmst_stex_tp = VALUES(req_dmst_stex_tp),
-            req_stk_cd = VALUES(req_stk_cd),
-            req_ord_qty = VALUES(req_ord_qty),
-            req_ord_uv = VALUES(req_ord_uv),
-            req_trde_tp = VALUES(req_trde_tp),
-            req_cond_uv = VALUES(req_cond_uv),
-            rsp_dmst_stex_tp = VALUES(rsp_dmst_stex_tp),
-            fetched_at = CURRENT_TIMESTAMP
     """,
     'kt10001': """
         INSERT INTO kt10001_stk_sll_ord
@@ -43,15 +34,6 @@ _UPSERT_ORDR_SQL = {
         VALUES
             (%(req_dt)s, %(req_dmst_stex_tp)s, %(req_stk_cd)s, %(req_ord_qty)s, %(req_ord_uv)s, %(req_trde_tp)s, %(req_cond_uv)s,
              %(rsp_ord_no)s, %(rsp_dmst_stex_tp)s)
-        ON DUPLICATE KEY UPDATE
-            req_dmst_stex_tp = VALUES(req_dmst_stex_tp),
-            req_stk_cd = VALUES(req_stk_cd),
-            req_ord_qty = VALUES(req_ord_qty),
-            req_ord_uv = VALUES(req_ord_uv),
-            req_trde_tp = VALUES(req_trde_tp),
-            req_cond_uv = VALUES(req_cond_uv),
-            rsp_dmst_stex_tp = VALUES(rsp_dmst_stex_tp),
-            fetched_at = CURRENT_TIMESTAMP
     """,
     'kt10002': """
         INSERT INTO kt10002_stk_mdfy_ord
@@ -60,17 +42,6 @@ _UPSERT_ORDR_SQL = {
         VALUES
             (%(req_dt)s, %(req_dmst_stex_tp)s, %(req_orig_ord_no)s, %(req_stk_cd)s, %(req_mdfy_qty)s, %(req_mdfy_uv)s, %(req_mdfy_cond_uv)s,
              %(rsp_ord_no)s, %(rsp_base_orig_ord_no)s, %(rsp_mdfy_qty)s, %(rsp_dmst_stex_tp)s)
-        ON DUPLICATE KEY UPDATE
-            req_dmst_stex_tp = VALUES(req_dmst_stex_tp),
-            req_orig_ord_no = VALUES(req_orig_ord_no),
-            req_stk_cd = VALUES(req_stk_cd),
-            req_mdfy_qty = VALUES(req_mdfy_qty),
-            req_mdfy_uv = VALUES(req_mdfy_uv),
-            req_mdfy_cond_uv = VALUES(req_mdfy_cond_uv),
-            rsp_base_orig_ord_no = VALUES(rsp_base_orig_ord_no),
-            rsp_mdfy_qty = VALUES(rsp_mdfy_qty),
-            rsp_dmst_stex_tp = VALUES(rsp_dmst_stex_tp),
-            fetched_at = CURRENT_TIMESTAMP
     """,
     'kt10003': """
         INSERT INTO kt10003_stk_cncl_ord
@@ -79,38 +50,18 @@ _UPSERT_ORDR_SQL = {
         VALUES
             (%(req_dt)s, %(req_dmst_stex_tp)s, %(req_orig_ord_no)s, %(req_stk_cd)s, %(req_cncl_qty)s,
              %(rsp_ord_no)s, %(rsp_base_orig_ord_no)s, %(rsp_cncl_qty)s)
-        ON DUPLICATE KEY UPDATE
-            req_dmst_stex_tp = VALUES(req_dmst_stex_tp),
-            req_orig_ord_no = VALUES(req_orig_ord_no),
-            req_stk_cd = VALUES(req_stk_cd),
-            req_cncl_qty = VALUES(req_cncl_qty),
-            rsp_base_orig_ord_no = VALUES(rsp_base_orig_ord_no),
-            rsp_cncl_qty = VALUES(rsp_cncl_qty),
-            fetched_at = CURRENT_TIMESTAMP
     """,
     'kt50000': """
         INSERT INTO kt50000_gold_buy_ord
             (req_dt, req_stk_cd, req_ord_qty, req_ord_uv, req_trde_tp, rsp_ord_no)
         VALUES
             (%(req_dt)s, %(req_stk_cd)s, %(req_ord_qty)s, %(req_ord_uv)s, %(req_trde_tp)s, %(rsp_ord_no)s)
-        ON DUPLICATE KEY UPDATE
-            req_stk_cd = VALUES(req_stk_cd),
-            req_ord_qty = VALUES(req_ord_qty),
-            req_ord_uv = VALUES(req_ord_uv),
-            req_trde_tp = VALUES(req_trde_tp),
-            fetched_at = CURRENT_TIMESTAMP
     """,
     'kt50001': """
         INSERT INTO kt50001_gold_sll_ord
             (req_dt, req_stk_cd, req_ord_qty, req_ord_uv, req_trde_tp, rsp_ord_no)
         VALUES
             (%(req_dt)s, %(req_stk_cd)s, %(req_ord_qty)s, %(req_ord_uv)s, %(req_trde_tp)s, %(rsp_ord_no)s)
-        ON DUPLICATE KEY UPDATE
-            req_stk_cd = VALUES(req_stk_cd),
-            req_ord_qty = VALUES(req_ord_qty),
-            req_ord_uv = VALUES(req_ord_uv),
-            req_trde_tp = VALUES(req_trde_tp),
-            fetched_at = CURRENT_TIMESTAMP
     """,
     'kt50002': """
         INSERT INTO kt50002_gold_mdfy_ord
@@ -119,14 +70,6 @@ _UPSERT_ORDR_SQL = {
         VALUES
             (%(req_dt)s, %(req_stk_cd)s, %(req_orig_ord_no)s, %(req_mdfy_qty)s, %(req_mdfy_uv)s,
              %(rsp_ord_no)s, %(rsp_base_orig_ord_no)s, %(rsp_mdfy_qty)s)
-        ON DUPLICATE KEY UPDATE
-            req_stk_cd = VALUES(req_stk_cd),
-            req_orig_ord_no = VALUES(req_orig_ord_no),
-            req_mdfy_qty = VALUES(req_mdfy_qty),
-            req_mdfy_uv = VALUES(req_mdfy_uv),
-            rsp_base_orig_ord_no = VALUES(rsp_base_orig_ord_no),
-            rsp_mdfy_qty = VALUES(rsp_mdfy_qty),
-            fetched_at = CURRENT_TIMESTAMP
     """,
     'kt50003': """
         INSERT INTO kt50003_gold_cncl_ord
@@ -135,21 +78,15 @@ _UPSERT_ORDR_SQL = {
         VALUES
             (%(req_dt)s, %(req_orig_ord_no)s, %(req_stk_cd)s, %(req_cncl_qty)s,
              %(rsp_ord_no)s, %(rsp_base_orig_ord_no)s, %(rsp_cncl_qty)s)
-        ON DUPLICATE KEY UPDATE
-            req_orig_ord_no = VALUES(req_orig_ord_no),
-            req_stk_cd = VALUES(req_stk_cd),
-            req_cncl_qty = VALUES(req_cncl_qty),
-            rsp_base_orig_ord_no = VALUES(rsp_base_orig_ord_no),
-            rsp_cncl_qty = VALUES(rsp_cncl_qty),
-            fetched_at = CURRENT_TIMESTAMP
     """,
 }
 
 
 def _save_order_response(api_id: str, body: dict, payload: dict, req_dt: str) -> int:
-    """주문 API 성공 응답을 API별 테이블에 upsert 저장한다."""
-    sql = _UPSERT_ORDR_SQL.get(api_id)
+    """주문 API 성공 응답을 API별 테이블에 insert 저장한다."""
+    sql = _INSERT_ORDR_SQL.get(api_id)
     if not sql:
+        print(f'  [저장 오류] 알 수 없는 API ID: {api_id}')
         return 0
 
     row = {
@@ -172,17 +109,15 @@ def _save_order_response(api_id: str, body: dict, payload: dict, req_dt: str) ->
         'rsp_cncl_qty': payload.get('cncl_qty', ''),
     }
 
-    if not row['rsp_ord_no']:
-        return 0
-
     conn = db.get_connection()
     try:
         with conn.cursor() as cur:
             cur.execute(sql, row)
         conn.commit()
         return 1
-    except Exception:
+    except Exception as exc:
         conn.rollback()
+        print(f'  [DB 오류] {exc}')
         raise
     finally:
         conn.close()
@@ -331,8 +266,24 @@ def _post_ordr_api(token: str, spec: ApiSpec, body: dict, cont_yn: str = 'N', ne
     )
     print(f'  -> 응답 로그 저장: {path}')
 
-    response.raise_for_status()
     return response
+
+
+def _response_payload(response: requests.Response) -> dict:
+    """응답 본문을 dict로 반환한다. 파싱 실패 시 상태코드/원문으로 대체한다."""
+    try:
+        payload = response.json()
+        if isinstance(payload, dict):
+            return payload
+        return {
+            'return_code': response.status_code,
+            'return_msg': str(payload),
+        }
+    except Exception:
+        return {
+            'return_code': response.status_code,
+            'return_msg': response.text,
+        }
 
 
 def _build_label_map(api_id: str) -> dict[str, str]:
@@ -379,10 +330,9 @@ def _print_kv_block(title: str, values: dict, label_map: dict[str, str] | None =
         print(f'  {_ljust(display_keys[key], key_width)} : {_ljust(rendered, value_width)}')
 
 
-def _print_response(response: requests.Response, api_id: str = ''):
+def _print_response(response: requests.Response, payload: dict, api_id: str = ''):
     cont_yn = response.headers.get('cont-yn', '')
     next_key = response.headers.get('next-key', '')
-    payload = response.json()
     label_map = _build_label_map(api_id) if api_id else {}
 
     _print_kv_block('응답 헤더', {
@@ -429,28 +379,19 @@ def run_order_api_menu(token: str):
             print(f'\n  → {spec.name} ({spec.api_id}) 호출 중...')
             try:
                 response = _post_ordr_api(token, spec, body, cont_yn=cont_yn, next_key=next_key)
-            except requests.HTTPError as exc:
-                print(f'  [HTTP 오류] {exc}')
-                if exc.response is not None:
-                    try:
-                        print(json.dumps(exc.response.json(), indent=4, ensure_ascii=False))
-                    except Exception:
-                        print(exc.response.text)
-                break
             except Exception as exc:
                 print(f'  [오류] {exc}')
                 break
 
-            cont_yn, next_key = _print_response(response, api_id=spec.api_id)
-
-            payload = response.json()
-            if payload.get('return_code') == 0:
-                try:
-                    count = _save_order_response(spec.api_id, body, payload, req_dt)
-                    if count:
-                        print(f'  → {count}건 저장 완료.')
-                except Exception as exc:
-                    print(f'  [DB 오류] {exc}')
+            payload = _response_payload(response)
+            cont_yn, next_key = _print_response(response, payload, api_id=spec.api_id)
+            
+            try:
+                count = _save_order_response(spec.api_id, body, payload, req_dt)
+                if count:
+                    print(f'  → {count}건 저장 완료.')
+            except Exception as exc:
+                print(f'  [DB 오류] {exc}')
 
             if cont_yn != 'Y' or not next_key:
                 break

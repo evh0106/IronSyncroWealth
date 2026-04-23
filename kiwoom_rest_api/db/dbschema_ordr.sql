@@ -40,7 +40,8 @@ CREATE TABLE IF NOT EXISTS kt10000_stk_buy_ord (
     rsp_dmst_stex_tp    VARCHAR(10)  NOT NULL DEFAULT '' COMMENT '응답 국내거래소구분',
     fetched_at          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수신일시',
     PRIMARY KEY (id),
-    INDEX idx_stk_fetched (req_stk_cd, fetched_at)
+    INDEX idx_stk_fetched (req_stk_cd, fetched_at),
+    INDEX idx_dt (req_dt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='kt10000 주식 매수주문';
 
 -- ------------------------------------------------------------
@@ -59,7 +60,8 @@ CREATE TABLE IF NOT EXISTS kt10001_stk_sll_ord (
     rsp_dmst_stex_tp    VARCHAR(10)  NOT NULL DEFAULT '' COMMENT '응답 국내거래소구분',
     fetched_at          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수신일시',
     PRIMARY KEY (id),
-    INDEX idx_stk_fetched (req_stk_cd, fetched_at)
+    INDEX idx_stk_fetched (req_stk_cd, fetched_at),
+    INDEX idx_dt (req_dt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='kt10001 주식 매도주문';
 
 -- ------------------------------------------------------------
@@ -81,7 +83,8 @@ CREATE TABLE IF NOT EXISTS kt10002_stk_mdfy_ord (
     fetched_at          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수신일시',
     PRIMARY KEY (id),
     INDEX idx_stk_fetched (req_stk_cd, fetched_at),
-    INDEX idx_orig_ord (req_orig_ord_no)
+    INDEX idx_orig_ord (req_orig_ord_no),
+    INDEX idx_dt (req_dt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='kt10002 주식 정정주문';
 
 -- ------------------------------------------------------------
@@ -100,7 +103,8 @@ CREATE TABLE IF NOT EXISTS kt10003_stk_cncl_ord (
     fetched_at          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수신일시',
     PRIMARY KEY (id),
     INDEX idx_stk_fetched (req_stk_cd, fetched_at),
-    INDEX idx_orig_ord (req_orig_ord_no)
+    INDEX idx_orig_ord (req_orig_ord_no),
+    INDEX idx_dt (req_dt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='kt10003 주식 취소주문';
 
 -- ------------------------------------------------------------
@@ -116,7 +120,8 @@ CREATE TABLE IF NOT EXISTS kt50000_gold_buy_ord (
     rsp_ord_no          VARCHAR(20)  NOT NULL DEFAULT '' COMMENT '응답 주문번호',
     fetched_at          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수신일시',
     PRIMARY KEY (id),
-    INDEX idx_stk_fetched (req_stk_cd, fetched_at)
+    INDEX idx_stk_fetched (req_stk_cd, fetched_at),
+    INDEX idx_dt (req_dt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='kt50000 금현물 매수주문';
 
 -- ------------------------------------------------------------
@@ -132,7 +137,8 @@ CREATE TABLE IF NOT EXISTS kt50001_gold_sll_ord (
     rsp_ord_no          VARCHAR(20)  NOT NULL DEFAULT '' COMMENT '응답 주문번호',
     fetched_at          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수신일시',
     PRIMARY KEY (id),
-    INDEX idx_stk_fetched (req_stk_cd, fetched_at)
+    INDEX idx_stk_fetched (req_stk_cd, fetched_at),
+    INDEX idx_dt (req_dt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='kt50001 금현물 매도주문';
 
 -- ------------------------------------------------------------
@@ -151,7 +157,8 @@ CREATE TABLE IF NOT EXISTS kt50002_gold_mdfy_ord (
     fetched_at          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수신일시',
     PRIMARY KEY (id),
     INDEX idx_stk_fetched (req_stk_cd, fetched_at),
-    INDEX idx_orig_ord (req_orig_ord_no)
+    INDEX idx_orig_ord (req_orig_ord_no),
+    INDEX idx_dt (req_dt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='kt50002 금현물 정정주문';
 
 -- ------------------------------------------------------------
@@ -169,5 +176,6 @@ CREATE TABLE IF NOT EXISTS kt50003_gold_cncl_ord (
     fetched_at          DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수신일시',
     PRIMARY KEY (id),
     INDEX idx_stk_fetched (req_stk_cd, fetched_at),
-    INDEX idx_orig_ord (req_orig_ord_no)
+    INDEX idx_orig_ord (req_orig_ord_no),
+    INDEX idx_dt (req_dt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='kt50003 금현물 취소주문';
