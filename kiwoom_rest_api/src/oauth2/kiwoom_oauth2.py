@@ -18,7 +18,7 @@ _RES_SPEC: dict = OAUTH2_RESPONSE_SPECS
 
 HOST_REAL = 'https://api.kiwoom.com'        # 실전투자 서버
 HOST_MOC = 'https://mockapi.kiwoom.com'     # 모의투자 서버 (KRX만 지원)
-HOST = HOST_MOC
+HOST = HOST_REAL
 
 
 def is_mock_server(host: str = HOST) -> bool:

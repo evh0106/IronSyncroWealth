@@ -17,15 +17,15 @@ if __package__ is None or __package__ == '':
     sys.path.insert(0, src_dir)
     __package__ = 'websocket'
 
-from .client import WebSocketClient, SOCKET_URL
-from .realtime import register
-from .condition import (
+from websocket.client import WebSocketClient, SOCKET_URL
+from websocket.realtime import register
+from websocket.condition import (
     get_condition_list,
     request_condition,
     request_condition_realtime,
     remove_condition_realtime,
 )
-from .menu import REALTIME_TYPES, ACCOUNT_TYPES
+from websocket.menu import REALTIME_TYPES, ACCOUNT_TYPES
 from oauth2 import HOST, get_access_token, get_server_mode_label, load_api_keys, revoke_access_token
 
 
@@ -62,7 +62,12 @@ async def _run_session(token: str, items: list[str] | None, types: list[str]):
     """
     client = WebSocketClient(SOCKET_URL, token)
     receive_task = asyncio.create_task(client.run())
-    await asyncio.sleep(1)           # 로그인 완료 대기
+    login_ok = await client.wait_for_login(timeout=5)
+    if not login_ok:
+        print('\n[중단] WebSocket 로그인에 실패하여 실시간 등록을 수행하지 않습니다.')
+        await client.disconnect()
+        await _cancel(receive_task)
+        return
     await register(client, types, items=items or None)
 
     print('\n실시간 데이터를 수신 중입니다. [q + Enter] 로 종료하세요.')
@@ -101,7 +106,12 @@ async def _run_condition(token: str):
     """조건검색 WebSocket 세션."""
     client = WebSocketClient(SOCKET_URL, token)
     receive_task = asyncio.create_task(client.run())
-    await asyncio.sleep(1)  # 로그인 대기
+    login_ok = await client.wait_for_login(timeout=5)
+    if not login_ok:
+        print('\n[중단] WebSocket 로그인에 실패하여 조건검색을 수행하지 않습니다.')
+        await client.disconnect()
+        await _cancel(receive_task)
+        return
 
     try:
         # 1. 목록 조회
@@ -261,7 +271,7 @@ def main():
 
     try:
         # 순환 import를 피하기 위해 진입 시점에 메뉴 모듈을 로드합니다.
-        from .menu import run_websocket_menu
+        from websocket.menu import run_websocket_menu
 
         run_websocket_menu(token)
     finally:

@@ -200,7 +200,7 @@ def _select_spec(specs: list[ApiSpec]) -> ApiSpec | None:
         print(f'  알 수 없는 선택: {choice!r}')
 
 
-def _prompt_body(spec: ApiSpec) -> dict:
+def _prompt_body(spec: ApiSpec) -> dict | None:
     body: dict[str, str] = {}
 
     print()
@@ -211,7 +211,7 @@ def _prompt_body(spec: ApiSpec) -> dict:
         print('  요청 바디 없음')
         return body
 
-    print('  요청 필드 입력: Enter만 누르면 기본값 또는 생략 처리합니다.')
+    print('  요청 필드 입력: Enter만 누르면 기본값 또는 생략 처리합니다. (/q 입력 시 취소)')
     for field in spec.fields:
         default_value = spec.request_example.get(field.element, '')
         required_text = '필수' if field.required else '선택'
@@ -223,6 +223,9 @@ def _prompt_body(spec: ApiSpec) -> dict:
 
         while True:
             value = input(prompt).strip()
+            if value == '/q':
+                print('  취소되었습니다.')
+                return None
             if not value and default_value != '':
                 value = str(default_value)
             if value:
@@ -371,6 +374,8 @@ def run_order_api_menu(token: str):
             return
 
         body = _prompt_body(spec)
+        if body is None:
+            continue
         req_dt = datetime.now().strftime('%Y%m%d')
         cont_yn = 'N'
         next_key = ''

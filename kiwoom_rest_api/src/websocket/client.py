@@ -7,6 +7,7 @@ import asyncio
 import json
 import websockets
 from oauth2 import HOST
+from logger import log_websocket_message
 
 # ─────────────────────────────────────────────
 # 서버 URL
@@ -47,6 +48,8 @@ class WebSocketClient:
         self.websocket = None
         self.connected = False
         self.keep_running = True
+        self.login_ok = False
+        self._login_event = asyncio.Event()
 
     # ────────────────────────────────
     # 연결 및 로그인
@@ -54,6 +57,8 @@ class WebSocketClient:
     async def connect(self):
         """서버에 연결하고 로그인 패킷을 전송합니다."""
         try:
+            self.login_ok = False
+            self._login_event.clear()
             self.websocket = await websockets.connect(self.uri)
             self.connected = True
             print('서버와 연결되었습니다.')
@@ -61,6 +66,7 @@ class WebSocketClient:
         except Exception as exc:
             print(f'[연결 오류] {exc}')
             self.connected = False
+            self._login_event.set()
 
     # ────────────────────────────────
     # 메시지 송신
@@ -74,12 +80,22 @@ class WebSocketClient:
         message : dict | str
             dict이면 JSON으로 직렬화하여 전송합니다.
         """
+        if not self.keep_running:
+            return
         if not self.connected:
             await self.connect()
         if self.connected:
             payload = message if isinstance(message, str) else json.dumps(message)
             await self.websocket.send(payload)
             print(f'[송신] {payload}')
+
+    async def wait_for_login(self, timeout: float = 5.0) -> bool:
+        """LOGIN 응답을 timeout 내에 기다리고 성공 여부를 반환합니다."""
+        try:
+            await asyncio.wait_for(self._login_event.wait(), timeout=timeout)
+        except asyncio.TimeoutError:
+            return False
+        return self.login_ok
 
     # ────────────────────────────────
     # 메시지 수신
@@ -95,9 +111,13 @@ class WebSocketClient:
                 # 로그인 응답
                 if trnm == 'LOGIN':
                     if response.get('return_code') != 0:
+                        self.login_ok = False
+                        self._login_event.set()
                         print(f'[로그인 실패] {response.get("return_msg")}')
                         await self.disconnect()
                     else:
+                        self.login_ok = True
+                        self._login_event.set()
                         print('[로그인 성공]')
 
                 # PING → 그대로 되돌려 보냄 (연결 유지)
@@ -109,14 +129,21 @@ class WebSocketClient:
                     if self.on_message:
                         self.on_message(response)
                     else:
-                        print(f'[수신] {json.dumps(response, indent=2, ensure_ascii=False)}')
+                        pretty = json.dumps(response, indent=2, ensure_ascii=False)
+                        print(f'[수신] {pretty}')
+                    log_path = log_websocket_message(response, direction='recv')
+                    print(f'[로그] {log_path}')
 
             except websockets.ConnectionClosed:
                 print('[연결 종료] 서버와의 연결이 끊어졌습니다.')
                 self.connected = False
+                if not self._login_event.is_set():
+                    self._login_event.set()
                 break
             except Exception as exc:
                 print(f'[수신 오류] {exc}')
+                if not self._login_event.is_set():
+                    self._login_event.set()
                 break
 
     # ────────────────────────────────

@@ -1,4 +1,5 @@
 import os
+import json
 from datetime import datetime
 
 _LOG_DIR = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'log'))
@@ -63,6 +64,26 @@ def log_http_response(req_id: str, response_status: int, response_headers, respo
         f.write('[response json raw]\n')
         f.write(res_body_text)
         if not res_body_text.endswith('\n'):
+            f.write('\n')
+        f.write('\n')
+
+    return path
+
+
+def log_websocket_message(message, direction: str = 'recv') -> str:
+    """WebSocket 메시지를 날짜_websocket.log 파일에 append 저장"""
+    path = _get_log_path('websocket')
+    ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    if isinstance(message, (dict, list)):
+        payload = json.dumps(message, ensure_ascii=False, indent=2)
+    else:
+        payload = _as_text(message)
+
+    with open(path, 'a', encoding='utf-8') as f:
+        f.write(f'[{ts}] [{direction}]\n')
+        f.write(payload)
+        if not payload.endswith('\n'):
             f.write('\n')
         f.write('\n')
 
