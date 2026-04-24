@@ -8,6 +8,7 @@ import websockets
 import json
 from contextlib import suppress
 from oauth2 import get_access_token, load_api_keys, revoke_access_token
+from logger import log_websocket_message
 
 # ============================================================
 # 서버 설정
@@ -104,6 +105,8 @@ class WebSocketClient:
                 # 실시간 시세 데이터 출력
                 else:
                     print(f'[수신] {json.dumps(response, indent=2, ensure_ascii=False)}')
+                    log_path = log_websocket_message(response, direction='recv')
+                    print(f'[로그] {log_path}')
 
             except websockets.ConnectionClosed:
                 print('서버와의 연결이 종료되었습니다.')

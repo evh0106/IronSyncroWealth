@@ -8,6 +8,7 @@ import json
 import websockets
 from oauth2 import HOST
 from logger import log_websocket_message
+from . import db as ws_db
 
 # ─────────────────────────────────────────────
 # 서버 URL
@@ -131,8 +132,18 @@ class WebSocketClient:
                     else:
                         pretty = json.dumps(response, indent=2, ensure_ascii=False)
                         print(f'[수신] {pretty}')
+                    
+                    # 로그 저장
                     log_path = log_websocket_message(response, direction='recv')
                     print(f'[로그] {log_path}')
+                    
+                    # DB 저장
+                    try:
+                        saved_count = ws_db.save_websocket_realtime(response)
+                        if saved_count > 0:
+                            print(f'[DB 저장] {saved_count} 행 저장됨')
+                    except Exception as exc:
+                        print(f'[DB 저장 오류] {exc}')
 
             except websockets.ConnectionClosed:
                 print('[연결 종료] 서버와의 연결이 끊어졌습니다.')
