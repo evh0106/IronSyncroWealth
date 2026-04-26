@@ -1,6 +1,6 @@
 """
 키움증권 WebSocket 전용 메뉴
-websocket.websocket 모듈이 독립 실행될 때 사용합니다.
+websocket.main 모듈이 독립 실행될 때 사용합니다.
 """
 
 from volume._fmt import _ljust
@@ -50,7 +50,7 @@ def print_websocket_menu() -> None:
 
 def run_websocket_menu(token: str) -> None:
     """토큰을 받아 WebSocket 전용 메뉴 루프를 실행합니다."""
-    from .websocket import run_realtime_quote, run_account_realtime, run_condition_search
+    from .main import run_realtime_quote, run_account_realtime, run_condition_search
 
     handlers = {
         'run_realtime_quote': run_realtime_quote,

@@ -1,4 +1,4 @@
-"""호환용 래퍼: 기존 websocket.websocket 경로를 src/websocket.py로 연결합니다."""
+"""호환용 래퍼: 기존 websocket.main 경로를 src/websocket.py로 연결합니다."""
 
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path

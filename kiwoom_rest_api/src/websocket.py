@@ -1,6 +1,6 @@
 """
 키움증권 WebSocket 메뉴 - 동기 진입점
-독립 실행은 `python -m websocket.websocket`으로 가능합니다.
+독립 실행은 `python -m websocket.main`으로 가능합니다.
 """
 
 import asyncio
