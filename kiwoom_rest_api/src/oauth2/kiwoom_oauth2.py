@@ -11,6 +11,7 @@ import requests
 
 from .specs_request import OAUTH2_API_SPECS
 from .specs_response import OAUTH2_RESPONSE_SPECS
+from .oauth import get_unrevoked_token, save_au10001_response, save_au10002_response
 
 # api_id → 스펙 빠른 조회용 딕셔너리
 _REQ_SPEC: dict = {s['api_id']: s for s in OAUTH2_API_SPECS}
@@ -76,6 +77,11 @@ def load_api_keys(host: str = HOST) -> tuple[str, str]:
 
 def get_access_token(app_key: str, app_secret: str, host: str = HOST) -> str:
     """OAuth 2.0 방식으로 액세스 토큰을 발급받습니다."""
+    cached_token = get_unrevoked_token(app_key)
+    if cached_token:
+        print('DB에서 폐기되지 않은 기존 토큰을 재사용합니다.')
+        return cached_token
+
     spec = _REQ_SPEC['au10001']
     url = host + spec['url']
 
@@ -93,6 +99,13 @@ def get_access_token(app_key: str, app_secret: str, host: str = HOST) -> str:
     _print_response(response, 'au10001')
 
     result = response.json()
+    
+    # DB 저장
+    try:
+        save_au10001_response(app_key, 'client_credentials', result)
+    except Exception as exc:
+        print(f'  [DB 저장 실패] au10001: {exc}')
+    
     if result.get('return_code') == 0:
         access_token = result.get('token')
         print(f'토큰 발급 성공 (만료일: {result.get("expires_dt")})')
@@ -121,6 +134,13 @@ def revoke_access_token(app_key: str, app_secret: str, token: str, host: str = H
     _print_response(response, 'au10002')
 
     result = response.json()
+    
+    # DB 저장
+    try:
+        save_au10002_response(app_key, token, result)
+    except Exception as exc:
+        print(f'  [DB 저장 실패] au10002: {exc}')
+    
     if result.get('return_code') == 0:
         print('토큰 폐기 성공')
     else:
