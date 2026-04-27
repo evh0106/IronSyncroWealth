@@ -8,6 +8,8 @@ import json
 
 import requests
 
+import db
+from logger import log_http_request, log_http_response
 from oauth2 import HOST
 from .specs import ACCOUNT_API_SPECS, ACCOUNT_RESPONSE_SPECS
 from volume._fmt import _ljust, _rjust, _wcslen
@@ -130,6 +132,71 @@ def _prompt_body(spec: ApiSpec) -> dict:
     return body
 
 
+_CREATE_ACNT_API_LOG = """
+CREATE TABLE IF NOT EXISTS acnt_api_log (
+    id         BIGINT       AUTO_INCREMENT PRIMARY KEY,
+    api_id     VARCHAR(20)  NOT NULL,
+    req_body   JSON,
+    rsp_status INT,
+    rsp_code   INT,
+    rsp_msg    VARCHAR(500),
+    rsp_payload JSON,
+    created_at DATETIME     DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+"""
+
+_INSERT_ACNT_API_LOG = """
+INSERT INTO acnt_api_log
+    (api_id, req_body, rsp_status, rsp_code, rsp_msg, rsp_payload)
+VALUES
+    (%(api_id)s, %(req_body)s, %(rsp_status)s, %(rsp_code)s, %(rsp_msg)s, %(rsp_payload)s)
+"""
+
+_table_ensured = False
+
+
+def _ensure_acnt_log_table():
+    global _table_ensured
+    if _table_ensured:
+        return
+    conn = db.get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(_CREATE_ACNT_API_LOG)
+        conn.commit()
+        _table_ensured = True
+    finally:
+        conn.close()
+
+
+def _save_to_db(spec: ApiSpec, req_body: dict, response: requests.Response):
+    _ensure_acnt_log_table()
+    try:
+        payload = response.json()
+    except Exception:
+        payload = {}
+    row = {
+        'api_id':      spec.api_id,
+        'req_body':    json.dumps(req_body,  ensure_ascii=False),
+        'rsp_status':  response.status_code,
+        'rsp_code':    payload.get('return_code'),
+        'rsp_msg':     payload.get('return_msg', ''),
+        'rsp_payload': json.dumps(payload, ensure_ascii=False),
+    }
+    conn = db.get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(_INSERT_ACNT_API_LOG, row)
+            new_id = cur.lastrowid
+        conn.commit()
+        print(f'  → DB 저장 완료 (테이블: acnt_api_log, id={new_id})')
+    except Exception as exc:
+        conn.rollback()
+        print(f'  [DB 오류] {type(exc).__name__}: {exc}')
+    finally:
+        conn.close()
+
+
 def _post_acnt_api(token: str, spec: ApiSpec, body: dict, cont_yn: str = 'N', next_key: str = ''):
     headers = {
         'Content-Type': 'application/json;charset=UTF-8',
@@ -138,7 +205,28 @@ def _post_acnt_api(token: str, spec: ApiSpec, body: dict, cont_yn: str = 'N', ne
         'next-key': next_key,
         'api-id': spec.api_id,
     }
-    response = requests.post(_ACNT_URL, headers=headers, json=body)
+    session = requests.Session()
+    req = requests.Request('POST', _ACNT_URL, headers=headers, json=body)
+    preq = session.prepare_request(req)
+
+    path, req_id = log_http_request(
+        api_id=spec.api_id,
+        url=_ACNT_URL,
+        request_headers=preq.headers,
+        request_body=preq.body,
+        log_name='acnt',
+    )
+    print(f'  → 요청 로그 저장: {path}')
+
+    response = session.send(preq)
+    path = log_http_response(
+        req_id=req_id,
+        response_status=response.status_code,
+        response_headers=response.headers,
+        response_body=response.text,
+        log_name='acnt',
+    )
+    print(f'  → 응답 로그 저장: {path}')
     response.raise_for_status()
     return response
 
@@ -310,11 +398,6 @@ def _print_response(response: requests.Response, api_id: str = ''):
     else:
         print(json.dumps(payload, indent=4, ensure_ascii=False))
 
-    show_raw = input('\n원시 JSON 출력? (y/N): ').strip().lower()
-    if show_raw == 'y':
-        print('\n[원시 JSON]')
-        print(json.dumps(payload, indent=4, ensure_ascii=False))
-
     return cont_yn, next_key
 
 
@@ -351,6 +434,7 @@ def run_account_api_menu(token: str):
                 break
 
             cont_yn, next_key = _print_response(response, api_id=spec.api_id)
+            _save_to_db(spec, body, response)
             if cont_yn != 'Y' or not next_key:
                 break
 
