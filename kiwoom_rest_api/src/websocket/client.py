@@ -42,15 +42,21 @@ class WebSocketClient:
         None이면 기본 출력(print)을 사용합니다.
     """
 
-    def __init__(self, uri: str, access_token: str, on_message=None):
+    def __init__(self, uri: str, access_token: str, on_message=None, silent: bool = False):
         self.uri = uri
         self.access_token = access_token
         self.on_message = on_message
+        self.silent = silent
         self.websocket = None
         self.connected = False
         self.keep_running = True
         self.login_ok = False
         self._login_event = asyncio.Event()
+
+    def _log(self, *args, **kwargs):
+        """silent=True이면 출력을 억제합니다."""
+        if not self.silent:
+            print(*args, **kwargs)
 
     # ────────────────────────────────
     # 연결 및 로그인
@@ -62,10 +68,10 @@ class WebSocketClient:
             self._login_event.clear()
             self.websocket = await websockets.connect(self.uri)
             self.connected = True
-            print('서버와 연결되었습니다.')
+            self._log('서버와 연결되었습니다.')
             await self.send_message({'trnm': 'LOGIN', 'token': self.access_token})
         except Exception as exc:
-            print(f'[연결 오류] {exc}')
+            self._log(f'[연결 오류] {exc}')
             self.connected = False
             self._login_event.set()
 
@@ -88,7 +94,7 @@ class WebSocketClient:
         if self.connected:
             payload = message if isinstance(message, str) else json.dumps(message)
             await self.websocket.send(payload)
-            print(f'[송신] {payload}')
+            self._log(f'[송신] {payload}')
 
     async def wait_for_login(self, timeout: float = 5.0) -> bool:
         """LOGIN 응답을 timeout 내에 기다리고 성공 여부를 반환합니다."""
@@ -114,12 +120,12 @@ class WebSocketClient:
                     if response.get('return_code') != 0:
                         self.login_ok = False
                         self._login_event.set()
-                        print(f'[로그인 실패] {response.get("return_msg")}')
+                        self._log(f'[로그인 실패] {response.get("return_msg")}')
                         await self.disconnect()
                     else:
                         self.login_ok = True
                         self._login_event.set()
-                        print('[로그인 성공]')
+                        self._log('[로그인 성공]')
 
                 # PING → 그대로 되돌려 보냄 (연결 유지)
                 elif trnm == 'PING':
@@ -131,28 +137,28 @@ class WebSocketClient:
                         self.on_message(response)
                     else:
                         pretty = json.dumps(response, indent=2, ensure_ascii=False)
-                        print(f'[수신] {pretty}')
+                        self._log(f'[수신] {pretty}')
                     
                     # 로그 저장
                     log_path = log_websocket_message(response, direction='recv')
-                    print(f'[로그] {log_path}')
+                    self._log(f'[로그] {log_path}')
                     
                     # DB 저장
                     try:
                         saved_count = ws_db.save_websocket_realtime(response)
                         if saved_count > 0:
-                            print(f'[DB 저장] {saved_count} 행 저장됨')
+                            self._log(f'[DB 저장] {saved_count} 행 저장됨')
                     except Exception as exc:
-                        print(f'[DB 저장 오류] {exc}')
+                        self._log(f'[DB 저장 오류] {exc}')
 
             except websockets.ConnectionClosed:
-                print('[연결 종료] 서버와의 연결이 끊어졌습니다.')
+                self._log('[연결 종료] 서버와의 연결이 끊어졌습니다.')
                 self.connected = False
                 if not self._login_event.is_set():
                     self._login_event.set()
                 break
             except Exception as exc:
-                print(f'[수신 오류] {exc}')
+                self._log(f'[수신 오류] {exc}')
                 if not self._login_event.is_set():
                     self._login_event.set()
                 break
@@ -171,4 +177,4 @@ class WebSocketClient:
         if self.connected and self.websocket:
             await self.websocket.close()
             self.connected = False
-            print('[연결 해제] WebSocket 서버와의 연결이 종료되었습니다.')
+            self._log('[연결 해제] WebSocket 서버와의 연결이 종료되었습니다.')

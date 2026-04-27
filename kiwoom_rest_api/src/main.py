@@ -21,6 +21,13 @@ from volume import (
     print_today_prev_contracts,
 )
 from volume._fmt import _ljust
+from websocket.main import (
+    run_realtime_quote_bg,
+    run_account_realtime_bg,
+    run_condition_search,
+    stop_realtime_background,
+    is_realtime_running,
+)
 
 # ─────────────────────────────────────────────
 # 메뉴 항목 정의 (카테고리 → 하위 메뉴)
@@ -40,6 +47,12 @@ MENU_CATEGORIES = [
         ('7', '당일전일체결량 조회   (ka10055)', print_today_prev_contracts),
     ]),
     ('4', '주문', run_order_api_menu),
+    ('5', '웹소켓', [
+        ('1', '종목 실시간 시세 시작  (백그라운드)', run_realtime_quote_bg),
+        ('2', '계좌/기타 실시간 시작  (백그라운드)', run_account_realtime_bg),
+        ('3', '조건검색              (ka10171~74)', run_condition_search),
+        ('4', '웹소켓 종료                       ', lambda t: stop_realtime_background()),
+    ]),
 ]
 
 
@@ -108,6 +121,9 @@ def main():
 
             # 하위 메뉴 루프
             while True:
+                if cat_label == '웹소켓':
+                    status = '● 실행 중' if is_realtime_running() else '○ 대기'
+                    print(f'\n  WebSocket 상태: {status}')
                 print_sub_menu(cat_label, sub_items)
                 sub_choice = input('메뉴 선택: ').strip()
 

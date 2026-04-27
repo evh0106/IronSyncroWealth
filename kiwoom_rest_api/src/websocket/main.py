@@ -28,6 +28,13 @@ _entry = _load_entry_module()
 run_realtime_quote = _entry.run_realtime_quote
 run_account_realtime = _entry.run_account_realtime
 run_condition_search = _entry.run_condition_search
+
+# 백그라운드 WebSocket (REST API와 동시 사용)
+run_realtime_quote_bg = _entry.run_realtime_quote_bg
+run_account_realtime_bg = _entry.run_account_realtime_bg
+stop_realtime_background = _entry.stop_realtime_background
+is_realtime_running = _entry.is_realtime_running
+
 main = _entry.main
 
 

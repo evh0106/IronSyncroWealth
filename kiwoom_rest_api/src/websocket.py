@@ -1,10 +1,11 @@
 """
 키움증권 WebSocket 메뉴 - 동기 진입점
-독립 실행은 `python -m websocket.main`으로 가능합니다.
+독립 실행은 `python -m websocket.websocket`으로 가능합니다.
 """
 
 import asyncio
 import sys
+import threading
 from contextlib import suppress
 
 if __package__ is None or __package__ == '':
@@ -252,6 +253,159 @@ def run_account_realtime(token: str):
 def run_condition_search(token: str):
     """조건검색 WebSocket 메뉴."""
     asyncio.run(_run_condition(token))
+
+
+# ─────────────────────────────────────────────────────────────
+# 백그라운드 WebSocket (main.py 메뉴에서 REST와 동시 사용)
+# ─────────────────────────────────────────────────────────────
+_bg_thread: threading.Thread | None = None
+_bg_stop_event: threading.Event = threading.Event()
+
+
+async def _run_session_background(
+    token: str,
+    items: list[str] | None,
+    types: list[str],
+    stop_event: threading.Event,
+) -> None:
+    """백그라운드 모드: stop_event가 설정되거나 연결이 끊길 때까지 수신. 화면 출력 없음."""
+    client = WebSocketClient(SOCKET_URL, token, silent=True)
+    receive_task = asyncio.create_task(client.run())
+    login_ok = await client.wait_for_login(timeout=5)
+    if not login_ok:
+        print('\n[WebSocket] 로그인 실패 - 백그라운드 세션을 종료합니다.')
+        await client.disconnect()
+        await _cancel(receive_task)
+        return
+    await register(client, types, items=items or None)
+    print('\n[WebSocket] 백그라운드 수신 시작. [웹소켓] → [웹소켓 종료]로 중지하세요.')
+    try:
+        while not stop_event.is_set() and client.keep_running:
+            done, _ = await asyncio.wait({receive_task}, timeout=0.5)
+            if receive_task in done:
+                break
+    finally:
+        await client.disconnect()
+        await _cancel(receive_task)
+    print('\n[WebSocket] 백그라운드 세션이 종료되었습니다.')
+
+
+def is_realtime_running() -> bool:
+    """백그라운드 WebSocket 실행 여부를 반환합니다."""
+    return _bg_thread is not None and _bg_thread.is_alive()
+
+
+def _launch_background(token: str, items: list[str] | None, types: list[str]) -> bool:
+    """백그라운드 스레드를 시작합니다. 이미 실행 중이면 False 반환."""
+    global _bg_thread, _bg_stop_event
+    if is_realtime_running():
+        print('\n이미 백그라운드 WebSocket이 실행 중입니다. 먼저 종료해주세요.')
+        return False
+    _bg_stop_event = threading.Event()
+
+    def _run() -> None:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            loop.run_until_complete(
+                _run_session_background(token, items, types, _bg_stop_event)
+            )
+        finally:
+            loop.close()
+
+    _bg_thread = threading.Thread(target=_run, daemon=True, name='ws-bg')
+    _bg_thread.start()
+    return True
+
+
+def stop_realtime_background() -> None:
+    """백그라운드 WebSocket을 안전하게 종료합니다."""
+    global _bg_thread
+    if not is_realtime_running():
+        print('\n실행 중인 백그라운드 WebSocket이 없습니다.')
+        return
+    _bg_stop_event.set()
+    assert _bg_thread is not None
+    _bg_thread.join(timeout=5)
+    _bg_thread = None
+    print('\n[WebSocket] 백그라운드 세션을 종료했습니다.')
+
+
+def run_realtime_quote_bg(token: str) -> None:
+    """종목 실시간 시세를 백그라운드 스레드에서 시작합니다."""
+    if is_realtime_running():
+        print('\n이미 백그라운드 WebSocket이 실행 중입니다. 먼저 종료해주세요.')
+        return
+    print()
+    print('─── 종목 실시간 시세 (백그라운드) ─────────────')
+    codes_raw = input('종목코드 입력 (여러 개는 쉼표로 구분, 예: 005930,039490): ').strip()
+    if not codes_raw:
+        print('종목코드를 입력하지 않았습니다.')
+        return
+    items = [c.strip() for c in codes_raw.split(',') if c.strip()]
+
+    print()
+    print('실시간 항목 선택 (여러 개 선택 가능, 쉼표 구분):')
+    for i, (code, name) in enumerate(REALTIME_TYPES, 1):
+        print(f'  [{i:2}] {code} – {name}')
+    type_input = input('번호 입력 (기본값 1=주식체결): ').strip()
+
+    if not type_input:
+        selected_types = [REALTIME_TYPES[0][0]]
+    else:
+        selected_types = []
+        for idx_str in type_input.split(','):
+            idx_str = idx_str.strip()
+            if idx_str.isdigit():
+                idx = int(idx_str) - 1
+                if 0 <= idx < len(REALTIME_TYPES):
+                    selected_types.append(REALTIME_TYPES[idx][0])
+        if not selected_types:
+            print('유효한 항목이 없습니다.')
+            return
+
+    print(f'\n[등록] 종목: {items}  타입: {selected_types}')
+    _launch_background(token, items, selected_types)
+
+
+def run_account_realtime_bg(token: str) -> None:
+    """계좌/기타 실시간을 백그라운드 스레드에서 시작합니다."""
+    if is_realtime_running():
+        print('\n이미 백그라운드 WebSocket이 실행 중입니다. 먼저 종료해주세요.')
+        return
+    print()
+    print('─── 계좌/기타 실시간 (백그라운드) ─────────────')
+    print('항목 선택 (여러 개는 쉼표로 구분):')
+    for i, (code, name) in enumerate(ACCOUNT_TYPES, 1):
+        print(f'  [{i:2}] {code} – {name}')
+    type_input = input('번호 입력 (기본값 1=주문체결): ').strip()
+
+    if not type_input:
+        selected_types = [ACCOUNT_TYPES[0][0]]
+        need_item = False
+    else:
+        selected_types = []
+        need_item_flags = []
+        for idx_str in type_input.split(','):
+            idx_str = idx_str.strip()
+            if idx_str.isdigit():
+                idx = int(idx_str) - 1
+                if 0 <= idx < len(ACCOUNT_TYPES):
+                    code = ACCOUNT_TYPES[idx][0]
+                    selected_types.append(code)
+                    need_item_flags.append(code not in ('00', '04', '0s'))
+        need_item = any(need_item_flags)
+        if not selected_types:
+            print('유효한 항목이 없습니다.')
+            return
+
+    items = None
+    if need_item:
+        codes_raw = input('종목/업종코드 입력 (여러 개 쉼표 구분): ').strip()
+        items = [c.strip() for c in codes_raw.split(',') if c.strip()] if codes_raw else None
+
+    print(f'\n[등록] 타입: {selected_types}  아이템: {items}')
+    _launch_background(token, items or [], selected_types)
 
 
 def main():

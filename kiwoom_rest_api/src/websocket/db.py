@@ -234,7 +234,7 @@ def save_websocket_realtime(response: dict) -> int:
     trnm = response.get('trnm', '')
     
     # 제어 메시지 제외
-    if trnm in ('LOGIN', 'PING', 'REG', 'SYSTEM'):
+    if trnm in ('LOGIN', 'PING', 'REG', 'SYSTEM', 'CNSRLST', 'CNSRREQ', 'CNSRCLR'):
         return 0
     
     # trnm=REAL: data 배열의 각 항목 type 기준으로 저장
