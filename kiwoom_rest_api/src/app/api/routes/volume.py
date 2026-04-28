@@ -28,7 +28,7 @@ router = APIRouter(prefix="/volume", tags=["거래량"])
     response_model=VolumeApiResponse,
     summary="거래량급증요청 (ka10023)",
 )
-def get_volume_surge(
+async def get_volume_surge(
     server_mode: str = Query("real", description="서버 모드 (real/mock)"),
     mrkt_tp: str = Query("000", description="시장구분: 000=전체, 001=코스피, 101=코스닥"),
     sort_tp: str = Query("1", description="정렬구분: 1=급증량, 2=급증률"),
@@ -46,7 +46,7 @@ def get_volume_surge(
         trde_qty_tp=trde_qty_tp, tm=tm, stk_cnd=stk_cnd,
         pric_tp=pric_tp, stex_tp=stex_tp,
     )
-    return service.volume_surge(req)
+    return await service.volume_surge(req)
 
 
 @router.get(
@@ -54,7 +54,7 @@ def get_volume_surge(
     response_model=VolumeApiResponse,
     summary="당일거래량상위요청 (ka10030)",
 )
-def get_today_volume_rank(
+async def get_today_volume_rank(
     server_mode: str = Query("real"),
     mrkt_tp: str = Query("000"),
     sort_tp: str = Query("1"),
@@ -73,7 +73,7 @@ def get_today_volume_rank(
         crd_tp=crd_tp, trde_qty_tp=trde_qty_tp, pric_tp=pric_tp,
         trde_prica_tp=trde_prica_tp, mrkt_open_tp=mrkt_open_tp, stex_tp=stex_tp,
     )
-    return service.today_volume_rank(req)
+    return await service.today_volume_rank(req)
 
 
 @router.get(
@@ -81,7 +81,7 @@ def get_today_volume_rank(
     response_model=VolumeApiResponse,
     summary="전일거래량상위요청 (ka10031)",
 )
-def get_prev_volume_rank(
+async def get_prev_volume_rank(
     server_mode: str = Query("real"),
     mrkt_tp: str = Query("000"),
     qry_tp: str = Query("1"),
@@ -95,7 +95,7 @@ def get_prev_volume_rank(
         mrkt_tp=mrkt_tp, qry_tp=qry_tp, rank_strt=rank_strt,
         rank_end=rank_end, stex_tp=stex_tp,
     )
-    return service.prev_volume_rank(req)
+    return await service.prev_volume_rank(req)
 
 
 @router.get(
@@ -103,7 +103,7 @@ def get_prev_volume_rank(
     response_model=VolumeApiResponse,
     summary="거래대금상위요청 (ka10032)",
 )
-def get_trade_amount_rank(
+async def get_trade_amount_rank(
     server_mode: str = Query("real"),
     mrkt_tp: str = Query("001"),
     mang_stk_incls: str = Query("1"),
@@ -114,7 +114,7 @@ def get_trade_amount_rank(
         server_mode=server_mode,  # type: ignore[arg-type]
         mrkt_tp=mrkt_tp, mang_stk_incls=mang_stk_incls, stex_tp=stex_tp,
     )
-    return service.trade_amount_rank(req)
+    return await service.trade_amount_rank(req)
 
 
 # ─────────────────────────────────────────────
@@ -126,7 +126,7 @@ def get_trade_amount_rank(
     response_model=VolumeApiResponse,
     summary="거래량갱신요청 (ka10024)",
 )
-def get_volume_update(
+async def get_volume_update(
     server_mode: str = Query("real"),
     mrkt_tp: str = Query("000"),
     cycle_tp: str = Query("5", description="주기구분: 1=1분, 2=3분, 3=5분, 4=10분, 5=30분"),
@@ -138,7 +138,7 @@ def get_volume_update(
         server_mode=server_mode,  # type: ignore[arg-type]
         mrkt_tp=mrkt_tp, cycle_tp=cycle_tp, trde_qty_tp=trde_qty_tp, stex_tp=stex_tp,
     )
-    return service.volume_update(req)
+    return await service.volume_update(req)
 
 
 @router.get(
@@ -146,7 +146,7 @@ def get_volume_update(
     response_model=VolumeApiResponse,
     summary="거래원순간거래량요청 (ka10052)",
 )
-def get_broker_instant_volume(
+async def get_broker_instant_volume(
     server_mode: str = Query("real"),
     mmcm_cd: str = Query(..., description="회원사코드 (예: 888=외국계합계, 001=키움증권)"),
     mrkt_tp: str = Query("0", description="시장구분: 0=전체, 1=코스피, 2=코스닥, 3=종목"),
@@ -161,7 +161,7 @@ def get_broker_instant_volume(
         mmcm_cd=mmcm_cd, mrkt_tp=mrkt_tp, stk_cd=stk_cd,
         qty_tp=qty_tp, pric_tp=pric_tp, stex_tp=stex_tp,
     )
-    return service.broker_instant_volume(req)
+    return await service.broker_instant_volume(req)
 
 
 @router.get(
@@ -169,7 +169,7 @@ def get_broker_instant_volume(
     response_model=VolumeApiResponse,
     summary="당일전일체결량요청 (ka10055)",
 )
-def get_today_prev_contracts(
+async def get_today_prev_contracts(
     server_mode: str = Query("real"),
     stk_cd: str = Query(..., description="종목코드 (예: 005930)"),
     tdy_pred: str = Query("1", description="당일전일구분: 1=당일, 2=전일"),
@@ -179,4 +179,4 @@ def get_today_prev_contracts(
         server_mode=server_mode,  # type: ignore[arg-type]
         stk_cd=stk_cd, tdy_pred=tdy_pred,
     )
-    return service.today_prev_contracts(req)
+    return await service.today_prev_contracts(req)

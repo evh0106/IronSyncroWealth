@@ -31,7 +31,7 @@ Pydantic 요청/응답 모델
 - [x] 3단계: 조회성 REST API(업종/거래량)부터 엔드포인트화
 - [x] 4단계: 계좌/주문 API 이관
 - [x] 5단계: WebSocket 제어 API(시작/중지/상태) 추가
-- [ ] 6단계: 필요 시 비동기 I/O와 작업 큐 도입
+- [x] 6단계: 필요 시 비동기 I/O와 작업 큐 도입
 
 ## 1단계 산출물
 
@@ -210,3 +210,29 @@ scripts\run_fastapi.bat
 
 - import 검증: 총 22개 라우트 정상 등록
   - /ws/types, /ws/status, /ws/start, /ws/stop, /ws/register (POST/DELETE)
+
+## 6단계 산출물
+
+### 변경된 파일
+
+- `requirements-fastapi.txt` — `httpx>=0.27.0,<1.0.0` 추가
+- `src/app/services/kiwoom_client.py` — `requests` 제거 → `httpx.AsyncClient` 기반 `async def kiwoom_post`
+- `src/app/services/sect_service.py` — `get_current_price` → `async def`
+- `src/app/services/volume_service.py` — 7개 메서드 → `async def`
+- `src/app/services/acnt_service.py` — `call` → `async def`
+- `src/app/services/ordr_service.py` — `call` → `async def`
+- `src/app/api/routes/sect.py` — 핸들러 → `async def` + `await`
+- `src/app/api/routes/volume.py` — 7개 핸들러 → `async def` + `await`
+- `src/app/api/routes/acnt.py` — 핸들러 → `async def` + `await`
+- `src/app/api/routes/ordr.py` — 핸들러 → `async def` + `await`
+
+### 주요 설계 결정
+
+- `httpx.AsyncClient(timeout=30)` — 요청마다 생성 (컨텍스트 매니저)
+- `requests.HTTPError` → `httpx.HTTPStatusError`, `requests.RequestException` → `httpx.RequestError`
+- `ws_manager.py` 백그라운드 스레드는 자체 asyncio 루프를 사용하므로 변경 대상 제외
+- 작업 큐(Celery/ARQ)는 현재 불필요하므로 도입 생략
+
+### 검증 메모
+
+- import 검증: 총 27개 라우트 정상 등록 확인

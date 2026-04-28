@@ -31,7 +31,7 @@ ServiceDep = Annotated[AcntService, Depends(get_acnt_service)]
     summary="계좌 API 스펙 목록",
     description="지원하는 계좌 조회 API 목록과 각 API의 요청 필드 스펙을 반환합니다.",
 )
-def list_acnt_specs(svc: ServiceDep) -> AcntApiSpecListResponse:
+async def list_acnt_specs(svc: ServiceDep) -> AcntApiSpecListResponse:
     specs = svc.list_specs()
     return AcntApiSpecListResponse(total=len(specs), specs=specs)
 
@@ -46,12 +46,12 @@ def list_acnt_specs(svc: ServiceDep) -> AcntApiSpecListResponse:
         "유효한 api_id 목록은 `GET /api/v1/acnt/specs` 에서 확인하세요."
     ),
 )
-def call_acnt_api(
+async def call_acnt_api(
     api_id: Annotated[str, Path(description="계좌 API 식별자 (예: ka00001, kt00001)")],
     req: AcntApiRequest,
     svc: ServiceDep,
 ) -> AcntApiResponse:
-    return svc.call(
+    return await svc.call(
         server_mode=req.server_mode,
         api_id=api_id,
         body=req.body,

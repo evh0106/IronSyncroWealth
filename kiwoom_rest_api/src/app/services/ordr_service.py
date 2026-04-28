@@ -62,7 +62,7 @@ class OrdrService:
             for s in ORDR_API_SPECS
         ]
 
-    def call(
+    async def call(
         self,
         server_mode: ServerMode,
         api_id: str,
@@ -93,7 +93,7 @@ class OrdrService:
             )
 
         host, token = self._resolve_token(server_mode)
-        data = kiwoom_post(
+        data = await kiwoom_post(
             host=host,
             url_path=_ORDR_URL_PATH,
             api_id=api_id,

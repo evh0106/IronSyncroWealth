@@ -62,7 +62,7 @@ class VolumeService:
     # 순위정보 (rkinfo)
     # ─────────────────────────────────────────────
 
-    def volume_surge(self, req: VolumeSurgeRequest) -> VolumeApiResponse:
+    async def volume_surge(self, req: VolumeSurgeRequest) -> VolumeApiResponse:
         """거래량급증요청 (ka10023)."""
         host, token = self._resolve_token(req.server_mode)
         body = {
@@ -75,10 +75,10 @@ class VolumeService:
             "pric_tp": req.pric_tp,
             "stex_tp": req.stex_tp,
         }
-        data = kiwoom_post(host, _RKINFO_URL_PATH, "ka10023", token, body)
+        data = await kiwoom_post(host, _RKINFO_URL_PATH, "ka10023", token, body)
         return self._wrap(req.server_mode, "ka10023", data)
 
-    def today_volume_rank(self, req: TodayVolumeRankRequest) -> VolumeApiResponse:
+    async def today_volume_rank(self, req: TodayVolumeRankRequest) -> VolumeApiResponse:
         """당일거래량상위요청 (ka10030)."""
         host, token = self._resolve_token(req.server_mode)
         body = {
@@ -92,10 +92,10 @@ class VolumeService:
             "mrkt_open_tp": req.mrkt_open_tp,
             "stex_tp": req.stex_tp,
         }
-        data = kiwoom_post(host, _RKINFO_URL_PATH, "ka10030", token, body)
+        data = await kiwoom_post(host, _RKINFO_URL_PATH, "ka10030", token, body)
         return self._wrap(req.server_mode, "ka10030", data)
 
-    def prev_volume_rank(self, req: PrevVolumeRankRequest) -> VolumeApiResponse:
+    async def prev_volume_rank(self, req: PrevVolumeRankRequest) -> VolumeApiResponse:
         """전일거래량상위요청 (ka10031)."""
         host, token = self._resolve_token(req.server_mode)
         body = {
@@ -105,10 +105,10 @@ class VolumeService:
             "rank_end": req.rank_end,
             "stex_tp": req.stex_tp,
         }
-        data = kiwoom_post(host, _RKINFO_URL_PATH, "ka10031", token, body)
+        data = await kiwoom_post(host, _RKINFO_URL_PATH, "ka10031", token, body)
         return self._wrap(req.server_mode, "ka10031", data)
 
-    def trade_amount_rank(self, req: TradeAmountRankRequest) -> VolumeApiResponse:
+    async def trade_amount_rank(self, req: TradeAmountRankRequest) -> VolumeApiResponse:
         """거래대금상위요청 (ka10032)."""
         host, token = self._resolve_token(req.server_mode)
         body = {
@@ -116,14 +116,14 @@ class VolumeService:
             "mang_stk_incls": req.mang_stk_incls,
             "stex_tp": req.stex_tp,
         }
-        data = kiwoom_post(host, _RKINFO_URL_PATH, "ka10032", token, body)
+        data = await kiwoom_post(host, _RKINFO_URL_PATH, "ka10032", token, body)
         return self._wrap(req.server_mode, "ka10032", data)
 
     # ─────────────────────────────────────────────
     # 종목정보 (stkinfo)
     # ─────────────────────────────────────────────
 
-    def volume_update(self, req: VolumeUpdateRequest) -> VolumeApiResponse:
+    async def volume_update(self, req: VolumeUpdateRequest) -> VolumeApiResponse:
         """거래량갱신요청 (ka10024)."""
         host, token = self._resolve_token(req.server_mode)
         body = {
@@ -132,10 +132,10 @@ class VolumeService:
             "trde_qty_tp": req.trde_qty_tp,
             "stex_tp": req.stex_tp,
         }
-        data = kiwoom_post(host, _STKINFO_URL_PATH, "ka10024", token, body)
+        data = await kiwoom_post(host, _STKINFO_URL_PATH, "ka10024", token, body)
         return self._wrap(req.server_mode, "ka10024", data)
 
-    def broker_instant_volume(self, req: BrokerInstantVolumeRequest) -> VolumeApiResponse:
+    async def broker_instant_volume(self, req: BrokerInstantVolumeRequest) -> VolumeApiResponse:
         """거래원순간거래량요청 (ka10052)."""
         host, token = self._resolve_token(req.server_mode)
         body = {
@@ -146,17 +146,17 @@ class VolumeService:
             "pric_tp": req.pric_tp,
             "stex_tp": req.stex_tp,
         }
-        data = kiwoom_post(host, _STKINFO_URL_PATH, "ka10052", token, body)
+        data = await kiwoom_post(host, _STKINFO_URL_PATH, "ka10052", token, body)
         return self._wrap(req.server_mode, "ka10052", data)
 
-    def today_prev_contracts(self, req: TodayPrevContractsRequest) -> VolumeApiResponse:
+    async def today_prev_contracts(self, req: TodayPrevContractsRequest) -> VolumeApiResponse:
         """당일전일체결량요청 (ka10055)."""
         host, token = self._resolve_token(req.server_mode)
         body = {
             "stk_cd": req.stk_cd,
             "tdy_pred": req.tdy_pred,
         }
-        data = kiwoom_post(host, _STKINFO_URL_PATH, "ka10055", token, body)
+        data = await kiwoom_post(host, _STKINFO_URL_PATH, "ka10055", token, body)
         return self._wrap(req.server_mode, "ka10055", data)
 
 

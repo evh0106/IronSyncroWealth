@@ -46,7 +46,7 @@ class SectService:
             )
         return host, token
 
-    def get_current_price(
+    async def get_current_price(
         self,
         server_mode: ServerMode,
         mrkt_tp: str,
@@ -58,7 +58,7 @@ class SectService:
             "mrkt_tp": mrkt_tp,
             "inds_cd": sect_cd,
         }
-        data = kiwoom_post(
+        data = await kiwoom_post(
             host=host,
             url_path=_SECT_URL_PATH,
             api_id="ka20001",

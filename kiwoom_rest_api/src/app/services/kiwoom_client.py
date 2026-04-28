@@ -2,17 +2,19 @@
 
 기존 CLI 모듈의 requests 호출 패턴을 FastAPI 서비스에서 재사용하기 위한
 얇은 래퍼입니다.  print/log 의존성 없이 순수하게 HTTP POST → dict 반환.
+
+6단계에서 httpx.AsyncClient 기반 비동기 구현으로 전환했습니다.
 """
 
 from __future__ import annotations
 
-import requests
+import httpx
 
 from app.core.exceptions import ApiError
 
 
-def kiwoom_post(host: str, url_path: str, api_id: str, token: str, body: dict) -> dict:
-    """Kiwoom API 서버에 POST 요청을 보내고 JSON 응답을 반환합니다.
+async def kiwoom_post(host: str, url_path: str, api_id: str, token: str, body: dict) -> dict:
+    """Kiwoom API 서버에 비동기 POST 요청을 보내고 JSON 응답을 반환합니다.
 
     Parameters
     ----------
@@ -46,16 +48,17 @@ def kiwoom_post(host: str, url_path: str, api_id: str, token: str, body: dict) -
         "api-id": api_id,
     }
     try:
-        resp = requests.post(url, headers=headers, json=body, timeout=30)
-        resp.raise_for_status()
-    except requests.HTTPError as exc:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.post(url, headers=headers, json=body)
+            resp.raise_for_status()
+    except httpx.HTTPStatusError as exc:
         raise ApiError(
             message=f"Kiwoom API HTTP error: {exc.response.status_code}",
             code="KIWOOM_HTTP_ERROR",
             status_code=502,
             detail={"api_id": api_id, "status_code": exc.response.status_code},
         ) from exc
-    except requests.RequestException as exc:
+    except httpx.RequestError as exc:
         raise ApiError(
             message=f"Kiwoom API request failed: {exc}",
             code="KIWOOM_REQUEST_ERROR",
