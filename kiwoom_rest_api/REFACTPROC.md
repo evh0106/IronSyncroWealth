@@ -27,7 +27,7 @@ Pydantic 요청/응답 모델
 ## 진행 현황
 
 - [x] 1단계: FastAPI 뼈대 + 헬스체크 + 공통 예외/로깅
-- [ ] 2단계: 인증/토큰 서비스 이관
+- [x] 2단계: 인증/토큰 서비스 이관
 - [ ] 3단계: 조회성 REST API(업종/거래량)부터 엔드포인트화
 - [ ] 4단계: 계좌/주문 API 이관
 - [ ] 5단계: WebSocket 제어 API(시작/중지/상태) 추가
@@ -40,9 +40,12 @@ Pydantic 요청/응답 모델
 - src/app/main.py
 - src/app/api/router.py
 - src/app/api/routes/health.py
+- src/app/api/routes/auth.py
 - src/app/core/config.py
 - src/app/core/logging.py
 - src/app/core/exceptions.py
+- src/app/services/token_service.py
+- src/app/schemas/auth.py
 - scripts/run_fastapi.bat
 - requirements-fastapi.txt
 
@@ -64,7 +67,50 @@ scripts\run_fastapi.bat
 
 - 루트: http://localhost:8000/
 - 헬스체크: http://localhost:8000/api/v1/health
+- 토큰 상태 조회: http://localhost:8000/api/v1/auth/token?server_mode=real
 - Swagger: http://localhost:8000/docs
+
+## 2단계 산출물
+
+### 추가된 엔드포인트
+
+- GET /api/v1/auth/token
+- POST /api/v1/auth/token
+- POST /api/v1/auth/token/revoke
+
+### 엔드포인트 요약
+
+1. GET /api/v1/auth/token
+- DB에 저장된 미폐기 토큰 존재 여부를 조회합니다.
+- `server_mode=real|mock` 쿼리 지원
+
+2. POST /api/v1/auth/token
+- 키움 접근 토큰을 발급합니다.
+- 기본적으로 DB의 미폐기 토큰이 있으면 재사용합니다.
+- 요청 예시:
+
+```json
+{
+  "server_mode": "real",
+  "reuse_cached": true
+}
+```
+
+3. POST /api/v1/auth/token/revoke
+- 전달된 토큰 또는 DB의 현재 미폐기 토큰을 폐기합니다.
+- 요청 예시:
+
+```json
+{
+  "server_mode": "real",
+  "token": null
+}
+```
+
+### 검증 메모
+
+- `app.main` import 성공
+- 등록 라우트 확인: `/api/v1/auth/token`, `/api/v1/auth/token/revoke`, `/api/v1/health`
 
 **예상 공수 (대략)**
 1. 최소 MVP(조회 API + 토큰 + 기본 로깅): 3~5일
