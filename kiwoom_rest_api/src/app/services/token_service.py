@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from pathlib import Path
+import json
 
 import requests
 
 from app.core.exceptions import ApiError
 from app.schemas.auth import TokenIssueResponse, TokenRevokeResponse, TokenStatusResponse
+from logger import log_http_request, log_http_response
 from oauth2.kiwoom_oauth2 import HOST_MOC, HOST_REAL, load_api_keys
 from oauth2.oauth import get_unrevoked_token, save_au10001_response, save_au10002_response
 from oauth2.specs_request import OAUTH2_API_SPECS
@@ -86,16 +88,51 @@ class TokenService:
             },
         )
 
+        req_id = ""
+        try:
+            _, req_id = log_http_request(
+                api_id="au10001",
+                url=url,
+                request_headers=headers,
+                request_body=json.dumps(payload, ensure_ascii=False),
+                log_name="fastapi",
+            )
+        except Exception:
+            req_id = ""
+
         try:
             response = requests.post(url, headers=headers, json=payload, timeout=15)
             response.raise_for_status()
         except requests.RequestException as exc:
+            if req_id and getattr(exc, "response", None) is not None:
+                try:
+                    log_http_response(
+                        req_id=req_id,
+                        response_status=exc.response.status_code,
+                        response_headers=exc.response.headers,
+                        response_body=exc.response.text,
+                        log_name="fastapi",
+                    )
+                except Exception:
+                    pass
             raise ApiError(
                 message="Failed to issue Kiwoom access token",
                 code="TOKEN_ISSUE_REQUEST_FAILED",
                 status_code=502,
                 detail={"reason": str(exc)},
             ) from exc
+
+        if req_id:
+            try:
+                log_http_response(
+                    req_id=req_id,
+                    response_status=response.status_code,
+                    response_headers=response.headers,
+                    response_body=response.text,
+                    log_name="fastapi",
+                )
+            except Exception:
+                pass
 
         result = response.json()
 
@@ -152,16 +189,51 @@ class TokenService:
             },
         )
 
+        req_id = ""
+        try:
+            _, req_id = log_http_request(
+                api_id="au10002",
+                url=url,
+                request_headers=headers,
+                request_body=json.dumps(payload, ensure_ascii=False),
+                log_name="fastapi",
+            )
+        except Exception:
+            req_id = ""
+
         try:
             response = requests.post(url, headers=headers, json=payload, timeout=15)
             response.raise_for_status()
         except requests.RequestException as exc:
+            if req_id and getattr(exc, "response", None) is not None:
+                try:
+                    log_http_response(
+                        req_id=req_id,
+                        response_status=exc.response.status_code,
+                        response_headers=exc.response.headers,
+                        response_body=exc.response.text,
+                        log_name="fastapi",
+                    )
+                except Exception:
+                    pass
             raise ApiError(
                 message="Failed to revoke Kiwoom access token",
                 code="TOKEN_REVOKE_REQUEST_FAILED",
                 status_code=502,
                 detail={"reason": str(exc)},
             ) from exc
+
+        if req_id:
+            try:
+                log_http_response(
+                    req_id=req_id,
+                    response_status=response.status_code,
+                    response_headers=response.headers,
+                    response_body=response.text,
+                    log_name="fastapi",
+                )
+            except Exception:
+                pass
 
         result = response.json()
 

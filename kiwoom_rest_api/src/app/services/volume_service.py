@@ -5,6 +5,9 @@
 
 from __future__ import annotations
 
+import asyncio
+from datetime import datetime
+
 from app.core.exceptions import ApiError
 from app.schemas.volume import (
     BrokerInstantVolumeRequest,
@@ -20,6 +23,7 @@ from app.schemas.volume import (
 from app.services.kiwoom_client import kiwoom_post
 from oauth2.kiwoom_oauth2 import HOST_MOC, HOST_REAL, load_api_keys
 from oauth2.oauth import get_unrevoked_token
+from volume.rank import save_ka10030
 
 _SERVER_HOSTS: dict[str, str] = {
     "real": HOST_REAL,
@@ -58,6 +62,30 @@ class VolumeService:
     def _wrap(self, server_mode: ServerMode, api_id: str, data: dict) -> VolumeApiResponse:
         return VolumeApiResponse(server_mode=server_mode, api_id=api_id, data=data)
 
+    async def _save_today_volume_rank(self, req: TodayVolumeRankRequest, data: dict) -> None:
+        items = data.get("tdy_trde_qty_upper", [])
+        if data.get("return_code") != 0 or not items:
+            return
+
+        request_params = {
+            "req_dt": datetime.now().strftime("%Y%m%d"),
+            "mrkt_tp": req.mrkt_tp,
+            "sort_tp": req.sort_tp,
+            "mang_stk_incls": req.mang_stk_incls,
+            "crd_tp": req.crd_tp,
+            "trde_qty_tp": req.trde_qty_tp,
+            "pric_tp": req.pric_tp,
+            "trde_prica_tp": req.trde_prica_tp,
+            "mrkt_open_tp": req.mrkt_open_tp,
+            "stex_tp": req.stex_tp,
+        }
+
+        try:
+            await asyncio.to_thread(save_ka10030, items, request_params)
+        except Exception:
+            # CLI 경로와 동일하게 저장 실패가 응답 자체를 막지 않도록 합니다.
+            pass
+
     # ─────────────────────────────────────────────
     # 순위정보 (rkinfo)
     # ─────────────────────────────────────────────
@@ -93,6 +121,7 @@ class VolumeService:
             "stex_tp": req.stex_tp,
         }
         data = await kiwoom_post(host, _RKINFO_URL_PATH, "ka10030", token, body)
+        await self._save_today_volume_rank(req, data)
         return self._wrap(req.server_mode, "ka10030", data)
 
     async def prev_volume_rank(self, req: PrevVolumeRankRequest) -> VolumeApiResponse:

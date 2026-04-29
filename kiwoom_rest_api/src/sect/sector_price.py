@@ -135,14 +135,12 @@ def save_ka20001(result: dict, request_params: dict) -> int:
             'rsp_acc_trde_qty_n': item.get('acc_trde_qty_n'),
         })
 
-    print(f'\n  [SQL] {_UPSERT_KA20001.strip()}')
-    print(f'  [파라미터 예시] {rows[0] if rows else {}}')
-
     conn = db.get_connection()
     try:
         with conn.cursor() as cur:
             cur.executemany(_UPSERT_KA20001, rows)
         conn.commit()
+        print(f'  [DB 저장] ka20001_inds_cur_prc: {len(rows)}행 저장됨')
         return len(rows)
     except Exception as e:
         conn.rollback()
