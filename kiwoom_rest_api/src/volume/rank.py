@@ -268,6 +268,18 @@ def print_volume_surge(token: str):
 
     _print_table(items, cols_disp, widths, left_set, row_num=True, row_fn=_row)
 
+    try:
+        count = save_ka10023(items)
+        print(f'  → {count}건 저장 완료.')
+    except Exception as e:
+        print(f'  [DB 오류] {e}')
+
+    try:
+        count = save_ka10023(items)
+        print(f'  → {count}건 저장 완료.')
+    except Exception as e:
+        print(f'  [DB 오류] {e}')
+
 
 # ═══════════════════════════════════════════════════════
 # ka10030 – 당일거래량상위요청
@@ -421,6 +433,12 @@ def print_prev_volume_rank(token: str):
 
     _print_table(items, cols_disp, widths, left_set, row_num=True, row_fn=_row)
 
+    try:
+        count = save_ka10031(items)
+        print(f'  → {count}건 저장 완료.')
+    except Exception as e:
+        print(f'  [DB 오류] {e}')
+
 
 # ═══════════════════════════════════════════════════════
 # ka10032 – 거래대금상위요청
@@ -477,6 +495,18 @@ def print_trade_amount_rank(token: str):
         return r
 
     _print_table(items, cols_disp, widths, left_set, row_num=False, row_fn=_row)
+
+    try:
+        count = save_ka10032(items)
+        print(f'  → {count}건 저장 완료.')
+    except Exception as e:
+        print(f'  [DB 오류] {e}')
+
+    try:
+        count = save_ka10032(items)
+        print(f'  → {count}건 저장 완료.')
+    except Exception as e:
+        print(f'  [DB 오류] {e}')
 
 
 # ═══════════════════════════════════════════════════════
@@ -548,6 +578,244 @@ def save_ka10030(items: list, request_params: dict = None) -> int:
             cur.executemany(_INSERT_KA10030, rows)
         conn.commit()
         print(f'  [DB 저장] ka10030_tdy_trde_qty_upper: {len(rows)}행 저장됨')
+        return len(rows)
+    except Exception as e:
+        conn.rollback()
+        print(f'  [DB 오류] {type(e).__name__}: {e}')
+        raise
+    finally:
+        conn.close()
+
+
+# ═══════════════════════════════════════════════════════
+# DB 저장 – ka10031
+# ═══════════════════════════════════════════════════════
+
+_INSERT_KA10031 = """
+    INSERT INTO ka10031_pred_trde_qty_upper
+        (header_id, stk_cd, stk_nm, mrkt_tp, cur_prc, pred_pre_sig, pred_pre, trde_qty)
+    VALUES
+        (%(header_id)s, %(stk_cd)s, %(stk_nm)s, %(mrkt_tp)s, %(cur_prc)s, %(pred_pre_sig)s, %(pred_pre)s, %(trde_qty)s)
+"""
+
+
+def save_ka10031(items: list) -> int:
+    """전일거래량상위 리스트를 ka10031_pred_trde_qty_upper 테이블에 저장합니다."""
+    if not items:
+        return 0
+
+    header_id = int(datetime.now().timestamp() * 1000)
+    rows = []
+    for item in items:
+        rows.append({
+            'header_id': header_id,
+            'stk_cd': item.get('stk_cd', ''),
+            'stk_nm': item.get('stk_nm', ''),
+            'mrkt_tp': item.get('mrkt_tp', ''),
+            'cur_prc': item.get('cur_prc', ''),
+            'pred_pre_sig': item.get('pred_pre_sig', ''),
+            'pred_pre': item.get('pred_pre', ''),
+            'trde_qty': item.get('trde_qty', ''),
+        })
+
+    conn = db.get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.executemany(_INSERT_KA10031, rows)
+        conn.commit()
+        print(f'  [DB 저장] ka10031_pred_trde_qty_upper: {len(rows)}행 저장됨')
+        return len(rows)
+    except Exception as e:
+        conn.rollback()
+        print(f'  [DB 오류] {type(e).__name__}: {e}')
+        raise
+    finally:
+        conn.close()
+
+
+# ═══════════════════════════════════════════════════════
+# DB 저장 – ka10023
+# ═══════════════════════════════════════════════════════
+
+_INSERT_KA10023 = """
+    INSERT INTO ka10023_trde_qty_sdnin
+        (header_id, stk_cd, stk_nm, mrkt_tp, cur_prc, flu_rt, prev_trde_qty, now_trde_qty, sdnin_qty, sdnin_rt)
+    VALUES
+        (%(header_id)s, %(stk_cd)s, %(stk_nm)s, %(mrkt_tp)s, %(cur_prc)s, %(flu_rt)s, %(prev_trde_qty)s, %(now_trde_qty)s, %(sdnin_qty)s, %(sdnin_rt)s)
+"""
+
+
+def save_ka10023(items: list) -> int:
+    """거래량급증 리스트를 ka10023_trde_qty_sdnin 테이블에 저장합니다."""
+    if not items:
+        return 0
+
+    header_id = int(datetime.now().timestamp() * 1000)
+    rows = []
+    for item in items:
+        rows.append({
+            'header_id': header_id,
+            'stk_cd': item.get('stk_cd', ''),
+            'stk_nm': item.get('stk_nm', ''),
+            'mrkt_tp': item.get('mrkt_tp', ''),
+            'cur_prc': item.get('cur_prc', ''),
+            'flu_rt': item.get('flu_rt', ''),
+            'prev_trde_qty': item.get('prev_trde_qty', ''),
+            'now_trde_qty': item.get('now_trde_qty', ''),
+            'sdnin_qty': item.get('sdnin_qty', ''),
+            'sdnin_rt': item.get('sdnin_rt', ''),
+        })
+
+    conn = db.get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.executemany(_INSERT_KA10023, rows)
+        conn.commit()
+        print(f'  [DB 저장] ka10023_trde_qty_sdnin: {len(rows)}행 저장됨')
+        return len(rows)
+    except Exception as e:
+        conn.rollback()
+        print(f'  [DB 오류] {type(e).__name__}: {e}')
+        raise
+    finally:
+        conn.close()
+
+
+# ═══════════════════════════════════════════════════════
+# DB 저장 – ka10032
+# ═══════════════════════════════════════════════════════
+
+_INSERT_KA10032 = """
+    INSERT INTO ka10032_trde_prica_upper
+        (header_id, now_rank, pred_rank, stk_cd, stk_nm, mrkt_tp, cur_prc, flu_rt, now_trde_qty, trde_prica)
+    VALUES
+        (%(header_id)s, %(now_rank)s, %(pred_rank)s, %(stk_cd)s, %(stk_nm)s, %(mrkt_tp)s, %(cur_prc)s, %(flu_rt)s, %(now_trde_qty)s, %(trde_prica)s)
+"""
+
+
+def save_ka10032(items: list) -> int:
+    """거래대금상위 리스트를 ka10032_trde_prica_upper 테이블에 저장합니다."""
+    if not items:
+        return 0
+
+    header_id = int(datetime.now().timestamp() * 1000)
+    rows = []
+    for item in items:
+        rows.append({
+            'header_id': header_id,
+            'now_rank': item.get('now_rank', ''),
+            'pred_rank': item.get('pred_rank', ''),
+            'stk_cd': item.get('stk_cd', ''),
+            'stk_nm': item.get('stk_nm', ''),
+            'mrkt_tp': item.get('mrkt_tp', ''),
+            'cur_prc': item.get('cur_prc', ''),
+            'flu_rt': item.get('flu_rt', ''),
+            'now_trde_qty': item.get('now_trde_qty', ''),
+            'trde_prica': item.get('trde_prica', ''),
+        })
+
+    conn = db.get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.executemany(_INSERT_KA10032, rows)
+        conn.commit()
+        print(f'  [DB 저장] ka10032_trde_prica_upper: {len(rows)}행 저장됨')
+        return len(rows)
+    except Exception as e:
+        conn.rollback()
+        print(f'  [DB 오류] {type(e).__name__}: {e}')
+        raise
+    finally:
+        conn.close()
+
+
+# ═══════════════════════════════════════════════════════
+# DB 저장 – ka10023
+# ═══════════════════════════════════════════════════════
+
+_INSERT_KA10023 = """
+    INSERT INTO ka10023_trde_qty_sdnin
+        (header_id, stk_cd, stk_nm, mrkt_tp, cur_prc, flu_rt, prev_trde_qty, now_trde_qty, sdnin_qty, sdnin_rt)
+    VALUES
+        (%(header_id)s, %(stk_cd)s, %(stk_nm)s, %(mrkt_tp)s, %(cur_prc)s, %(flu_rt)s, %(prev_trde_qty)s, %(now_trde_qty)s, %(sdnin_qty)s, %(sdnin_rt)s)
+"""
+
+
+def save_ka10023(items: list) -> int:
+    """거래량급증 리스트를 ka10023_trde_qty_sdnin 테이블에 저장합니다."""
+    if not items:
+        return 0
+
+    header_id = int(datetime.now().timestamp() * 1000)
+    rows = []
+    for item in items:
+        rows.append({
+            'header_id': header_id,
+            'stk_cd': item.get('stk_cd', ''),
+            'stk_nm': item.get('stk_nm', ''),
+            'mrkt_tp': item.get('mrkt_tp', ''),
+            'cur_prc': item.get('cur_prc', ''),
+            'flu_rt': item.get('flu_rt', ''),
+            'prev_trde_qty': item.get('prev_trde_qty', ''),
+            'now_trde_qty': item.get('now_trde_qty', ''),
+            'sdnin_qty': item.get('sdnin_qty', ''),
+            'sdnin_rt': item.get('sdnin_rt', ''),
+        })
+
+    conn = db.get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.executemany(_INSERT_KA10023, rows)
+        conn.commit()
+        print(f'  [DB 저장] ka10023_trde_qty_sdnin: {len(rows)}행 저장됨')
+        return len(rows)
+    except Exception as e:
+        conn.rollback()
+        print(f'  [DB 오류] {type(e).__name__}: {e}')
+        raise
+    finally:
+        conn.close()
+
+
+# ═══════════════════════════════════════════════════════
+# DB 저장 – ka10032
+# ═══════════════════════════════════════════════════════
+
+_INSERT_KA10032 = """
+    INSERT INTO ka10032_trde_prica_upper
+        (header_id, now_rank, pred_rank, stk_cd, stk_nm, mrkt_tp, cur_prc, flu_rt, now_trde_qty, trde_prica)
+    VALUES
+        (%(header_id)s, %(now_rank)s, %(pred_rank)s, %(stk_cd)s, %(stk_nm)s, %(mrkt_tp)s, %(cur_prc)s, %(flu_rt)s, %(now_trde_qty)s, %(trde_prica)s)
+"""
+
+
+def save_ka10032(items: list) -> int:
+    """거래대금상위 리스트를 ka10032_trde_prica_upper 테이블에 저장합니다."""
+    if not items:
+        return 0
+
+    header_id = int(datetime.now().timestamp() * 1000)
+    rows = []
+    for item in items:
+        rows.append({
+            'header_id': header_id,
+            'now_rank': item.get('now_rank', ''),
+            'pred_rank': item.get('pred_rank', ''),
+            'stk_cd': item.get('stk_cd', ''),
+            'stk_nm': item.get('stk_nm', ''),
+            'mrkt_tp': item.get('mrkt_tp', ''),
+            'cur_prc': item.get('cur_prc', ''),
+            'flu_rt': item.get('flu_rt', ''),
+            'now_trde_qty': item.get('now_trde_qty', ''),
+            'trde_prica': item.get('trde_prica', ''),
+        })
+
+    conn = db.get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.executemany(_INSERT_KA10032, rows)
+        conn.commit()
+        print(f'  [DB 저장] ka10032_trde_prica_upper: {len(rows)}행 저장됨')
         return len(rows)
     except Exception as e:
         conn.rollback()

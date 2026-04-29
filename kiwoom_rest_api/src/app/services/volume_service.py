@@ -23,7 +23,8 @@ from app.schemas.volume import (
 from app.services.kiwoom_client import kiwoom_post
 from oauth2.kiwoom_oauth2 import HOST_MOC, HOST_REAL, load_api_keys
 from oauth2.oauth import get_unrevoked_token
-from volume.rank import save_ka10030
+from volume.rank import save_ka10023, save_ka10030, save_ka10031, save_ka10032
+from volume.stkinfo import save_ka10024, save_ka10052, save_ka10055
 
 _SERVER_HOSTS: dict[str, str] = {
     "real": HOST_REAL,
@@ -86,6 +87,67 @@ class VolumeService:
             # CLI 경로와 동일하게 저장 실패가 응답 자체를 막지 않도록 합니다.
             pass
 
+    async def _save_prev_volume_rank(self, data: dict) -> None:
+        items = data.get("pred_trde_qty_upper", [])
+        if data.get("return_code") != 0 or not items:
+            return
+
+        try:
+            await asyncio.to_thread(save_ka10031, items)
+        except Exception:
+            # CLI 경로와 동일하게 저장 실패가 응답 자체를 막지 않도록 합니다.
+            pass
+
+    async def _save_volume_surge(self, data: dict) -> None:
+        items = data.get("trde_qty_sdnin", [])
+        if data.get("return_code") != 0 or not items:
+            return
+
+        try:
+            await asyncio.to_thread(save_ka10023, items)
+        except Exception:
+            pass
+
+    async def _save_trade_amount_rank(self, data: dict) -> None:
+        items = data.get("trde_prica_upper", [])
+        if data.get("return_code") != 0 or not items:
+            return
+
+        try:
+            await asyncio.to_thread(save_ka10032, items)
+        except Exception:
+            pass
+
+    async def _save_volume_update(self, data: dict) -> None:
+        items = data.get("trde_qty_updt", [])
+        if data.get("return_code") != 0 or not items:
+            return
+
+        try:
+            await asyncio.to_thread(save_ka10024, items)
+        except Exception:
+            pass
+
+    async def _save_broker_instant_volume(self, data: dict) -> None:
+        items = data.get("trde_ori_mont_trde_qty", [])
+        if data.get("return_code") != 0 or not items:
+            return
+
+        try:
+            await asyncio.to_thread(save_ka10052, items)
+        except Exception:
+            pass
+
+    async def _save_today_prev_contracts(self, req: TodayPrevContractsRequest, data: dict) -> None:
+        items = data.get("tdy_pred_cntr_qty", [])
+        if data.get("return_code") != 0 or not items:
+            return
+
+        try:
+            await asyncio.to_thread(save_ka10055, items, req.stk_cd)
+        except Exception:
+            pass
+
     # ─────────────────────────────────────────────
     # 순위정보 (rkinfo)
     # ─────────────────────────────────────────────
@@ -104,6 +166,7 @@ class VolumeService:
             "stex_tp": req.stex_tp,
         }
         data = await kiwoom_post(host, _RKINFO_URL_PATH, "ka10023", token, body)
+        await self._save_volume_surge(data)
         return self._wrap(req.server_mode, "ka10023", data)
 
     async def today_volume_rank(self, req: TodayVolumeRankRequest) -> VolumeApiResponse:
@@ -135,6 +198,7 @@ class VolumeService:
             "stex_tp": req.stex_tp,
         }
         data = await kiwoom_post(host, _RKINFO_URL_PATH, "ka10031", token, body)
+        await self._save_prev_volume_rank(data)
         return self._wrap(req.server_mode, "ka10031", data)
 
     async def trade_amount_rank(self, req: TradeAmountRankRequest) -> VolumeApiResponse:
@@ -146,6 +210,7 @@ class VolumeService:
             "stex_tp": req.stex_tp,
         }
         data = await kiwoom_post(host, _RKINFO_URL_PATH, "ka10032", token, body)
+        await self._save_trade_amount_rank(data)
         return self._wrap(req.server_mode, "ka10032", data)
 
     # ─────────────────────────────────────────────
@@ -162,6 +227,7 @@ class VolumeService:
             "stex_tp": req.stex_tp,
         }
         data = await kiwoom_post(host, _STKINFO_URL_PATH, "ka10024", token, body)
+        await self._save_volume_update(data)
         return self._wrap(req.server_mode, "ka10024", data)
 
     async def broker_instant_volume(self, req: BrokerInstantVolumeRequest) -> VolumeApiResponse:
@@ -176,6 +242,7 @@ class VolumeService:
             "stex_tp": req.stex_tp,
         }
         data = await kiwoom_post(host, _STKINFO_URL_PATH, "ka10052", token, body)
+        await self._save_broker_instant_volume(data)
         return self._wrap(req.server_mode, "ka10052", data)
 
     async def today_prev_contracts(self, req: TodayPrevContractsRequest) -> VolumeApiResponse:
@@ -186,6 +253,7 @@ class VolumeService:
             "tdy_pred": req.tdy_pred,
         }
         data = await kiwoom_post(host, _STKINFO_URL_PATH, "ka10055", token, body)
+        await self._save_today_prev_contracts(req, data)
         return self._wrap(req.server_mode, "ka10055", data)
 
 

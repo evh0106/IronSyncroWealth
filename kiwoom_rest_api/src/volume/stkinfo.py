@@ -11,11 +11,13 @@ URL: /api/dostk/stkinfo
 """
 
 import requests
+from datetime import datetime
 from oauth2 import HOST
 from logger import log_http_request, log_http_response
 from ._fmt import _ljust, _rjust, _wcslen
 from .specs_request import STKINFO_API_SPECS
 from .specs_response import STKINFO_RESPONSE_SPECS
+import db
 
 # ─────────────────────────────────────────────
 # 전일대비기호 표시용 (응답 스펙에는 없는 표현)
@@ -224,6 +226,12 @@ def print_volume_update(token: str):
         left_cols={'stk_nm'},
     )
 
+    try:
+        count = save_ka10024(items)
+        print(f'  → {count}건 저장 완료.')
+    except Exception as e:
+        print(f'  [DB 오류] {e}')
+
 
 # ═══════════════════════════════════════════════════════
 # ka10052 – 거래원순간거래량요청
@@ -297,6 +305,12 @@ def print_broker_instant_volume(token: str):
 
     print()
     _print_table(items, all_cols, widths, left_cols={'stk_nm', 'trde_ori_nm'})
+
+    try:
+        count = save_ka10052(items)
+        print(f'  → {count}건 저장 완료.')
+    except Exception as e:
+        print(f'  [DB 오류] {e}')
 
 
 # ═══════════════════════════════════════════════════════
@@ -376,5 +390,139 @@ def print_today_prev_contracts(token: str):
 
     print()
     _print_table(enriched, display_cols, widths)
+
+    try:
+        count = save_ka10055(items, stk_cd)
+        print(f'  → {count}건 저장 완료.')
+    except Exception as e:
+        print(f'  [DB 오류] {e}')
+
+
+# ═══════════════════════════════════════════════════════
+# DB 저장 함수
+# ═══════════════════════════════════════════════════════
+
+_INSERT_KA10024 = """
+    INSERT INTO ka10024_trde_qty_updt
+        (header_id, stk_cd, stk_nm, cur_prc, pred_pre_sig, pred_pre, flu_rt, prev_trde_qty, now_trde_qty, sel_bid, buy_bid)
+    VALUES
+        (%(header_id)s, %(stk_cd)s, %(stk_nm)s, %(cur_prc)s, %(pred_pre_sig)s, %(pred_pre)s, %(flu_rt)s, %(prev_trde_qty)s, %(now_trde_qty)s, %(sel_bid)s, %(buy_bid)s)
+"""
+
+_INSERT_KA10052 = """
+    INSERT INTO ka10052_trde_ori_mont_trde_qty
+        (header_id, stk_cd, tm, stk_nm, trde_ori_nm, tp, mont_trde_qty, acc_netprps, cur_prc, pred_pre_sig, pred_pre, flu_rt)
+    VALUES
+        (%(header_id)s, %(stk_cd)s, %(tm)s, %(stk_nm)s, %(trde_ori_nm)s, %(tp)s, %(mont_trde_qty)s, %(acc_netprps)s, %(cur_prc)s, %(pred_pre_sig)s, %(pred_pre)s, %(flu_rt)s)
+"""
+
+_INSERT_KA10055 = """
+    INSERT INTO ka10055_tdy_pred_cntr_qty
+        (header_id, stk_cd, cntr_tm, cntr_pric, pred_pre_sig, pred_pre, flu_rt, cntr_qty, acc_trde_qty, acc_trde_prica)
+    VALUES
+        (%(header_id)s, %(stk_cd)s, %(cntr_tm)s, %(cntr_pric)s, %(pred_pre_sig)s, %(pred_pre)s, %(flu_rt)s, %(cntr_qty)s, %(acc_trde_qty)s, %(acc_trde_prica)s)
+"""
+
+
+def save_ka10024(items: list) -> int:
+    if not items:
+        return 0
+    header_id = int(datetime.now().timestamp() * 1000)
+    rows = []
+    for item in items:
+        rows.append({
+            'header_id': header_id,
+            'stk_cd': item.get('stk_cd', ''),
+            'stk_nm': item.get('stk_nm', ''),
+            'cur_prc': item.get('cur_prc', ''),
+            'pred_pre_sig': item.get('pred_pre_sig', ''),
+            'pred_pre': item.get('pred_pre', ''),
+            'flu_rt': item.get('flu_rt', ''),
+            'prev_trde_qty': item.get('prev_trde_qty', ''),
+            'now_trde_qty': item.get('now_trde_qty', ''),
+            'sel_bid': item.get('sel_bid', ''),
+            'buy_bid': item.get('buy_bid', ''),
+        })
+    conn = db.get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.executemany(_INSERT_KA10024, rows)
+        conn.commit()
+        print(f'  [DB 저장] ka10024_trde_qty_updt: {len(rows)}행 저장됨')
+        return len(rows)
+    except Exception as e:
+        conn.rollback()
+        print(f'  [DB 오류] {type(e).__name__}: {e}')
+        raise
+    finally:
+        conn.close()
+
+
+def save_ka10052(items: list) -> int:
+    if not items:
+        return 0
+    header_id = int(datetime.now().timestamp() * 1000)
+    rows = []
+    for item in items:
+        rows.append({
+            'header_id': header_id,
+            'stk_cd': item.get('stk_cd', ''),
+            'tm': item.get('tm', ''),
+            'stk_nm': item.get('stk_nm', ''),
+            'trde_ori_nm': item.get('trde_ori_nm', ''),
+            'tp': item.get('tp', ''),
+            'mont_trde_qty': item.get('mont_trde_qty', ''),
+            'acc_netprps': item.get('acc_netprps', ''),
+            'cur_prc': item.get('cur_prc', ''),
+            'pred_pre_sig': item.get('pred_pre_sig', ''),
+            'pred_pre': item.get('pred_pre', ''),
+            'flu_rt': item.get('flu_rt', ''),
+        })
+    conn = db.get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.executemany(_INSERT_KA10052, rows)
+        conn.commit()
+        print(f'  [DB 저장] ka10052_trde_ori_mont_trde_qty: {len(rows)}행 저장됨')
+        return len(rows)
+    except Exception as e:
+        conn.rollback()
+        print(f'  [DB 오류] {type(e).__name__}: {e}')
+        raise
+    finally:
+        conn.close()
+
+
+def save_ka10055(items: list, stk_cd: str) -> int:
+    if not items:
+        return 0
+    header_id = int(datetime.now().timestamp() * 1000)
+    rows = []
+    for item in items:
+        rows.append({
+            'header_id': header_id,
+            'stk_cd': stk_cd,
+            'cntr_tm': item.get('cntr_tm', ''),
+            'cntr_pric': item.get('cntr_pric', ''),
+            'pred_pre_sig': item.get('pred_pre_sig', ''),
+            'pred_pre': item.get('pred_pre', ''),
+            'flu_rt': item.get('flu_rt', ''),
+            'cntr_qty': item.get('cntr_qty', ''),
+            'acc_trde_qty': item.get('acc_trde_qty', ''),
+            'acc_trde_prica': item.get('acc_trde_prica', ''),
+        })
+    conn = db.get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.executemany(_INSERT_KA10055, rows)
+        conn.commit()
+        print(f'  [DB 저장] ka10055_tdy_pred_cntr_qty: {len(rows)}행 저장됨')
+        return len(rows)
+    except Exception as e:
+        conn.rollback()
+        print(f'  [DB 오류] {type(e).__name__}: {e}')
+        raise
+    finally:
+        conn.close()
 
     

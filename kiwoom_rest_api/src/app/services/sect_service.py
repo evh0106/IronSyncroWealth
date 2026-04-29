@@ -5,6 +5,9 @@
 
 from __future__ import annotations
 
+import asyncio
+from datetime import datetime
+
 from fastapi import Depends
 
 from app.core.exceptions import ApiError
@@ -12,6 +15,7 @@ from app.schemas.sect import SectCurrentPriceResponse, ServerMode
 from app.services.kiwoom_client import kiwoom_post
 from oauth2.kiwoom_oauth2 import HOST_MOC, HOST_REAL, load_api_keys
 from oauth2.oauth import get_unrevoked_token
+from sect.sector_price import save_ka20001
 
 _SERVER_HOSTS: dict[str, str] = {
     "real": HOST_REAL,
@@ -65,6 +69,18 @@ class SectService:
             token=token,
             body=body,
         )
+
+        request_params = {
+            "req_dt": datetime.now().strftime("%Y%m%d"),
+            "mrkt_tp": mrkt_tp,
+            "sect_cd": sect_cd,
+        }
+        try:
+            await asyncio.to_thread(save_ka20001, data, request_params)
+        except Exception:
+            # 저장 실패가 응답 자체를 막지 않도록 합니다.
+            pass
+
         return SectCurrentPriceResponse(
             server_mode=server_mode,
             api_id="ka20001",
