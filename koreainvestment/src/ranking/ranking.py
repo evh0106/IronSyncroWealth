@@ -3,19 +3,48 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
+import json
 import re
 from typing import Any
 
 import requests
 
+from db import get_connection
 from kis_config import load_config
 from logger import log_http_request, log_http_response
 from ranking._fmt import _ljust, _rjust
 from ranking.specs_request import RANKING_API_SPECS
+from ranking.specs_response import RANKING_API_RESPONSE_SPECS_BY_TR_ID
 
 
 def _base_url(cfg: dict[str, Any]) -> str:
     return cfg["my_url_vts"] if cfg.get("env_dv") == "demo" else cfg["my_url"]
+
+
+def _norm_col(name: str) -> str:
+    text = (name or "").strip().lower()
+    text = re.sub(r"[^a-z0-9_]+", "_", text)
+    text = re.sub(r"_+", "_", text).strip("_")
+    if not text:
+        return "field"
+    if text[0].isdigit():
+        return f"f_{text}"
+    return text
+
+
+def _table_name_from_url(url: str) -> str:
+    return _norm_col((url or "").rstrip("/").split("/")[-1])
+
+
+TR_ID_TO_TABLE: dict[str, str] = {
+    spec.get("tr_id", ""): _table_name_from_url(spec.get("url", ""))
+    for spec in RANKING_API_SPECS
+    if spec.get("tr_id")
+}
+
+_TABLE_COLUMNS_CACHE: dict[str, set[str]] = {}
+_INSERT_SQL_CACHE: dict[str, tuple[str, list[str]]] = {}
+_RESP_SKIP_FIELDS = {"rt_cd", "msg_cd", "msg1", "output", "output1", "output2"}
 
 
 def _infer_default(element: str, description: str) -> str:
@@ -210,6 +239,135 @@ def call_ranking_api(token: str, spec: dict[str, Any], params: dict[str, str]) -
     return response.json()
 
 
+def _get_table_columns(cur: Any, table: str) -> set[str]:
+    cached = _TABLE_COLUMNS_CACHE.get(table)
+    if cached is not None:
+        return cached
+
+    cur.execute(f"SHOW COLUMNS FROM `{table}`")
+    cols = {r["Field"] for r in cur.fetchall()}
+    _TABLE_COLUMNS_CACHE[table] = cols
+    return cols
+
+
+def _prepare_insert_sql(table: str, insert_cols: list[str]) -> tuple[str, list[str]]:
+    key = f"{table}|{'|'.join(insert_cols)}"
+    cached = _INSERT_SQL_CACHE.get(key)
+    if cached is not None:
+        return cached
+
+    col_sql = ", ".join([f"`{c}`" for c in insert_cols])
+    placeholders = ", ".join([f"%({c})s" for c in insert_cols])
+    sql = f"INSERT INTO `{table}` ({col_sql}) VALUES ({placeholders})"
+    prepared = (sql, insert_cols)
+    _INSERT_SQL_CACHE[key] = prepared
+    return prepared
+
+
+def _extract_top_rsp_values(result: dict[str, Any]) -> dict[str, str]:
+    values: dict[str, str] = {}
+
+    # Top-level scalar fields
+    for key, value in result.items():
+        if isinstance(value, (dict, list)):
+            continue
+        values[key] = "" if value is None else str(value)
+
+    return values
+
+
+def _extract_array_rows(result: dict[str, Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+
+    for key in ("output", "output1", "output2"):
+        value = result.get(key)
+        if isinstance(value, dict):
+            rows.append(value)
+        elif isinstance(value, list):
+            rows.extend([row for row in value if isinstance(row, dict)])
+
+    return rows
+
+
+def _collect_rsp_row_data(tr_id: str, top_values: dict[str, str], row_values: dict[str, Any] | None = None) -> dict[str, str]:
+    spec = RANKING_API_RESPONSE_SPECS_BY_TR_ID.get(tr_id, {})
+
+    row_scalar: dict[str, str] = {}
+    if row_values:
+        for k, v in row_values.items():
+            if not isinstance(v, (dict, list)):
+                row_scalar[k] = "" if v is None else str(v)
+
+    row_data: dict[str, str] = {}
+    seen_cols: set[str] = set()
+    for field in spec.get("fields", []):
+        element = str(field.get("element", "")).strip()
+        if not element or element in _RESP_SKIP_FIELDS:
+            continue
+
+        col = f"rsp_{_norm_col(element)}"
+        if col in seen_cols:
+            continue
+        seen_cols.add(col)
+        row_data[col] = row_scalar.get(element, top_values.get(element, ""))
+
+    return row_data
+
+
+def save_ranking_result(spec: dict[str, Any], params: dict[str, str], result: dict[str, Any]) -> int:
+    tr_id = spec.get("tr_id", "")
+    table = TR_ID_TO_TABLE.get(tr_id)
+    if not table:
+        return 0
+
+    base_row: dict[str, Any] = {
+        "tr_id": tr_id,
+        "req_url": spec.get("url", ""),
+        "rt_cd": str(result.get("rt_cd", "") or ""),
+        "msg_cd": str(result.get("msg_cd", "") or ""),
+        "msg1": str(result.get("msg1", "") or ""),
+        "response_json": json.dumps(result, ensure_ascii=False),
+    }
+
+    for key, value in params.items():
+        base_row[f"req_{_norm_col(key)}"] = value
+
+    top_rsp_values = _extract_top_rsp_values(result)
+    rsp_rows = _extract_array_rows(result)
+    if not rsp_rows:
+        rsp_rows = [{}]
+
+    payload_rows: list[dict[str, Any]] = []
+    for rsp_row in rsp_rows:
+        row_data = dict(base_row)
+        row_data.update(_collect_rsp_row_data(tr_id, top_rsp_values, rsp_row))
+        payload_rows.append(row_data)
+
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            available_cols = _get_table_columns(cur, table)
+
+            insert_cols = [c for c in payload_rows[0] if c in available_cols and c != "id"]
+            if not insert_cols:
+                return 0
+
+            sql, sql_cols = _prepare_insert_sql(table, insert_cols)
+            payload = [{c: row.get(c, "") for c in sql_cols} for row in payload_rows]
+
+            cur.executemany(sql, payload)
+
+        conn.commit()
+        print(f"  [DB 저장] {table}: {len(payload_rows)}행 저장됨")
+        return len(payload_rows)
+    except Exception as exc:
+        conn.rollback()
+        print(f"  [DB 오류] {type(exc).__name__}: {exc}")
+        raise
+    finally:
+        conn.close()
+
+
 def print_ranking_api(token: str, spec: dict[str, Any]) -> None:
     print(f"\n[{spec['name']}]")
     print(f"TR_ID: {spec['tr_id']}")
@@ -256,6 +414,11 @@ def print_ranking_api(token: str, spec: dict[str, Any]) -> None:
         print(f"  msg_cd: {msg_cd}")
     if msg1:
         print(f"  msg1: {msg1}")
+
+    try:
+        save_ranking_result(spec, params, result)
+    except Exception:
+        pass
 
     rows = _pick_output_rows(result)
     if not rows:
