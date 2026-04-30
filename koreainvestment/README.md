@@ -40,14 +40,16 @@ Copy-Item .\kis_devlp.yaml.example .\kis_devlp.yaml
 ### 3) 인증 테스트 실행
 
 ```powershell
-python .\src\examples\check_auth.py
+python .\src\_sample\check_auth.py
 ```
 
 정상 동작 시 액세스 토큰 발급 성공 여부와 웹소켓 접속키(approval key) 응답을 확인할 수 있습니다.
+샘플은 토큰 폐기(`/oauth2/revokeP`)까지 순차 수행합니다.
 
 ## 디렉토리 설명
 
 - `kis_devlp.yaml.example`: KIS 실행 환경 템플릿
 - `src/kis_config.py`: YAML/키 파일 로더
-- `src/kis_auth.py`: OAuth 토큰, WebSocket approval key 발급 유틸
-- `src/examples/check_auth.py`: 인증 동작 점검 예제
+- `src/oauth2/`: OAuth2 URL 스펙(`/oauth2/tokenP`, `/oauth2/revokeP`, `/oauth2/Approval`) 및 호출 모듈
+- `src/kis_auth.py`: OAuth2 호출 래퍼(토큰 발급/폐기, WebSocket approval key)
+- `src/_sample/check_auth.py`: 인증 동작 점검 예제

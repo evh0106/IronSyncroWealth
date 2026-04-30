@@ -1,14 +1,10 @@
 .venv/
+log/
+
 __pycache__/
 **/__pycache__/
 *.py[cod]
-*.pyc
-*.pyo
-*.pyd
-*.log
-kis_devlp.yaml
 
-log/
 conf/*appkey.txt
 conf/*secretkey.txt
 
