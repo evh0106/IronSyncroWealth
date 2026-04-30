@@ -9,10 +9,173 @@ from typing import Any
 
 import requests
 
+from db import get_connection
 from kis_config import load_config
 from logger import log_http_request, log_http_response
 from ranking._fmt import _ljust, _rjust
 from trading.specs_request import TRADING_API_SPECS
+from trading.specs_response import TRADING_API_RESPONSE_SPECS_BY_TR_ID
+
+
+_TABLE_COLUMNS_CACHE: dict[str, set[str]] = {}
+_INSERT_SQL_CACHE: dict[str, tuple[str, list[str]]] = {}
+_RESP_SKIP_FIELDS = {"rt_cd", "msg_cd", "msg1", "output", "output1", "output2"}
+
+
+def _norm_col(name: str) -> str:
+    s = (name or "").strip().lower()
+    s = re.sub(r"[^a-z0-9]+", "_", s)
+    s = re.sub(r"_+", "_", s)
+    return s.strip("_")
+
+
+def _table_from_url(url: str) -> str:
+    marker = "/uapi/domestic-stock/v1/trading/"
+    lower = str(url or "").strip().lower()
+    if marker in lower:
+        lower = lower.split(marker, 1)[1]
+    return _norm_col(lower)
+
+
+def _get_table_columns(cur: Any, table: str) -> set[str]:
+    cached = _TABLE_COLUMNS_CACHE.get(table)
+    if cached is not None:
+        return cached
+
+    cur.execute(f"SHOW COLUMNS FROM `{table}`")
+    cols = {r["Field"] for r in cur.fetchall()}
+    _TABLE_COLUMNS_CACHE[table] = cols
+    return cols
+
+
+def _prepare_insert_sql(table: str, insert_cols: list[str]) -> tuple[str, list[str]]:
+    key = f"{table}|{'|'.join(insert_cols)}"
+    cached = _INSERT_SQL_CACHE.get(key)
+    if cached is not None:
+        return cached
+
+    col_sql = ", ".join([f"`{c}`" for c in insert_cols])
+    placeholders = ", ".join([f"%({c})s" for c in insert_cols])
+    sql = f"INSERT INTO `{table}` ({col_sql}) VALUES ({placeholders})"
+    prepared = (sql, insert_cols)
+    _INSERT_SQL_CACHE[key] = prepared
+    return prepared
+
+
+def _extract_top_rsp_values(result: dict[str, Any]) -> dict[str, str]:
+    values: dict[str, str] = {}
+
+    for key, value in result.items():
+        if isinstance(value, (dict, list)):
+            continue
+        values[key] = "" if value is None else str(value)
+
+    return values
+
+
+def _extract_array_rows(result: dict[str, Any]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+
+    for key in ("output", "output1", "output2"):
+        value = result.get(key)
+        if isinstance(value, dict):
+            rows.append(value)
+        elif isinstance(value, list):
+            rows.extend([row for row in value if isinstance(row, dict)])
+
+    return rows
+
+
+def _collect_rsp_row_data(tr_id: str, top_values: dict[str, str], row_values: dict[str, Any] | None = None) -> dict[str, str]:
+    spec = TRADING_API_RESPONSE_SPECS_BY_TR_ID.get(tr_id, {})
+
+    row_scalar: dict[str, str] = {}
+    if row_values:
+        for k, v in row_values.items():
+            if not isinstance(v, (dict, list)):
+                row_scalar[k] = "" if v is None else str(v)
+
+    row_data: dict[str, str] = {}
+    seen_cols: set[str] = set()
+    for field in spec.get("fields", []):
+        element = str(field.get("element", "")).strip()
+        if not element or element.lower() in _RESP_SKIP_FIELDS:
+            continue
+
+        col = f"rsp_{_norm_col(element)}"
+        if col in seen_cols:
+            continue
+        seen_cols.add(col)
+        row_data[col] = row_scalar.get(element, row_scalar.get(element.lower(), top_values.get(element, top_values.get(element.lower(), ""))))
+
+    return row_data
+
+
+def save_trading_result(
+    spec: dict[str, Any],
+    tr_id: str,
+    query_params: dict[str, str],
+    body_params: dict[str, str],
+    result: dict[str, Any],
+) -> int:
+    table = _table_from_url(str(spec.get("url", "")))
+    if not table:
+        return 0
+
+    request_payload = {
+        "query": query_params,
+        "body": body_params,
+    }
+
+    base_row: dict[str, Any] = {
+        "tr_id": tr_id,
+        "req_url": spec.get("url", ""),
+        "rt_cd": str(result.get("rt_cd", "") or ""),
+        "msg_cd": str(result.get("msg_cd", "") or ""),
+        "msg1": str(result.get("msg1", "") or ""),
+        "request_json": json.dumps(request_payload, ensure_ascii=False),
+        "response_json": json.dumps(result, ensure_ascii=False),
+    }
+
+    req_merged = dict(query_params)
+    req_merged.update(body_params)
+    for key, value in req_merged.items():
+        base_row[f"req_{_norm_col(key)}"] = value
+
+    top_rsp_values = _extract_top_rsp_values(result)
+    rsp_rows = _extract_array_rows(result)
+    if not rsp_rows:
+        rsp_rows = [{}]
+
+    payload_rows: list[dict[str, Any]] = []
+    for rsp_row in rsp_rows:
+        row_data = dict(base_row)
+        row_data.update(_collect_rsp_row_data(tr_id, top_rsp_values, rsp_row))
+        payload_rows.append(row_data)
+
+    conn = get_connection()
+    try:
+        with conn.cursor() as cur:
+            available_cols = _get_table_columns(cur, table)
+
+            insert_cols = [c for c in payload_rows[0] if c in available_cols and c != "id"]
+            if not insert_cols:
+                return 0
+
+            sql, sql_cols = _prepare_insert_sql(table, insert_cols)
+            payload = [{c: row.get(c, "") for c in sql_cols} for row in payload_rows]
+
+            cur.executemany(sql, payload)
+
+        conn.commit()
+        print(f"  [DB 저장] {table}: {len(payload_rows)}행 저장됨")
+        return len(payload_rows)
+    except Exception as exc:
+        conn.rollback()
+        print(f"  [DB 오류] {type(exc).__name__}: {exc}")
+        raise
+    finally:
+        conn.close()
 
 
 def _base_url(cfg: dict[str, Any]) -> str:
@@ -358,6 +521,8 @@ def print_trading_api(token: str, spec: dict[str, Any]) -> None:
         print(f"  msg_cd: {msg_cd}")
     if msg1:
         print(f"  msg1: {msg1}")
+
+    save_trading_result(spec, tr_id, query_params, body_params, result)
 
     rows = _pick_output_rows(result)
     if not rows:

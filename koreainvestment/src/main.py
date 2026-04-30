@@ -18,6 +18,7 @@ from kis_config import load_config
 from quotations import run_quotations_menu
 from ranking import run_ranking_menu
 from trading import run_trading_menu
+from websocket import run_websocket_menu
 
 
 MENU_ITEMS = [
@@ -26,7 +27,8 @@ MENU_ITEMS = [
     ("3", "국내주식 ranking 조회 (/uapi/domestic-stock/v1/ranking/*)"),
     ("4", "국내주식 quotations 조회 (/uapi/domestic-stock/v1/quotations/*)"),
     ("5", "국내주식 trading 조회 (/uapi/domestic-stock/v1/trading/*)"),
-    ("6", "접근토큰 폐기 (/oauth2/revokeP)"),
+    ("6", "국내주식 websocket 조회 (/tryitout/*, quotations/*)"),
+    ("7", "접근토큰 폐기 (/oauth2/revokeP)"),
 ]
 
 
@@ -168,6 +170,13 @@ def main() -> None:
                 continue
 
             if choice == "6":
+                try:
+                    current_access_token = run_websocket_menu(current_access_token)
+                except Exception as exc:
+                    print(f"\n[오류] websocket 메뉴 실행 실패: {exc}")
+                continue
+
+            if choice == "7":
                 token = input("폐기할 access_token 입력 (엔터 시 최근 발급 토큰 사용): ").strip()
                 if not token:
                     token = current_access_token
