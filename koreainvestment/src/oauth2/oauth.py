@@ -181,20 +181,40 @@ def load_api_keys() -> tuple[str, str]:
     return cfg["my_app"], cfg["my_sec"]
 
 
-def get_access_token(grant_type: str = "client_credentials", env_dv: str | None = None) -> dict[str, Any]:
+def get_cached_access_token(env_dv: str | None = None) -> dict[str, Any] | None:
+    """DB에 저장된 유효한 액세스 토큰 정보를 반환합니다."""
+    cfg = load_config()
+    current_env = _resolve_env_dv(env_dv, cfg)
+    cached = _get_valid_token(cfg["my_app"])
+    if not cached:
+        return None
+    return {
+        "access_token": cached,
+        "token_type": "Bearer",
+        "server_mode": current_env,
+        "host": _base_url(current_env, cfg),
+    }
+
+
+def get_access_token(
+    grant_type: str = "client_credentials",
+    env_dv: str | None = None,
+    reuse_cached: bool = True,
+) -> dict[str, Any]:
     """액세스 토큰을 반환합니다.
 
     DB에 유효한(미폐기·미만료) 토큰이 있으면 그대로 반환하고,
     없으면 KIS API로 신규 발급 후 DB에 저장합니다.
     """
     cfg = load_config()
+    current_env = _resolve_env_dv(env_dv, cfg)
     app_key = cfg["my_app"]
 
-    cached = _get_valid_token(app_key)
-    if cached:
-        return {"access_token": cached, "token_type": "Bearer", "_from_cache": True}
+    if reuse_cached:
+        cached = get_cached_access_token(current_env)
+        if cached:
+            return {**cached, "_from_cache": True}
 
-    current_env = _resolve_env_dv(env_dv, cfg)
     url = _base_url(current_env, cfg) + _REQ_SPEC["ka10001"]["url"]
 
     payload = _build_request_body(

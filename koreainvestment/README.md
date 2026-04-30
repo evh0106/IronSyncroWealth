@@ -4,6 +4,10 @@
 ## API 문서
 https://apiportal.koreainvestment.com/apiservice-summary
 
+### 프로젝트 내 URL 목록 문서
+- docs/spec_request_urls.txt
+- 생성 기준: src/*/specs_request.py 의 모든 "url" 항목
+
 ## 예제코드
 https://github.com/koreainvestment/open-trading-api.git
 

@@ -391,8 +391,11 @@ def call_trading_api(
     tr_id: str,
     query_params: dict[str, str],
     body_params: dict[str, str],
+    env_dv: str | None = None,
 ) -> dict[str, Any]:
     cfg = load_config()
+    if env_dv is not None:
+        cfg = {**cfg, "env_dv": env_dv}
     base = _base_url(cfg)
     url = base + spec["url"]
     method = str(spec.get("method", "GET")).upper()

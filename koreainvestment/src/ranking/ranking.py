@@ -211,8 +211,15 @@ def _print_rows(rows: list[dict[str, Any]]) -> None:
         print(f"\n  ... 총 {len(rows)}건 중 {sample_size}건 표시")
 
 
-def call_ranking_api(token: str, spec: dict[str, Any], params: dict[str, str]) -> dict[str, Any]:
+def call_ranking_api(
+    token: str,
+    spec: dict[str, Any],
+    params: dict[str, str],
+    env_dv: str | None = None,
+) -> dict[str, Any]:
     cfg = load_config()
+    if env_dv is not None:
+        cfg = {**cfg, "env_dv": env_dv}
     url = _base_url(cfg) + spec["url"]
     headers = _build_headers(token, spec["tr_id"], cfg)
 

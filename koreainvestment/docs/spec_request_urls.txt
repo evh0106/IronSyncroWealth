@@ -1,0 +1,363 @@
+KoreaInvestment spec_request URL 목록
+
+생성 기준 파일: src/*/specs_request.py
+
+[oauth2] (3개)
+  1. /oauth2/tokenP
+  2. /oauth2/revokeP
+  3. /oauth2/Approval
+
+[quotations] (67개)
+  1. /uapi/domestic-stock/v1/quotations/inquire-daily-price
+  2. /uapi/domestic-stock/v1/quotations/inquire-price
+  3. /uapi/domestic-stock/v1/quotations/inquire-overtime-price
+  4. /uapi/domestic-stock/v1/quotations/inquire-time-overtimeconclusion
+  5. /uapi/domestic-stock/v1/quotations/inquire-daily-overtimeprice
+  6. /uapi/domestic-stock/v1/quotations/inquire-overtime-asking-price
+  7. /uapi/domestic-stock/v1/quotations/inquire-time-itemconclusion
+  8. /uapi/domestic-stock/v1/quotations/inquire-price-2
+  9. /uapi/domestic-stock/v1/quotations/inquire-time-dailychartprice
+ 10. /uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice
+ 11. /uapi/domestic-stock/v1/quotations/inquire-asking-price-exp-ccn
+ 12. /uapi/domestic-stock/v1/quotations/inquire-ccnl
+ 13. /uapi/domestic-stock/v1/quotations/inquire-member
+ 14. /uapi/domestic-stock/v1/quotations/inquire-investor
+ 15. /uapi/domestic-stock/v1/quotations/exp-closing-price
+ 16. /uapi/domestic-stock/v1/quotations/inquire-time-itemchartprice
+ 17. /uapi/domestic-stock/v1/quotations/inquire-elw-price
+ 18. /uapi/domestic-stock/v1/quotations/exp-index-trend
+ 19. /uapi/domestic-stock/v1/quotations/inquire-daily-indexchartprice
+ 20. /uapi/domestic-stock/v1/quotations/inquire-index-timeprice
+ 21. /uapi/domestic-stock/v1/quotations/inquire-index-category-price
+ 22. /uapi/domestic-stock/v1/quotations/inquire-time-indexchartprice
+ 23. /uapi/domestic-stock/v1/quotations/chk-holiday
+ 24. /uapi/domestic-stock/v1/quotations/exp-total-index
+ 25. /uapi/domestic-stock/v1/quotations/inquire-index-price
+ 26. /uapi/domestic-stock/v1/quotations/market-time
+ 27. /uapi/domestic-stock/v1/quotations/inquire-index-tickprice
+ 28. /uapi/domestic-stock/v1/quotations/inquire-index-daily-price
+ 29. /uapi/domestic-stock/v1/quotations/comp-interest
+ 30. /uapi/domestic-stock/v1/quotations/inquire-vi-status
+ 31. /uapi/domestic-stock/v1/quotations/news-title
+ 32. /uapi/domestic-stock/v1/quotations/search-info
+ 33. /uapi/domestic-stock/v1/quotations/invest-opbysec
+ 34. /uapi/domestic-stock/v1/quotations/credit-by-company
+ 35. /uapi/domestic-stock/v1/quotations/invest-opinion
+ 36. /uapi/domestic-stock/v1/quotations/lendable-by-company
+ 37. /uapi/domestic-stock/v1/quotations/search-stock-info
+ 38. /uapi/domestic-stock/v1/quotations/estimate-perform
+ 39. /uapi/domestic-stock/v1/quotations/comp-program-trade-today
+ 40. /uapi/domestic-stock/v1/quotations/daily-credit-balance
+ 41. /uapi/domestic-stock/v1/quotations/inquire-investor-daily-by-market
+ 42. /uapi/domestic-stock/v1/quotations/daily-short-sale
+ 43. /uapi/domestic-stock/v1/quotations/investor-trade-by-stock-daily
+ 44. /uapi/domestic-stock/v1/quotations/psearch-title
+ 45. /uapi/domestic-stock/v1/quotations/capture-uplowprice
+ 46. /uapi/domestic-stock/v1/quotations/comp-program-trade-daily
+ 47. /uapi/domestic-stock/v1/quotations/daily-loan-trans
+ 48. /uapi/domestic-stock/v1/quotations/psearch-result
+ 49. /uapi/domestic-stock/v1/quotations/pbar-tratio
+ 50. /uapi/domestic-stock/v1/quotations/foreign-institution-total
+ 51. /uapi/domestic-stock/v1/quotations/intstock-stocklist-by-group
+ 52. /uapi/domestic-stock/v1/quotations/inquire-member-daily
+ 53. /uapi/domestic-stock/v1/quotations/program-trade-by-stock-daily
+ 54. /uapi/domestic-stock/v1/quotations/intstock-grouplist
+ 55. /uapi/domestic-stock/v1/quotations/investor-trend-estimate
+ 56. /uapi/domestic-stock/v1/quotations/inquire-daily-trade-volume
+ 57. /uapi/domestic-stock/v1/quotations/tradprt-byamt
+ 58. /uapi/domestic-stock/v1/quotations/investor-program-trade-today
+ 59. /uapi/domestic-stock/v1/quotations/mktfunds
+ 60. /uapi/domestic-stock/v1/quotations/exp-price-trend
+ 61. /uapi/domestic-stock/v1/quotations/frgnmem-trade-trend
+ 62. /uapi/domestic-stock/v1/quotations/inquire-investor-time-by-market
+ 63. /uapi/domestic-stock/v1/quotations/program-trade-by-stock
+ 64. /uapi/domestic-stock/v1/quotations/frgnmem-trade-estimate
+ 65. /uapi/domestic-stock/v1/quotations/frgnmem-pchs-trend
+ 66. /uapi/domestic-stock/v1/quotations/intstock-multprice
+ 67. /uapi/domestic-stock/v1/quotations/volume-rank
+
+[ranking] (22개)
+  1. /uapi/domestic-stock/v1/ranking/overtime-exp-trans-fluct
+  2. /uapi/domestic-stock/v1/ranking/exp-trans-updown
+  3. /uapi/domestic-stock/v1/ranking/quote-balance
+  4. /uapi/domestic-stock/v1/ranking/credit-balance
+  5. /uapi/domestic-stock/v1/ranking/overtime-volume
+  6. /uapi/domestic-stock/v1/ranking/dividend-rate
+  7. /uapi/domestic-stock/v1/ranking/after-hour-balance
+  8. /uapi/domestic-stock/v1/ranking/short-sale
+  9. /uapi/domestic-stock/v1/ranking/disparity
+ 10. /uapi/domestic-stock/v1/ranking/hts-top-view
+ 11. /uapi/domestic-stock/v1/ranking/profit-asset-index
+ 12. /uapi/domestic-stock/v1/ranking/near-new-highlow
+ 13. /uapi/domestic-stock/v1/ranking/prefer-disparate-ratio
+ 14. /uapi/domestic-stock/v1/ranking/bulk-trans-num
+ 15. /uapi/domestic-stock/v1/ranking/finance-ratio
+ 16. /uapi/domestic-stock/v1/ranking/market-cap
+ 17. /uapi/domestic-stock/v1/ranking/traded-by-company
+ 18. /uapi/domestic-stock/v1/ranking/fluctuation
+ 19. /uapi/domestic-stock/v1/ranking/market-value
+ 20. /uapi/domestic-stock/v1/ranking/top-interest-stock
+ 21. /uapi/domestic-stock/v1/ranking/volume-power
+ 22. /uapi/domestic-stock/v1/ranking/overtime-fluctuation
+
+[trading] (23개)
+  1. /uapi/domestic-stock/v1/trading/period-rights
+  2. /uapi/domestic-stock/v1/trading/inquire-account-balance
+  3. /uapi/domestic-stock/v1/trading/pension/inquire-deposit
+  4. /uapi/domestic-stock/v1/trading/order-resv-rvsecncl
+  5. /uapi/domestic-stock/v1/trading/inquire-credit-psamount
+  6. /uapi/domestic-stock/v1/trading/intgr-margin
+  7. /uapi/domestic-stock/v1/trading/pension/inquire-daily-ccld
+  8. /uapi/domestic-stock/v1/trading/inquire-period-trade-profit
+  9. /uapi/domestic-stock/v1/trading/order-rvsecncl
+ 10. /uapi/domestic-stock/v1/trading/order-resv-ccnl
+ 11. /uapi/domestic-stock/v1/trading/pension/inquire-psbl-order
+ 12. /uapi/domestic-stock/v1/trading/inquire-balance
+ 13. /uapi/domestic-stock/v1/trading/pension/inquire-present-balance
+ 14. /uapi/domestic-stock/v1/trading/inquire-psbl-order
+ 15. /uapi/domestic-stock/v1/trading/inquire-period-profit
+ 16. /uapi/domestic-stock/v1/trading/order-cash
+ 17. /uapi/domestic-stock/v1/trading/inquire-psbl-sell
+ 18. /uapi/domestic-stock/v1/trading/inquire-daily-ccld
+ 19. /uapi/domestic-stock/v1/trading/inquire-psbl-rvsecncl
+ 20. /uapi/domestic-stock/v1/trading/order-resv
+ 21. /uapi/domestic-stock/v1/trading/order-credit
+ 22. /uapi/domestic-stock/v1/trading/pension/inquire-balance
+ 23. /uapi/domestic-stock/v1/trading/inquire-balance-rlz-pl
+
+[websocket] (59개)
+  1. /tryitout/H0BICNT0
+  2. /tryitout/H0BJASP0
+  3. /tryitout/H0BJCNT0
+  4. /tryitout/H0CFASP0
+  5. /tryitout/H0CFCNT0
+  6. /tryitout/H0EUANC0
+  7. /tryitout/H0EUASP0
+  8. /tryitout/H0EUCNI0
+  9. /tryitout/H0EUCNT0
+ 10. /tryitout/H0EWANC0
+ 11. /tryitout/H0EWASP0
+ 12. /tryitout/H0EWCNT0
+ 13. /tryitout/H0GSCNI0
+ 14. /tryitout/H0IFASP0
+ 15. /tryitout/H0IFCNI0
+ 16. /tryitout/H0IFCNT0
+ 17. /tryitout/H0IOASP0
+ 18. /tryitout/H0IOCNT0
+ 19. /tryitout/H0MFASP0
+ 20. /tryitout/H0MFCNI0
+ 21. /tryitout/H0MFCNT0
+ 22. /tryitout/H0NXANC0
+ 23. /tryitout/H0NXASP0
+ 24. /tryitout/H0NXCNT0
+ 25. /tryitout/H0NXMBC0
+ 26. /tryitout/H0NXPGM0
+ 27. /tryitout/H0STANC0
+ 28. /tryitout/H0STASP0
+ 29. /tryitout/H0STCNI0
+ 30. /tryitout/H0STCNT0
+ 31. /tryitout/H0STMBC0
+ 32. /tryitout/H0STMKO0
+ 33. /tryitout/H0STNAV0
+ 34. /tryitout/H0STOAA0
+ 35. /tryitout/H0STOAC0
+ 36. /tryitout/H0STOUP0
+ 37. /tryitout/H0STPGM0
+ 38. /tryitout/H0UNANC0
+ 39. /tryitout/H0UNASP0
+ 40. /tryitout/H0UNCNT0
+ 41. /tryitout/H0UNMBC0
+ 42. /tryitout/H0UNPGM0
+ 43. /tryitout/H0UPANC0
+ 44. /tryitout/H0UPCNT0
+ 45. /tryitout/H0UPPGM0
+ 46. /tryitout/H0ZFANC0
+ 47. /tryitout/H0ZFASP0
+ 48. /tryitout/H0ZFCNT0
+ 49. /tryitout/H0ZOANC0
+ 50. /tryitout/H0ZOASP0
+ 51. /tryitout/H0ZOCNT0
+ 52. /tryitout/HDFFF010
+ 53. /tryitout/HDFFF020
+ 54. /tryitout/HDFFF1C0
+ 55. /tryitout/HDFFF2C0
+ 56. /tryitout/HDFSASP0
+ 57. /tryitout/HDFSASP1
+ 58. /tryitout/HDFSCNT0
+ 59. /uapi/domestic-stock/v1/quotations/frgnmem-trade-trend
+
+[전체 고유 URL] (173개)
+  1. /oauth2/tokenP
+  2. /oauth2/revokeP
+  3. /oauth2/Approval
+  4. /uapi/domestic-stock/v1/quotations/inquire-daily-price
+  5. /uapi/domestic-stock/v1/quotations/inquire-price
+  6. /uapi/domestic-stock/v1/quotations/inquire-overtime-price
+  7. /uapi/domestic-stock/v1/quotations/inquire-time-overtimeconclusion
+  8. /uapi/domestic-stock/v1/quotations/inquire-daily-overtimeprice
+  9. /uapi/domestic-stock/v1/quotations/inquire-overtime-asking-price
+ 10. /uapi/domestic-stock/v1/quotations/inquire-time-itemconclusion
+ 11. /uapi/domestic-stock/v1/quotations/inquire-price-2
+ 12. /uapi/domestic-stock/v1/quotations/inquire-time-dailychartprice
+ 13. /uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice
+ 14. /uapi/domestic-stock/v1/quotations/inquire-asking-price-exp-ccn
+ 15. /uapi/domestic-stock/v1/quotations/inquire-ccnl
+ 16. /uapi/domestic-stock/v1/quotations/inquire-member
+ 17. /uapi/domestic-stock/v1/quotations/inquire-investor
+ 18. /uapi/domestic-stock/v1/quotations/exp-closing-price
+ 19. /uapi/domestic-stock/v1/quotations/inquire-time-itemchartprice
+ 20. /uapi/domestic-stock/v1/quotations/inquire-elw-price
+ 21. /uapi/domestic-stock/v1/quotations/exp-index-trend
+ 22. /uapi/domestic-stock/v1/quotations/inquire-daily-indexchartprice
+ 23. /uapi/domestic-stock/v1/quotations/inquire-index-timeprice
+ 24. /uapi/domestic-stock/v1/quotations/inquire-index-category-price
+ 25. /uapi/domestic-stock/v1/quotations/inquire-time-indexchartprice
+ 26. /uapi/domestic-stock/v1/quotations/chk-holiday
+ 27. /uapi/domestic-stock/v1/quotations/exp-total-index
+ 28. /uapi/domestic-stock/v1/quotations/inquire-index-price
+ 29. /uapi/domestic-stock/v1/quotations/market-time
+ 30. /uapi/domestic-stock/v1/quotations/inquire-index-tickprice
+ 31. /uapi/domestic-stock/v1/quotations/inquire-index-daily-price
+ 32. /uapi/domestic-stock/v1/quotations/comp-interest
+ 33. /uapi/domestic-stock/v1/quotations/inquire-vi-status
+ 34. /uapi/domestic-stock/v1/quotations/news-title
+ 35. /uapi/domestic-stock/v1/quotations/search-info
+ 36. /uapi/domestic-stock/v1/quotations/invest-opbysec
+ 37. /uapi/domestic-stock/v1/quotations/credit-by-company
+ 38. /uapi/domestic-stock/v1/quotations/invest-opinion
+ 39. /uapi/domestic-stock/v1/quotations/lendable-by-company
+ 40. /uapi/domestic-stock/v1/quotations/search-stock-info
+ 41. /uapi/domestic-stock/v1/quotations/estimate-perform
+ 42. /uapi/domestic-stock/v1/quotations/comp-program-trade-today
+ 43. /uapi/domestic-stock/v1/quotations/daily-credit-balance
+ 44. /uapi/domestic-stock/v1/quotations/inquire-investor-daily-by-market
+ 45. /uapi/domestic-stock/v1/quotations/daily-short-sale
+ 46. /uapi/domestic-stock/v1/quotations/investor-trade-by-stock-daily
+ 47. /uapi/domestic-stock/v1/quotations/psearch-title
+ 48. /uapi/domestic-stock/v1/quotations/capture-uplowprice
+ 49. /uapi/domestic-stock/v1/quotations/comp-program-trade-daily
+ 50. /uapi/domestic-stock/v1/quotations/daily-loan-trans
+ 51. /uapi/domestic-stock/v1/quotations/psearch-result
+ 52. /uapi/domestic-stock/v1/quotations/pbar-tratio
+ 53. /uapi/domestic-stock/v1/quotations/foreign-institution-total
+ 54. /uapi/domestic-stock/v1/quotations/intstock-stocklist-by-group
+ 55. /uapi/domestic-stock/v1/quotations/inquire-member-daily
+ 56. /uapi/domestic-stock/v1/quotations/program-trade-by-stock-daily
+ 57. /uapi/domestic-stock/v1/quotations/intstock-grouplist
+ 58. /uapi/domestic-stock/v1/quotations/investor-trend-estimate
+ 59. /uapi/domestic-stock/v1/quotations/inquire-daily-trade-volume
+ 60. /uapi/domestic-stock/v1/quotations/tradprt-byamt
+ 61. /uapi/domestic-stock/v1/quotations/investor-program-trade-today
+ 62. /uapi/domestic-stock/v1/quotations/mktfunds
+ 63. /uapi/domestic-stock/v1/quotations/exp-price-trend
+ 64. /uapi/domestic-stock/v1/quotations/frgnmem-trade-trend
+ 65. /uapi/domestic-stock/v1/quotations/inquire-investor-time-by-market
+ 66. /uapi/domestic-stock/v1/quotations/program-trade-by-stock
+ 67. /uapi/domestic-stock/v1/quotations/frgnmem-trade-estimate
+ 68. /uapi/domestic-stock/v1/quotations/frgnmem-pchs-trend
+ 69. /uapi/domestic-stock/v1/quotations/intstock-multprice
+ 70. /uapi/domestic-stock/v1/quotations/volume-rank
+ 71. /uapi/domestic-stock/v1/ranking/overtime-exp-trans-fluct
+ 72. /uapi/domestic-stock/v1/ranking/exp-trans-updown
+ 73. /uapi/domestic-stock/v1/ranking/quote-balance
+ 74. /uapi/domestic-stock/v1/ranking/credit-balance
+ 75. /uapi/domestic-stock/v1/ranking/overtime-volume
+ 76. /uapi/domestic-stock/v1/ranking/dividend-rate
+ 77. /uapi/domestic-stock/v1/ranking/after-hour-balance
+ 78. /uapi/domestic-stock/v1/ranking/short-sale
+ 79. /uapi/domestic-stock/v1/ranking/disparity
+ 80. /uapi/domestic-stock/v1/ranking/hts-top-view
+ 81. /uapi/domestic-stock/v1/ranking/profit-asset-index
+ 82. /uapi/domestic-stock/v1/ranking/near-new-highlow
+ 83. /uapi/domestic-stock/v1/ranking/prefer-disparate-ratio
+ 84. /uapi/domestic-stock/v1/ranking/bulk-trans-num
+ 85. /uapi/domestic-stock/v1/ranking/finance-ratio
+ 86. /uapi/domestic-stock/v1/ranking/market-cap
+ 87. /uapi/domestic-stock/v1/ranking/traded-by-company
+ 88. /uapi/domestic-stock/v1/ranking/fluctuation
+ 89. /uapi/domestic-stock/v1/ranking/market-value
+ 90. /uapi/domestic-stock/v1/ranking/top-interest-stock
+ 91. /uapi/domestic-stock/v1/ranking/volume-power
+ 92. /uapi/domestic-stock/v1/ranking/overtime-fluctuation
+ 93. /uapi/domestic-stock/v1/trading/period-rights
+ 94. /uapi/domestic-stock/v1/trading/inquire-account-balance
+ 95. /uapi/domestic-stock/v1/trading/pension/inquire-deposit
+ 96. /uapi/domestic-stock/v1/trading/order-resv-rvsecncl
+ 97. /uapi/domestic-stock/v1/trading/inquire-credit-psamount
+ 98. /uapi/domestic-stock/v1/trading/intgr-margin
+ 99. /uapi/domestic-stock/v1/trading/pension/inquire-daily-ccld
+100. /uapi/domestic-stock/v1/trading/inquire-period-trade-profit
+101. /uapi/domestic-stock/v1/trading/order-rvsecncl
+102. /uapi/domestic-stock/v1/trading/order-resv-ccnl
+103. /uapi/domestic-stock/v1/trading/pension/inquire-psbl-order
+104. /uapi/domestic-stock/v1/trading/inquire-balance
+105. /uapi/domestic-stock/v1/trading/pension/inquire-present-balance
+106. /uapi/domestic-stock/v1/trading/inquire-psbl-order
+107. /uapi/domestic-stock/v1/trading/inquire-period-profit
+108. /uapi/domestic-stock/v1/trading/order-cash
+109. /uapi/domestic-stock/v1/trading/inquire-psbl-sell
+110. /uapi/domestic-stock/v1/trading/inquire-daily-ccld
+111. /uapi/domestic-stock/v1/trading/inquire-psbl-rvsecncl
+112. /uapi/domestic-stock/v1/trading/order-resv
+113. /uapi/domestic-stock/v1/trading/order-credit
+114. /uapi/domestic-stock/v1/trading/pension/inquire-balance
+115. /uapi/domestic-stock/v1/trading/inquire-balance-rlz-pl
+116. /tryitout/H0BICNT0
+117. /tryitout/H0BJASP0
+118. /tryitout/H0BJCNT0
+119. /tryitout/H0CFASP0
+120. /tryitout/H0CFCNT0
+121. /tryitout/H0EUANC0
+122. /tryitout/H0EUASP0
+123. /tryitout/H0EUCNI0
+124. /tryitout/H0EUCNT0
+125. /tryitout/H0EWANC0
+126. /tryitout/H0EWASP0
+127. /tryitout/H0EWCNT0
+128. /tryitout/H0GSCNI0
+129. /tryitout/H0IFASP0
+130. /tryitout/H0IFCNI0
+131. /tryitout/H0IFCNT0
+132. /tryitout/H0IOASP0
+133. /tryitout/H0IOCNT0
+134. /tryitout/H0MFASP0
+135. /tryitout/H0MFCNI0
+136. /tryitout/H0MFCNT0
+137. /tryitout/H0NXANC0
+138. /tryitout/H0NXASP0
+139. /tryitout/H0NXCNT0
+140. /tryitout/H0NXMBC0
+141. /tryitout/H0NXPGM0
+142. /tryitout/H0STANC0
+143. /tryitout/H0STASP0
+144. /tryitout/H0STCNI0
+145. /tryitout/H0STCNT0
+146. /tryitout/H0STMBC0
+147. /tryitout/H0STMKO0
+148. /tryitout/H0STNAV0
+149. /tryitout/H0STOAA0
+150. /tryitout/H0STOAC0
+151. /tryitout/H0STOUP0
+152. /tryitout/H0STPGM0
+153. /tryitout/H0UNANC0
+154. /tryitout/H0UNASP0
+155. /tryitout/H0UNCNT0
+156. /tryitout/H0UNMBC0
+157. /tryitout/H0UNPGM0
+158. /tryitout/H0UPANC0
+159. /tryitout/H0UPCNT0
+160. /tryitout/H0UPPGM0
+161. /tryitout/H0ZFANC0
+162. /tryitout/H0ZFASP0
+163. /tryitout/H0ZFCNT0
+164. /tryitout/H0ZOANC0
+165. /tryitout/H0ZOASP0
+166. /tryitout/H0ZOCNT0
+167. /tryitout/HDFFF010
+168. /tryitout/HDFFF020
+169. /tryitout/HDFFF1C0
+170. /tryitout/HDFFF2C0
+171. /tryitout/HDFSASP0
+172. /tryitout/HDFSASP1
+173. /tryitout/HDFSCNT0
+
