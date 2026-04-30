@@ -1,0 +1,14 @@
+services:
+  db:
+    image: mariadb:latest
+    container_name: korinvest_db
+    volumes:
+      - type: bind
+        source: ./mysql
+        target: /var/lib/mysql
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: my-secret-pw
+      TZ: Asia/Seoul
+    ports:
+      - 3307:3306

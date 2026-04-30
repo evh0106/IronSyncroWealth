@@ -1,0 +1,1 @@
+docker compose -p korinvest-db -f .\docker-compose.yml up -d
