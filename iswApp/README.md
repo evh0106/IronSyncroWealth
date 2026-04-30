@@ -21,93 +21,55 @@
 
 ### 폴더 구조(Feature-Sliced)
 ```
-iswApp/
-       src/
-              app/
-                     providers/
-                            query-provider.tsx
-                            router-provider.tsx
-                            theme-provider.tsx
-                     routes/
-                            index.tsx
-                     store/
-                            ui-store.ts
-                            auth-store.ts
-              shared/
-                     api/
-                            client.ts
-                            interceptors.ts
-                     config/
-                            env.ts
-                     lib/
-                            query-client.ts
-                            query-keys.ts
-                     ui/
-                            components/
-                            styles/
-                     types/
-              entities/
-                     account/
-                            model/
-                                   types.ts
-                            api/
-                                   queries.ts
-                     order/
-                            model/
-                                   types.ts
-                            api/
-                                   mutations.ts
-                     market/
-                            model/
-                                   types.ts
-                            api/
-                                   queries.ts
-                     strategy/
-                            model/
-                                   types.ts
-              features/
-                     auth/
-                            model/
-                                   use-auth.ts
-                            ui/
-                                   login-form.tsx
-                     order-submit/
-                            model/
-                                   use-order-submit.ts
-                            ui/
-                                   order-panel.tsx
-                     broker-switch/
-                            model/
-                                   use-broker-switch.ts
-                            ui/
-                                   broker-switch.tsx
-                     realtime-subscribe/
-                            model/
-                                   use-realtime.ts
-              widgets/
-                     dashboard/
-                            ui/
-                                   dashboard-layout.tsx
-                     market-board/
-                            ui/
-                                   market-board.tsx
-                     account-summary/
-                            ui/
-                                   account-summary.tsx
-                     order-book/
-                            ui/
-                                   order-book.tsx
-              pages/
-                     home/
-                            ui/
-                                   page.tsx
-                     trade/
-                            ui/
-                                   page.tsx
-                     settings/
-                            ui/
-                                   page.tsx
+iswApp/src/
+├── app/
+│   ├── providers/
+│   ├── routes/
+│   └── store/
+├── shared/
+│   ├── api/
+│   ├── config/
+│   ├── lib/
+│   ├── ui/
+│   └── types/
+├── entities/
+│   ├── account/  (model/, api/)
+│   ├── order/    (model/, api/)
+│   ├── market/   (model/, api/)
+│   └── strategy/ (model/)
+├── features/
+│   ├── auth/             (model/, ui/)
+│   ├── order-submit/     (model/, ui/)
+│   ├── broker-switch/    (model/, ui/)
+│   └── realtime-subscribe/ (model/)
+├── widgets/
+│   ├── dashboard/
+│   ├── market-board/
+│   ├── account-summary/
+│   └── order-book/
+└── pages/
+    ├── home/
+    ├── trade/
+    └── settings/
 ```
+
+### 디렉토리 역할
+- app/: 앱 부트스트랩, 전역 Provider, 라우팅, 전역 상태 스토어를 관리한다.
+- shared/: 여러 도메인에서 공통으로 재사용하는 API 클라이언트, 설정, 유틸, 공용 UI를 둔다.
+- entities/: 계좌/주문/시세 같은 핵심 도메인 단위의 타입과 조회 로직을 정의한다.
+- features/: 사용자 액션 중심 기능(로그인, 주문 제출, 브로커 전환, 실시간 구독)을 캡슐화한다.
+- widgets/: 여러 feature/entities를 조합한 화면 블록(대시보드, 보드, 요약 패널)을 구성한다.
+- pages/: 라우트 진입점 화면을 담당하며, 위젯을 조합해 최종 페이지를 만든다.
+
+- app/providers/: QueryProvider, RouterProvider 등 앱 전역 Provider를 등록한다.
+- app/routes/: 페이지 라우트 매핑과 레이아웃 경계를 정의한다.
+- app/store/: UI/인증 같은 전역 클라이언트 상태(Zustand)를 관리한다.
+
+- shared/api/: axios 인스턴스, 인터셉터, 공통 요청/응답 처리를 담당한다.
+- shared/config/: 환경변수와 런타임 설정을 중앙 관리한다.
+- shared/lib/: queryClient, query key factory 같은 공통 라이브러리를 둔다.
+- shared/ui/: 공통 컴포넌트와 스타일 자산을 제공한다.
+- shared/types/: 공용 타입(여러 계층에서 재사용)을 보관한다.
 
 ### 상태 관리 원칙
 1. React Query에는 "서버에서 온 데이터"만 저장한다.
