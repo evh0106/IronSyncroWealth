@@ -11,9 +11,9 @@
 -- =============================================================
 -- Drop existing tables if they exist
 -- =============================================================
-DROP TABLE IF EXISTS tokenP;
-DROP TABLE IF EXISTS revokeP;
-DROP TABLE IF EXISTS Approval;
+DROP TABLE IF EXISTS tokenP CASCADE;
+DROP TABLE IF EXISTS revokeP CASCADE;
+DROP TABLE IF EXISTS Approval CASCADE;
 
 -- =============================================================
 -- tokenP - 액세스 토큰 발급 (/oauth2/tokenP)

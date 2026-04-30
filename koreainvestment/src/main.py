@@ -15,14 +15,18 @@ import sys
 
 from kis_auth import issue_access_token, issue_access_token_revoke, issue_ws_approval_key
 from kis_config import load_config
+from quotations import run_quotations_menu
 from ranking import run_ranking_menu
+from trading import run_trading_menu
 
 
 MENU_ITEMS = [
     ("1", "접근토큰 발급 (/oauth2/tokenP)"),
     ("2", "웹소켓 접속키 발급 (/oauth2/Approval)"),
     ("3", "국내주식 ranking 조회 (/uapi/domestic-stock/v1/ranking/*)"),
-    ("4", "접근토큰 폐기 (/oauth2/revokeP)"),
+    ("4", "국내주식 quotations 조회 (/uapi/domestic-stock/v1/quotations/*)"),
+    ("5", "국내주식 trading 조회 (/uapi/domestic-stock/v1/trading/*)"),
+    ("6", "접근토큰 폐기 (/oauth2/revokeP)"),
 ]
 
 
@@ -128,6 +132,42 @@ def main() -> None:
                 continue
 
             if choice == "4":
+                if not current_access_token:
+                    print("\n[안내] quotations 조회를 위해 접근토큰 발급 여부 확인 중...")
+                    try:
+                        access = issue_access_token()
+                    except Exception as exc:
+                        print(f"\n[오류] 토큰 발급 실패: {exc}")
+                        continue
+                    _print_token_summary(access)
+                    current_access_token = access.get("access_token") or ""
+
+                if not current_access_token:
+                    print("\n[오류] 유효한 접근토큰이 없어 quotations 메뉴를 실행할 수 없습니다.")
+                    continue
+
+                run_quotations_menu(current_access_token)
+                continue
+
+            if choice == "5":
+                if not current_access_token:
+                    print("\n[안내] trading 조회를 위해 접근토큰 발급 여부 확인 중...")
+                    try:
+                        access = issue_access_token()
+                    except Exception as exc:
+                        print(f"\n[오류] 토큰 발급 실패: {exc}")
+                        continue
+                    _print_token_summary(access)
+                    current_access_token = access.get("access_token") or ""
+
+                if not current_access_token:
+                    print("\n[오류] 유효한 접근토큰이 없어 trading 메뉴를 실행할 수 없습니다.")
+                    continue
+
+                run_trading_menu(current_access_token)
+                continue
+
+            if choice == "6":
                 token = input("폐기할 access_token 입력 (엔터 시 최근 발급 토큰 사용): ").strip()
                 if not token:
                     token = current_access_token
