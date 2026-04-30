@@ -2,149 +2,1182 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 import json
-from pathlib import Path
 from typing import Any
 
 
-_SPECS_PATH = Path(__file__).with_name("ranking_specs.json")
+_REQUEST_SPECS_JSON = r"""[
+  {
+    "name": "국내주식 시간외예상체결등락률",
+    "tr_id": "FHKST11860000",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/overtime-exp-trans-fluct",
+    "sheet_found": true,
+    "fields": [
+      {
+        "element": "FID_COND_MRKT_DIV_CODE",
+        "required": "Y",
+        "description": "시장구분코드 (J: 주식)"
+      },
+      {
+        "element": "FID_COND_SCR_DIV_CODE",
+        "required": "Y",
+        "description": "Unique key(11186)"
+      },
+      {
+        "element": "FID_INPUT_ISCD",
+        "required": "Y",
+        "description": "0000(전체), 0001(코스피), 1001(코스닥)"
+      },
+      {
+        "element": "FID_RANK_SORT_CLS_CODE",
+        "required": "Y",
+        "description": "0(상승률), 1(상승폭), 2(보합), 3(하락률), 4(하락폭)"
+      },
+      {
+        "element": "FID_DIV_CLS_CODE",
+        "required": "Y",
+        "description": "'0(전체), 1(관리종목), 2(투자주의), 3(투자경고),\r\n 4(투자위험예고), 5(투자위험), 6(보통주), 7(우선주)'"
+      },
+      {
+        "element": "FID_INPUT_PRICE_1",
+        "required": "Y",
+        "description": "가격 ~"
+      },
+      {
+        "element": "FID_INPUT_PRICE_2",
+        "required": "Y",
+        "description": "공백"
+      },
+      {
+        "element": "FID_INPUT_VOL_1",
+        "required": "Y",
+        "description": "거래량 ~"
+      }
+    ]
+  },
+  {
+    "name": "국내주식 예상체결 상승/하락상위",
+    "tr_id": "FHPST01820000",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/exp-trans-updown",
+    "sheet_found": false,
+    "fields": []
+  },
+  {
+    "name": "국내주식 호가잔량 순위",
+    "tr_id": "FHPST01720000",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/quote-balance",
+    "sheet_found": true,
+    "fields": [
+      {
+        "element": "fid_vol_cnt",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (거래량 ~)"
+      },
+      {
+        "element": "fid_cond_mrkt_div_code",
+        "required": "Y",
+        "description": "시장구분코드 (J:KRX, NX:NXT)"
+      },
+      {
+        "element": "fid_cond_scr_div_code",
+        "required": "Y",
+        "description": "Unique key( 20172 )"
+      },
+      {
+        "element": "fid_input_iscd",
+        "required": "Y",
+        "description": "0000(전체) 코스피(0001), 코스닥(1001), 코스피200(2001)"
+      },
+      {
+        "element": "fid_rank_sort_cls_code",
+        "required": "Y",
+        "description": "0: 순매수잔량순, 1:순매도잔량순, 2:매수비율순, 3:매도비율순"
+      },
+      {
+        "element": "fid_div_cls_code",
+        "required": "Y",
+        "description": "0:전체"
+      },
+      {
+        "element": "fid_trgt_cls_code",
+        "required": "Y",
+        "description": "0:전체"
+      },
+      {
+        "element": "fid_trgt_exls_cls_code",
+        "required": "Y",
+        "description": "0:전체"
+      },
+      {
+        "element": "fid_input_price_1",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (가격 ~)"
+      },
+      {
+        "element": "fid_input_price_2",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (~ 가격)"
+      }
+    ]
+  },
+  {
+    "name": "국내주식 신용잔고 상위",
+    "tr_id": "FHKST17010000",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/credit-balance",
+    "sheet_found": true,
+    "fields": [
+      {
+        "element": "FID_COND_SCR_DIV_CODE",
+        "required": "Y",
+        "description": "Unique key(11701)"
+      },
+      {
+        "element": "FID_INPUT_ISCD",
+        "required": "Y",
+        "description": "0000:전체, 0001:거래소, 1001:코스닥, 2001:코스피200,"
+      },
+      {
+        "element": "FID_OPTION",
+        "required": "Y",
+        "description": "2~999"
+      },
+      {
+        "element": "FID_COND_MRKT_DIV_CODE",
+        "required": "Y",
+        "description": "시장구분코드 (주식 J)"
+      },
+      {
+        "element": "FID_RANK_SORT_CLS_CODE",
+        "required": "Y",
+        "description": "'(융자)0:잔고비율 상위, 1: 잔고수량 상위, 2: 잔고금액 상위, 3: 잔고비율 증가상위, 4: 잔고비율 감소상위 \r\n(대주)5:잔고비율 상위, 6: 잔고수량 상위, 7: 잔고금액 상위, 8: 잔고비율 증가상위, 9: 잔고비율 감소상위 '"
+      }
+    ]
+  },
+  {
+    "name": "국내주식 시간외거래량순위",
+    "tr_id": "FHPST02350000",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/overtime-volume",
+    "sheet_found": true,
+    "fields": [
+      {
+        "element": "FID_COND_MRKT_DIV_CODE",
+        "required": "Y",
+        "description": "시장구분코드 (J: 주식)"
+      },
+      {
+        "element": "FID_COND_SCR_DIV_CODE",
+        "required": "Y",
+        "description": "Unique key(20235)"
+      },
+      {
+        "element": "FID_INPUT_ISCD",
+        "required": "Y",
+        "description": "0000(전체), 0001(코스피), 1001(코스닥)"
+      },
+      {
+        "element": "FID_RANK_SORT_CLS_CODE",
+        "required": "Y",
+        "description": "0(매수잔량),  1(매도잔량), 2(거래량)"
+      },
+      {
+        "element": "FID_INPUT_PRICE_1",
+        "required": "Y",
+        "description": "가격 ~"
+      },
+      {
+        "element": "FID_INPUT_PRICE_2",
+        "required": "Y",
+        "description": "~ 가격"
+      },
+      {
+        "element": "FID_VOL_CNT",
+        "required": "Y",
+        "description": "거래량 ~"
+      },
+      {
+        "element": "FID_TRGT_CLS_CODE",
+        "required": "Y",
+        "description": "공백"
+      },
+      {
+        "element": "FID_TRGT_EXLS_CLS_CODE",
+        "required": "Y",
+        "description": "공백"
+      }
+    ]
+  },
+  {
+    "name": "국내주식 배당률 상위",
+    "tr_id": "HHKDB13470100",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/dividend-rate",
+    "sheet_found": true,
+    "fields": [
+      {
+        "element": "CTS_AREA",
+        "required": "Y",
+        "description": "공백"
+      },
+      {
+        "element": "GB1",
+        "required": "Y",
+        "description": "0:전체, 1:코스피,  2: 코스피200, 3: 코스닥,"
+      },
+      {
+        "element": "UPJONG",
+        "required": "Y",
+        "description": "'코스피(0001:종합, 0002:대형주.…0027:제조업 ), \r\n코스닥(1001:종합, …. 1041:IT부품\r\n코스피200 (2001:KOSPI200, 2007:KOSPI100, 2008:KOSPI50)'"
+      },
+      {
+        "element": "GB2",
+        "required": "Y",
+        "description": "0:전체, 6:보통주, 7:우선주"
+      },
+      {
+        "element": "GB3",
+        "required": "Y",
+        "description": "1:주식배당, 2: 현금배당"
+      },
+      {
+        "element": "F_DT",
+        "required": "Y",
+        "description": ""
+      },
+      {
+        "element": "T_DT",
+        "required": "Y",
+        "description": ""
+      },
+      {
+        "element": "GB4",
+        "required": "Y",
+        "description": "0:전체, 1:결산배당, 2:중간배당"
+      }
+    ]
+  },
+  {
+    "name": "국내주식 시간외잔량 순위",
+    "tr_id": "FHPST01760000",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/after-hour-balance",
+    "sheet_found": true,
+    "fields": [
+      {
+        "element": "fid_input_price_1",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (가격 ~)"
+      },
+      {
+        "element": "fid_cond_mrkt_div_code",
+        "required": "Y",
+        "description": "시장구분코드 (주식 J)"
+      },
+      {
+        "element": "fid_cond_scr_div_code",
+        "required": "Y",
+        "description": "Unique key( 20176 )"
+      },
+      {
+        "element": "fid_rank_sort_cls_code",
+        "required": "Y",
+        "description": "1: 장전 시간외, 2: 장후 시간외, 3:매도잔량, 4:매수잔량"
+      },
+      {
+        "element": "fid_div_cls_code",
+        "required": "Y",
+        "description": "0 : 전체"
+      },
+      {
+        "element": "fid_input_iscd",
+        "required": "Y",
+        "description": "0000:전체, 0001:거래소, 1001:코스닥, 2001:코스피200"
+      },
+      {
+        "element": "fid_trgt_exls_cls_code",
+        "required": "Y",
+        "description": "0 : 전체"
+      },
+      {
+        "element": "fid_trgt_cls_code",
+        "required": "Y",
+        "description": "0 : 전체"
+      },
+      {
+        "element": "fid_vol_cnt",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (거래량 ~)"
+      },
+      {
+        "element": "fid_input_price_2",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (~ 가격)"
+      }
+    ]
+  },
+  {
+    "name": "국내주식 공매도 상위종목",
+    "tr_id": "FHPST04820000",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/short-sale",
+    "sheet_found": true,
+    "fields": [
+      {
+        "element": "FID_APLY_RANG_VOL",
+        "required": "Y",
+        "description": "공백"
+      },
+      {
+        "element": "FID_COND_MRKT_DIV_CODE",
+        "required": "Y",
+        "description": "시장구분코드 (주식 J)"
+      },
+      {
+        "element": "FID_COND_SCR_DIV_CODE",
+        "required": "Y",
+        "description": "Unique key(20482)"
+      },
+      {
+        "element": "FID_INPUT_ISCD",
+        "required": "Y",
+        "description": "0000:전체, 0001:코스피, 1001:코스닥, 2001:코스피200, 4001: KRX100, 3003: 코스닥150"
+      },
+      {
+        "element": "FID_PERIOD_DIV_CODE",
+        "required": "Y",
+        "description": "조회구분 (일/월) D: 일, M:월"
+      },
+      {
+        "element": "FID_INPUT_CNT_1",
+        "required": "Y",
+        "description": "'조회가간(일수):\r\n조회구분(D) 0:1일, 1:2일, 2:3일, 3:4일, 4:1주일, 9:2주일, 14:3주일, \r\n조회구분(M) 1:1개월,  2:2개월, 3:3개월'"
+      },
+      {
+        "element": "FID_TRGT_EXLS_CLS_CODE",
+        "required": "Y",
+        "description": "공백"
+      },
+      {
+        "element": "FID_TRGT_CLS_CODE",
+        "required": "Y",
+        "description": "공백"
+      },
+      {
+        "element": "FID_APLY_RANG_PRC_1",
+        "required": "Y",
+        "description": "가격 ~"
+      },
+      {
+        "element": "FID_APLY_RANG_PRC_2",
+        "required": "Y",
+        "description": "~ 가격"
+      }
+    ]
+  },
+  {
+    "name": "국내주식 이격도 순위",
+    "tr_id": "FHPST01780000",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/disparity",
+    "sheet_found": true,
+    "fields": [
+      {
+        "element": "fid_input_price_2",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (~ 가격)"
+      },
+      {
+        "element": "fid_cond_mrkt_div_code",
+        "required": "Y",
+        "description": "시장구분코드 (J:KRX, NX:NXT)"
+      },
+      {
+        "element": "fid_cond_scr_div_code",
+        "required": "Y",
+        "description": "Unique key( 20178 )"
+      },
+      {
+        "element": "fid_div_cls_code",
+        "required": "Y",
+        "description": "0: 전체, 1:관리종목, 2:투자주의, 3:투자경고, 4:투자위험예고, 5:투자위험, 6:보톧주, 7:우선주"
+      },
+      {
+        "element": "fid_rank_sort_cls_code",
+        "required": "Y",
+        "description": "0: 이격도상위순, 1:이격도하위순"
+      },
+      {
+        "element": "fid_hour_cls_code",
+        "required": "Y",
+        "description": "5:이격도5, 10:이격도10, 20:이격도20, 60:이격도60, 120:이격도120"
+      },
+      {
+        "element": "fid_input_iscd",
+        "required": "Y",
+        "description": "0000:전체, 0001:거래소, 1001:코스닥, 2001:코스피200"
+      },
+      {
+        "element": "fid_trgt_cls_code",
+        "required": "Y",
+        "description": "0 : 전체"
+      },
+      {
+        "element": "fid_trgt_exls_cls_code",
+        "required": "Y",
+        "description": "0 : 전체"
+      },
+      {
+        "element": "fid_input_price_1",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (가격 ~)"
+      },
+      {
+        "element": "fid_vol_cnt",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (거래량 ~)"
+      }
+    ]
+  },
+  {
+    "name": "HTS조회상위20종목",
+    "tr_id": "HHMCM000100C0",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/hts-top-view",
+    "sheet_found": true,
+    "fields": []
+  },
+  {
+    "name": "국내주식 수익자산지표 순위",
+    "tr_id": "FHPST01730000",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/profit-asset-index",
+    "sheet_found": true,
+    "fields": [
+      {
+        "element": "fid_cond_mrkt_div_code",
+        "required": "Y",
+        "description": "시장구분코드 (J:KRX, NX:NXT)"
+      },
+      {
+        "element": "fid_trgt_cls_code",
+        "required": "Y",
+        "description": "0:전체"
+      },
+      {
+        "element": "fid_cond_scr_div_code",
+        "required": "Y",
+        "description": "Unique key( 20173 )"
+      },
+      {
+        "element": "fid_input_iscd",
+        "required": "Y",
+        "description": "0000:전체, 0001:거래소, 1001:코스닥, 2001:코스피200"
+      },
+      {
+        "element": "fid_div_cls_code",
+        "required": "Y",
+        "description": "0:전체"
+      },
+      {
+        "element": "fid_input_price_1",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (가격 ~)"
+      },
+      {
+        "element": "fid_input_price_2",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (~ 가격)"
+      },
+      {
+        "element": "fid_vol_cnt",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (거래량 ~)"
+      },
+      {
+        "element": "fid_input_option_1",
+        "required": "Y",
+        "description": "회계연도 (2023)"
+      },
+      {
+        "element": "fid_input_option_2",
+        "required": "Y",
+        "description": "0: 1/4분기 , 1: 반기, 2: 3/4분기, 3: 결산"
+      },
+      {
+        "element": "fid_rank_sort_cls_code",
+        "required": "Y",
+        "description": "0:매출이익 1:영업이익 2:경상이익 3:당기순이익 4:자산총계 5:부채총계 6:자본총계"
+      },
+      {
+        "element": "fid_blng_cls_code",
+        "required": "Y",
+        "description": "0:전체"
+      },
+      {
+        "element": "fid_trgt_exls_cls_code",
+        "required": "Y",
+        "description": "0:전체"
+      }
+    ]
+  },
+  {
+    "name": "국내주식 신고/신저근접종목 상위",
+    "tr_id": "FHPST01870000",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/near-new-highlow",
+    "sheet_found": false,
+    "fields": []
+  },
+  {
+    "name": "국내주식 우선주/괴리율 상위",
+    "tr_id": "FHPST01770000",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/prefer-disparate-ratio",
+    "sheet_found": false,
+    "fields": []
+  },
+  {
+    "name": "국내주식 대량체결건수 상위",
+    "tr_id": "FHKST190900C0",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/bulk-trans-num",
+    "sheet_found": true,
+    "fields": [
+      {
+        "element": "fid_aply_rang_prc_2",
+        "required": "Y",
+        "description": "~ 가격"
+      },
+      {
+        "element": "fid_cond_mrkt_div_code",
+        "required": "Y",
+        "description": "시장구분코드 (J:KRX, NX:NXT)"
+      },
+      {
+        "element": "fid_cond_scr_div_code",
+        "required": "Y",
+        "description": "Unique key(11909)"
+      },
+      {
+        "element": "fid_input_iscd",
+        "required": "Y",
+        "description": "0000:전체, 0001:거래소, 1001:코스닥, 2001:코스피200, 4001: KRX100"
+      },
+      {
+        "element": "fid_rank_sort_cls_code",
+        "required": "Y",
+        "description": "0:매수상위, 1:매도상위"
+      },
+      {
+        "element": "fid_div_cls_code",
+        "required": "Y",
+        "description": "0:전체"
+      },
+      {
+        "element": "fid_input_price_1",
+        "required": "Y",
+        "description": "건별금액 ~"
+      },
+      {
+        "element": "fid_aply_rang_prc_1",
+        "required": "Y",
+        "description": "가격 ~"
+      },
+      {
+        "element": "fid_input_iscd_2",
+        "required": "Y",
+        "description": "공백:전체종목, 개별종목 조회시 종목코드 (000660)"
+      },
+      {
+        "element": "fid_trgt_exls_cls_code",
+        "required": "Y",
+        "description": "0:전체"
+      },
+      {
+        "element": "fid_trgt_cls_code",
+        "required": "Y",
+        "description": "0:전체"
+      },
+      {
+        "element": "fid_vol_cnt",
+        "required": "Y",
+        "description": "거래량 ~"
+      }
+    ]
+  },
+  {
+    "name": "국내주식 재무비율 순위",
+    "tr_id": "FHPST01750000",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/finance-ratio",
+    "sheet_found": true,
+    "fields": [
+      {
+        "element": "fid_trgt_cls_code",
+        "required": "Y",
+        "description": "0 : 전체"
+      },
+      {
+        "element": "fid_cond_mrkt_div_code",
+        "required": "Y",
+        "description": "시장구분코드 (J:KRX, NX:NXT)"
+      },
+      {
+        "element": "fid_cond_scr_div_code",
+        "required": "Y",
+        "description": "Unique key( 20175 )"
+      },
+      {
+        "element": "fid_input_iscd",
+        "required": "Y",
+        "description": "0000:전체, 0001:거래소, 1001:코스닥, 2001:코스피200"
+      },
+      {
+        "element": "fid_div_cls_code",
+        "required": "Y",
+        "description": "0 : 전체"
+      },
+      {
+        "element": "fid_input_price_1",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (가격 ~)"
+      },
+      {
+        "element": "fid_input_price_2",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (~ 가격)"
+      },
+      {
+        "element": "fid_vol_cnt",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (거래량 ~)"
+      },
+      {
+        "element": "fid_input_option_1",
+        "required": "Y",
+        "description": "회계년도 입력 (ex 2023)"
+      },
+      {
+        "element": "fid_input_option_2",
+        "required": "Y",
+        "description": "0: 1/4분기 , 1: 반기, 2: 3/4분기, 3: 결산"
+      },
+      {
+        "element": "fid_rank_sort_cls_code",
+        "required": "Y",
+        "description": "7: 수익성 분석, 11 : 안정성 분석, 15: 성장성 분석, 20: 활동성 분석"
+      },
+      {
+        "element": "fid_blng_cls_code",
+        "required": "Y",
+        "description": "0"
+      },
+      {
+        "element": "fid_trgt_exls_cls_code",
+        "required": "Y",
+        "description": "0 : 전체"
+      }
+    ]
+  },
+  {
+    "name": "국내주식 시가총액 상위",
+    "tr_id": "FHPST01740000",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/market-cap",
+    "sheet_found": true,
+    "fields": [
+      {
+        "element": "fid_input_price_2",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (~ 가격)"
+      },
+      {
+        "element": "fid_cond_mrkt_div_code",
+        "required": "Y",
+        "description": "시장구분코드 (J:KRX, NX:NXT)"
+      },
+      {
+        "element": "fid_cond_scr_div_code",
+        "required": "Y",
+        "description": "Unique key( 20174 )"
+      },
+      {
+        "element": "fid_div_cls_code",
+        "required": "Y",
+        "description": "0: 전체,  1:보통주,  2:우선주"
+      },
+      {
+        "element": "fid_input_iscd",
+        "required": "Y",
+        "description": "0000:전체, 0001:거래소, 1001:코스닥, 2001:코스피200"
+      },
+      {
+        "element": "fid_trgt_cls_code",
+        "required": "Y",
+        "description": "0 : 전체"
+      },
+      {
+        "element": "fid_trgt_exls_cls_code",
+        "required": "Y",
+        "description": "0 : 전체"
+      },
+      {
+        "element": "fid_input_price_1",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (가격 ~)"
+      },
+      {
+        "element": "fid_vol_cnt",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (거래량 ~)"
+      }
+    ]
+  },
+  {
+    "name": "국내주식 당사매매종목 상위",
+    "tr_id": "FHPST01860000",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/traded-by-company",
+    "sheet_found": true,
+    "fields": [
+      {
+        "element": "fid_trgt_exls_cls_code",
+        "required": "Y",
+        "description": "0: 전체"
+      },
+      {
+        "element": "fid_cond_mrkt_div_code",
+        "required": "Y",
+        "description": "시장구분코드 (J:KRX, NX:NXT)"
+      },
+      {
+        "element": "fid_cond_scr_div_code",
+        "required": "Y",
+        "description": "Unique key(20186)"
+      },
+      {
+        "element": "fid_div_cls_code",
+        "required": "Y",
+        "description": "0:전체, 1:관리종목, 2:투자주의, 3:투자경고, 4:투자위험예고, 5:투자위험, 6:보통주, 7:우선주"
+      },
+      {
+        "element": "fid_rank_sort_cls_code",
+        "required": "Y",
+        "description": "0:매도상위,1:매수상위"
+      },
+      {
+        "element": "fid_input_date_1",
+        "required": "Y",
+        "description": "기간~"
+      },
+      {
+        "element": "fid_input_date_2",
+        "required": "Y",
+        "description": "~기간"
+      },
+      {
+        "element": "fid_input_iscd",
+        "required": "Y",
+        "description": "0000:전체, 0001:거래소, 1001:코스닥, 2001:코스피200, 4001: KRX100"
+      },
+      {
+        "element": "fid_trgt_cls_code",
+        "required": "Y",
+        "description": "0: 전체"
+      },
+      {
+        "element": "fid_aply_rang_vol",
+        "required": "Y",
+        "description": "0: 전체, 100: 100주 이상"
+      },
+      {
+        "element": "fid_aply_rang_prc_2",
+        "required": "Y",
+        "description": "~ 가격"
+      },
+      {
+        "element": "fid_aply_rang_prc_1",
+        "required": "Y",
+        "description": "가격 ~"
+      }
+    ]
+  },
+  {
+    "name": "국내주식 등락률 순위",
+    "tr_id": "FHPST01700000",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/fluctuation",
+    "sheet_found": true,
+    "fields": [
+      {
+        "element": "fid_rsfl_rate2",
+        "required": "Y",
+        "description": "공백 입력 시 전체 (~ 비율"
+      },
+      {
+        "element": "fid_cond_mrkt_div_code",
+        "required": "Y",
+        "description": "시장구분코드 (J:KRX, NX:NXT)"
+      },
+      {
+        "element": "fid_cond_scr_div_code",
+        "required": "Y",
+        "description": "Unique key( 20170 )"
+      },
+      {
+        "element": "fid_input_iscd",
+        "required": "Y",
+        "description": "0000(전체) 코스피(0001), 코스닥(1001), 코스피200(2001)"
+      },
+      {
+        "element": "fid_rank_sort_cls_code",
+        "required": "Y",
+        "description": "0:상승율순 1:하락율순 2:시가대비상승율 3:시가대비하락율 4:변동율"
+      },
+      {
+        "element": "fid_input_cnt_1",
+        "required": "Y",
+        "description": "0:전체 , 누적일수 입력"
+      },
+      {
+        "element": "fid_prc_cls_code",
+        "required": "Y",
+        "description": "'fid_rank_sort_cls_code :0 상승율 순일때 (0:저가대비, 1:종가대비)\r\nfid_rank_sort_cls_code :1 하락율 순일때 (0:고가대비, 1:종가대비)\r\nfid_rank_sort_cls_code : 기타 (0:전체)'"
+      },
+      {
+        "element": "fid_input_price_1",
+        "required": "Y",
+        "description": "공백 입력 시 전체 (가격 ~)"
+      },
+      {
+        "element": "fid_input_price_2",
+        "required": "Y",
+        "description": "공백 입력 시 전체 (~ 가격)"
+      },
+      {
+        "element": "fid_vol_cnt",
+        "required": "Y",
+        "description": "공백 입력 시 전체 (거래량 ~)"
+      },
+      {
+        "element": "fid_trgt_cls_code",
+        "required": "Y",
+        "description": "0:전체"
+      },
+      {
+        "element": "fid_trgt_exls_cls_code",
+        "required": "Y",
+        "description": "0:전체"
+      },
+      {
+        "element": "fid_div_cls_code",
+        "required": "Y",
+        "description": "0:전체"
+      },
+      {
+        "element": "fid_rsfl_rate1",
+        "required": "Y",
+        "description": "공백 입력 시 전체 (비율 ~)"
+      }
+    ]
+  },
+  {
+    "name": "국내주식 시장가치 순위",
+    "tr_id": "FHPST01790000",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/market-value",
+    "sheet_found": true,
+    "fields": [
+      {
+        "element": "fid_trgt_cls_code",
+        "required": "Y",
+        "description": "0 : 전체"
+      },
+      {
+        "element": "fid_cond_mrkt_div_code",
+        "required": "Y",
+        "description": "시장구분코드 (J:KRX, NX:NXT)"
+      },
+      {
+        "element": "fid_cond_scr_div_code",
+        "required": "Y",
+        "description": "Unique key( 20179 )"
+      },
+      {
+        "element": "fid_input_iscd",
+        "required": "Y",
+        "description": "0000:전체, 0001:거래소, 1001:코스닥, 2001:코스피200"
+      },
+      {
+        "element": "fid_div_cls_code",
+        "required": "Y",
+        "description": "0: 전체, 1:관리종목, 2:투자주의, 3:투자경고, 4:투자위험예고, 5:투자위험, 6:보톧주, 7:우선주"
+      },
+      {
+        "element": "fid_input_price_1",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (가격 ~)"
+      },
+      {
+        "element": "fid_input_price_2",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (~ 가격)"
+      },
+      {
+        "element": "fid_vol_cnt",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (거래량 ~)"
+      },
+      {
+        "element": "fid_input_option_1",
+        "required": "Y",
+        "description": "회계연도 입력 (ex 2023)"
+      },
+      {
+        "element": "fid_input_option_2",
+        "required": "Y",
+        "description": "0: 1/4분기 , 1: 반기, 2: 3/4분기, 3: 결산"
+      },
+      {
+        "element": "fid_rank_sort_cls_code",
+        "required": "Y",
+        "description": "'가치분석(23:PER, 24:PBR, 25:PCR, 26:PSR, 27: EPS, 28:EVA,\r\n29: EBITDA, 30: EV/EBITDA, 31:EBITDA/금융비율'"
+      },
+      {
+        "element": "fid_blng_cls_code",
+        "required": "Y",
+        "description": "0 : 전체"
+      },
+      {
+        "element": "fid_trgt_exls_cls_code",
+        "required": "Y",
+        "description": "0 : 전체"
+      }
+    ]
+  },
+  {
+    "name": "국내주식 관심종목등록 상위",
+    "tr_id": "FHPST01800000",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/top-interest-stock",
+    "sheet_found": true,
+    "fields": [
+      {
+        "element": "fid_input_iscd_2",
+        "required": "Y",
+        "description": "000000 : 필수입력값"
+      },
+      {
+        "element": "fid_cond_mrkt_div_code",
+        "required": "Y",
+        "description": "시장구분코드 (J:KRX, NX:NXT)"
+      },
+      {
+        "element": "fid_cond_scr_div_code",
+        "required": "Y",
+        "description": "Unique key(20180)"
+      },
+      {
+        "element": "fid_input_iscd",
+        "required": "Y",
+        "description": "0000:전체, 0001:거래소, 1001:코스닥, 2001:코스피200"
+      },
+      {
+        "element": "fid_trgt_cls_code",
+        "required": "Y",
+        "description": "0 : 전체"
+      },
+      {
+        "element": "fid_trgt_exls_cls_code",
+        "required": "Y",
+        "description": "0 : 전체"
+      },
+      {
+        "element": "fid_input_price_1",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (가격 ~)"
+      },
+      {
+        "element": "fid_input_price_2",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (~ 가격)"
+      },
+      {
+        "element": "fid_vol_cnt",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (거래량 ~)"
+      },
+      {
+        "element": "fid_div_cls_code",
+        "required": "Y",
+        "description": "0: 전체 1: 관리종목 2: 투자주의 3: 투자경고 4: 투자위험예고 5: 투자위험 6: 보통주 7: 우선주"
+      },
+      {
+        "element": "fid_input_cnt_1",
+        "required": "Y",
+        "description": "순위검색 입력값(1: 1위부터, 10:10위부터)"
+      }
+    ]
+  },
+  {
+    "name": "국내주식 체결강도 상위",
+    "tr_id": "FHPST01680000",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/volume-power",
+    "sheet_found": true,
+    "fields": [
+      {
+        "element": "fid_trgt_exls_cls_code",
+        "required": "Y",
+        "description": "0 : 전체"
+      },
+      {
+        "element": "fid_cond_mrkt_div_code",
+        "required": "Y",
+        "description": "시장구분코드 (J:KRX, NX:NXT)"
+      },
+      {
+        "element": "fid_cond_scr_div_code",
+        "required": "Y",
+        "description": "Unique key( 20168 )"
+      },
+      {
+        "element": "fid_input_iscd",
+        "required": "Y",
+        "description": "0000:전체, 0001:거래소, 1001:코스닥, 2001:코스피200"
+      },
+      {
+        "element": "fid_div_cls_code",
+        "required": "Y",
+        "description": "0: 전체,  1: 보통주 2: 우선주"
+      },
+      {
+        "element": "fid_input_price_1",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (가격 ~)"
+      },
+      {
+        "element": "fid_input_price_2",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (~ 가격)"
+      },
+      {
+        "element": "fid_vol_cnt",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (거래량 ~)"
+      },
+      {
+        "element": "fid_trgt_cls_code",
+        "required": "Y",
+        "description": "0 : 전체"
+      }
+    ]
+  },
+  {
+    "name": "국내주식 시간외등락율순위",
+    "tr_id": "FHPST02340000",
+    "method": "GET",
+    "url": "/uapi/domestic-stock/v1/ranking/overtime-fluctuation",
+    "sheet_found": true,
+    "fields": [
+      {
+        "element": "FID_COND_MRKT_DIV_CODE",
+        "required": "Y",
+        "description": "시장구분코드 (J: 주식)"
+      },
+      {
+        "element": "FID_MRKT_CLS_CODE",
+        "required": "Y",
+        "description": "공백 입력"
+      },
+      {
+        "element": "FID_COND_SCR_DIV_CODE",
+        "required": "Y",
+        "description": "Unique key(20234)"
+      },
+      {
+        "element": "FID_INPUT_ISCD",
+        "required": "Y",
+        "description": "0000(전체), 0001(코스피), 1001(코스닥)"
+      },
+      {
+        "element": "FID_DIV_CLS_CODE",
+        "required": "Y",
+        "description": "1(상한가), 2(상승률), 3(보합),4(하한가),5(하락률)"
+      },
+      {
+        "element": "FID_INPUT_PRICE_1",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (가격 ~)"
+      },
+      {
+        "element": "FID_INPUT_PRICE_2",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (~ 가격)"
+      },
+      {
+        "element": "FID_VOL_CNT",
+        "required": "Y",
+        "description": "입력값 없을때 전체 (거래량 ~)"
+      },
+      {
+        "element": "FID_TRGT_CLS_CODE",
+        "required": "Y",
+        "description": "공백 입력"
+      },
+      {
+        "element": "FID_TRGT_EXLS_CLS_CODE",
+        "required": "Y",
+        "description": "공백 입력"
+      }
+    ]
+  }
+]
+"""
+
+RANKING_API_REQUEST_SPECS: list[dict[str, Any]] = json.loads(_REQUEST_SPECS_JSON)
 
 
 def load_ranking_api_specs() -> list[dict[str, Any]]:
-    if not _SPECS_PATH.exists():
-        raise FileNotFoundError(f"ranking spec json not found: {_SPECS_PATH}")
-    specs: list[dict[str, Any]] = json.loads(_SPECS_PATH.read_text(encoding="utf-8"))
+  specs = deepcopy(RANKING_API_REQUEST_SPECS)
 
-    # 문서상 HHKDB13470100(배당률 상위)에는 CTS_AREA가 필수인데,
-    # 원본 추출 JSON 누락 가능성이 있어 로더 단계에서 보정합니다.
-    for spec in specs:
-        if spec.get("tr_id") != "HHKDB13470100":
-            continue
-        fields = spec.setdefault("fields", [])
-        exists = any(str(f.get("element", "")).upper() == "CTS_AREA" for f in fields)
-        if not exists:
-            fields.insert(
-                0,
-                {
-                    "element": "CTS_AREA",
-                    "required": "Y",
-                    "description": "공백",
-                },
-            )
+  # 엑셀 원본(20260430)에는 FHPST01820000 전용 시트가 없어 요청 필드가 비어 있어,
+  # 실제 호출 검증으로 확인된 필수 파라미터를 보정합니다.
+  for spec in specs:
+    if spec.get("tr_id") != "FHPST01820000":
+      continue
 
-    # 문서상 FHKST11860000(시간외예상체결등락률)는 FID_COND_MRKT_DIV_CODE가 필요하나,
-    # 추출 JSON 누락 가능성이 있어 로더 단계에서 보정합니다.
-    for spec in specs:
-        if spec.get("tr_id") != "FHKST11860000":
-            continue
+    fields = spec.setdefault("fields", [])
+    if fields:
+      break
 
-        fields = spec.setdefault("fields", [])
-        exists = any(str(f.get("element", "")).upper() == "FID_COND_MRKT_DIV_CODE" for f in fields)
-        if exists:
-            continue
+    spec["sheet_found"] = False
+    fields.extend(
+      [
+        {"element": "fid_cond_mrkt_div_code", "required": "Y", "description": "시장구분코드 (J:KRX, NX:NXT)"},
+        {"element": "fid_cond_scr_div_code", "required": "Y", "description": "Unique key(20182)"},
+        {"element": "fid_input_iscd", "required": "Y", "description": "0000:전체, 0001:거래소, 1001:코스닥, 2001:코스피200"},
+        {"element": "fid_rank_sort_cls_code", "required": "Y", "description": "0:상승률순, 1:하락률순"},
+        {"element": "fid_div_cls_code", "required": "Y", "description": "0:전체"},
+        {"element": "fid_input_price_1", "required": "Y", "description": "가격 ~"},
+        {"element": "fid_input_price_2", "required": "Y", "description": "~ 가격"},
+        {"element": "fid_aply_rang_prc_1", "required": "Y", "description": "가격 ~"},
+        {"element": "fid_vol_cnt", "required": "Y", "description": "거래량 ~"},
+        {"element": "fid_pbmn", "required": "Y", "description": "0:전체"},
+        {"element": "fid_blng_cls_code", "required": "Y", "description": "0:전체"},
+        {"element": "fid_mkop_cls_code", "required": "Y", "description": "0:전체"},
+        {"element": "fid_trgt_cls_code", "required": "Y", "description": "0:전체"},
+        {"element": "fid_trgt_exls_cls_code", "required": "Y", "description": "0:전체"},
+      ]
+    )
+    break
 
-        fields.insert(
-            0,
-            {
-                "element": "FID_COND_MRKT_DIV_CODE",
-                "required": "Y",
-                "description": "시장구분코드 (주식 J)",
-            },
-        )
-
-    # 문서상 FHKST190900C0(대량체결건수 상위)는 fid_aply_rang_prc_2가 필요하나,
-    # 추출 JSON 누락 가능성이 있어 로더 단계에서 보정합니다.
-    for spec in specs:
-        if spec.get("tr_id") != "FHKST190900C0":
-            continue
-
-        fields = spec.setdefault("fields", [])
-        exists = any(str(f.get("element", "")).lower() == "fid_aply_rang_prc_2" for f in fields)
-        if exists:
-            continue
-
-        insert_idx = len(fields)
-        for idx, field in enumerate(fields):
-            if str(field.get("element", "")).lower() == "fid_aply_rang_prc_1":
-                insert_idx = idx + 1
-                break
-
-        fields.insert(
-            insert_idx,
-            {
-                "element": "fid_aply_rang_prc_2",
-                "required": "Y",
-                "description": "~ 가격",
-            },
-        )
-
-    # 문서상 FHPST01820000(예상체결 상승/하락상위)는 조회 파라미터가 필요하나,
-    # 추출 JSON에서 fields가 비어 있을 수 있어 로더 단계에서 보정합니다.
-    for spec in specs:
-        if spec.get("tr_id") != "FHPST01820000":
-            continue
-
-        fields = spec.setdefault("fields", [])
-        if fields:
-            continue
-
-        spec["sheet_found"] = True
-        fields.extend(
-            [
-                {
-                    "element": "fid_cond_mrkt_div_code",
-                    "required": "Y",
-                    "description": "시장구분코드 (J:KRX, NX:NXT)",
-                },
-                {
-                    "element": "fid_cond_scr_div_code",
-                    "required": "Y",
-                    "description": "Unique key(20182)",
-                },
-                {
-                    "element": "fid_input_iscd",
-                    "required": "Y",
-                    "description": "0000:전체, 0001:거래소, 1001:코스닥, 2001:코스피200",
-                },
-                {
-                    "element": "fid_rank_sort_cls_code",
-                    "required": "Y",
-                    "description": "0:상승률순, 1:하락률순",
-                },
-                {
-                    "element": "fid_div_cls_code",
-                    "required": "Y",
-                    "description": "0:전체",
-                },
-                {
-                    "element": "fid_input_price_1",
-                    "required": "Y",
-                    "description": "가격 ~",
-                },
-                {
-                    "element": "fid_input_price_2",
-                    "required": "Y",
-                    "description": "~ 가격",
-                },
-                {
-                    "element": "fid_vol_cnt",
-                    "required": "Y",
-                    "description": "거래량 ~",
-                },
-                {
-                    "element": "fid_trgt_cls_code",
-                    "required": "Y",
-                    "description": "0:전체",
-                },
-                {
-                    "element": "fid_trgt_exls_cls_code",
-                    "required": "Y",
-                    "description": "0:전체",
-                },
-            ]
-        )
-
-    return specs
+  return specs
 
 
 RANKING_API_SPECS = load_ranking_api_specs()

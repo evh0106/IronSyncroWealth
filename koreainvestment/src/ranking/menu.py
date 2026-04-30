@@ -49,6 +49,21 @@ def _infer_default(element: str, description: str) -> str:
     if "COND_MRKT_DIV_CODE" in elem:
         return "J"
 
+    if "BLNG_CLS_CODE" in elem:
+        return "0"
+
+    if "MKOP_CLS_CODE" in elem:
+        return "0"
+
+    if "PBMN" in elem:
+        return "0"
+
+    if "APLY_RANG_PRC" in elem:
+        return "0"
+
+    if "INPUT_PRICE" in elem or "VOL" in elem:
+        return "0"
+
     m = re.search(r"([A-Za-z0-9]+)\s*[:(]", desc)
     if m:
         return m.group(1)
@@ -59,6 +74,29 @@ def _infer_default(element: str, description: str) -> str:
 def _normalize_yyyymmdd(value: str) -> str:
     digits = re.sub(r"\D", "", value or "")
     return digits if len(digits) == 8 else value
+
+
+def _extract_missing_input_field(msg1: Any) -> str | None:
+    text = str(msg1 or "")
+    m = re.search(r"INPUT FIELD NOT FOUND\s*\[\s*([A-Za-z0-9_]+)\s*\]", text, re.IGNORECASE)
+    return m.group(1) if m else None
+
+
+def _ensure_missing_field_param(params: dict[str, str], missing_field: str) -> bool:
+    missing_upper = missing_field.upper()
+    existing_key = next((k for k in params if k.upper() == missing_upper), None)
+
+    target_key = existing_key or missing_field
+    current_value = params.get(target_key, "")
+    if current_value:
+        return False
+
+    value = _infer_default(target_key, "")
+    if "DATE" in target_key.upper():
+        value = _normalize_yyyymmdd(value)
+
+    params[target_key] = value
+    return existing_key is None or bool(value)
 
 
 def _build_headers(token: str, tr_id: str, cfg: dict[str, Any]) -> dict[str, str]:
@@ -192,7 +230,22 @@ def print_ranking_api(token: str, spec: dict[str, Any]) -> None:
         params[element] = value
 
     print("\n  → 조회 중...")
-    result = call_ranking_api(token, spec, params)
+
+    max_retry = 10
+    retry_count = 0
+    while True:
+        result = call_ranking_api(token, spec, params)
+        missing_field = _extract_missing_input_field(result.get("msg1"))
+
+        if not missing_field or retry_count >= max_retry:
+            break
+
+        changed = _ensure_missing_field_param(params, missing_field)
+        if not changed:
+            break
+
+        retry_count += 1
+        print(f"  [안내] 누락 필드 감지: {missing_field} -> 기본값 보정 후 재조회 ({retry_count}/{max_retry})")
 
     rt_cd = result.get("rt_cd")
     msg1 = result.get("msg1")
