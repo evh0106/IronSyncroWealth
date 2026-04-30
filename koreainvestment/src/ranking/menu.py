@@ -28,6 +28,13 @@ def _infer_default(element: str, description: str) -> str:
     if elem == "T_DT":
         return datetime.now().strftime("%Y%m%d")
 
+    # 일부 ranking API는 기간 파라미터를 필수로 요구하므로 기본 기간을 보정합니다.
+    if "INPUT_DATE_1" in elem:
+        return (datetime.now() - timedelta(days=7)).strftime("%Y%m%d")
+
+    if "INPUT_DATE_2" in elem:
+        return datetime.now().strftime("%Y%m%d")
+
     if "UNIQUE KEY(" in desc.upper():
         m = re.search(r"\(([^)]+)\)", desc)
         if m:
@@ -47,6 +54,11 @@ def _infer_default(element: str, description: str) -> str:
         return m.group(1)
 
     return ""
+
+
+def _normalize_yyyymmdd(value: str) -> str:
+    digits = re.sub(r"\D", "", value or "")
+    return digits if len(digits) == 8 else value
 
 
 def _build_headers(token: str, tr_id: str, cfg: dict[str, Any]) -> dict[str, str]:
@@ -175,6 +187,8 @@ def print_ranking_api(token: str, spec: dict[str, Any]) -> None:
         value = input(f"  {element}{hint} [기본값: {default!r}]: ").strip()
         if not value:
             value = default
+        if "DATE" in element.upper():
+            value = _normalize_yyyymmdd(value)
         params[element] = value
 
     print("\n  → 조회 중...")

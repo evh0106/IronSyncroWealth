@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import Any
-from oauth2.koreainvestment_oauth2 import (
+from oauth2.oauth import (
     get_access_token,
     get_approval_key,
     revoke_access_token,

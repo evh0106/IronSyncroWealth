@@ -21,8 +21,8 @@ from ranking import run_ranking_menu
 MENU_ITEMS = [
     ("1", "접근토큰 발급 (/oauth2/tokenP)"),
     ("2", "웹소켓 접속키 발급 (/oauth2/Approval)"),
-    ("3", "접근토큰 폐기 (/oauth2/revokeP)"),
-    ("4", "국내주식 ranking 조회 (/uapi/domestic-stock/v1/ranking/*)"),
+    ("3", "국내주식 ranking 조회 (/uapi/domestic-stock/v1/ranking/*)"),
+    ("4", "접근토큰 폐기 (/oauth2/revokeP)"),
 ]
 
 
@@ -70,6 +70,7 @@ def _print_revoke_summary(revoke: dict) -> None:
     print(f"message: {revoke.get('message')}")
 
 
+
 def main() -> None:
     try:
         _print_env_info()
@@ -109,6 +110,24 @@ def main() -> None:
                 continue
 
             if choice == "3":
+                if not current_access_token:
+                    print("\n[안내] ranking 조회를 위해 접근토큰 발급 여부 확인 중...")
+                    try:
+                        access = issue_access_token()
+                    except Exception as exc:
+                        print(f"\n[오류] 토큰 발급 실패: {exc}")
+                        continue
+                    _print_token_summary(access)
+                    current_access_token = access.get("access_token") or ""
+
+                if not current_access_token:
+                    print("\n[오류] 유효한 접근토큰이 없어 ranking 메뉴를 실행할 수 없습니다.")
+                    continue
+
+                run_ranking_menu(current_access_token)
+                continue
+
+            if choice == "4":
                 token = input("폐기할 access_token 입력 (엔터 시 최근 발급 토큰 사용): ").strip()
                 if not token:
                     token = current_access_token
@@ -128,33 +147,9 @@ def main() -> None:
                     current_access_token = ""
                 continue
 
-            if choice == "4":
-                if not current_access_token:
-                    print("\n[안내] ranking 조회를 위해 접근토큰을 먼저 발급합니다.")
-                    try:
-                        access = issue_access_token()
-                    except Exception as exc:
-                        print(f"\n[오류] 토큰 발급 실패: {exc}")
-                        continue
-                    _print_token_summary(access)
-                    current_access_token = access.get("access_token") or ""
-
-                if not current_access_token:
-                    print("\n[오류] 유효한 접근토큰이 없어 ranking 메뉴를 실행할 수 없습니다.")
-                    continue
-
-                run_ranking_menu(current_access_token)
-                continue
-
             print(f"  알 수 없는 메뉴: {choice!r}  (0~{len(MENU_ITEMS)} 사이 값을 입력하세요)")
     finally:
-        if current_access_token:
-            print("\n[종료 처리] 마지막 발급 토큰을 자동 폐기합니다.")
-            try:
-                revoke = issue_access_token_revoke(current_access_token)
-                _print_revoke_summary(revoke)
-            except Exception as exc:
-                print(f"[경고] 종료 시 자동 토큰 폐기 실패: {exc}")
+        pass
 
 
 if __name__ == "__main__":
