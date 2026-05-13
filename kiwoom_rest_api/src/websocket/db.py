@@ -6,12 +6,84 @@ WebSocket 실시간 데이터 DB 저장 모듈
 """
 
 from datetime import datetime
+import json
 import sys
 from pathlib import Path
 
 # 부모 디렉토리의 db 모듈 import
 sys.path.insert(0, str(Path(__file__).parent.parent))
 import db
+
+
+_CREATE_WS_MESSAGE_LOG = """
+CREATE TABLE IF NOT EXISTS ws_message_log (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    direction VARCHAR(8) NOT NULL,
+    trnm VARCHAR(40),
+    return_code VARCHAR(40),
+    return_msg VARCHAR(500),
+    payload_json LONGTEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_direction_created_at (direction, created_at),
+    INDEX idx_trnm (trnm)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+"""
+
+_INSERT_WS_MESSAGE_LOG = """
+INSERT INTO ws_message_log (
+    direction, trnm, return_code, return_msg, payload_json
+) VALUES (
+    %(direction)s, %(trnm)s, %(return_code)s, %(return_msg)s, %(payload_json)s
+)
+"""
+
+_ws_message_log_table_ensured = False
+
+
+def _ensure_ws_message_log_table() -> None:
+    global _ws_message_log_table_ensured
+    if _ws_message_log_table_ensured:
+        return
+    conn = db.get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(_CREATE_WS_MESSAGE_LOG)
+        conn.commit()
+        _ws_message_log_table_ensured = True
+    finally:
+        conn.close()
+
+
+def save_websocket_message_log(message, direction: str) -> int:
+    """WebSocket 송수신 원문을 ws_message_log 테이블에 저장합니다."""
+    _ensure_ws_message_log_table()
+
+    payload_text = json.dumps(message, ensure_ascii=False) if isinstance(message, (dict, list)) else str(message)
+    if isinstance(message, dict):
+        trnm = str(message.get('trnm', ''))
+        return_code = str(message.get('return_code', ''))
+        return_msg = str(message.get('return_msg', ''))
+    else:
+        trnm = ''
+        return_code = ''
+        return_msg = ''
+
+    row = {
+        'direction': direction,
+        'trnm': trnm,
+        'return_code': return_code,
+        'return_msg': return_msg,
+        'payload_json': payload_text,
+    }
+
+    conn = db.get_connection()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(_INSERT_WS_MESSAGE_LOG, row)
+        conn.commit()
+        return 1
+    finally:
+        conn.close()
 
 
 # ─────────────────────────────────────────────────────────────
