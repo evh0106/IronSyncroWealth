@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 import json
 from typing import Any
 
@@ -22,14 +23,106 @@ _RES_SPEC = OAUTH2_RESPONSE_SPECS
 # DB helpers
 # ---------------------------------------------------------------------------
 
-def _get_valid_token(app_key: str) -> str | None:
+def _parse_token_expiry(raw: str) -> datetime | None:
+    """KIS 토큰 만료일 문자열을 datetime으로 파싱합니다."""
+    value = (raw or "").strip()
+    if not value:
+        return None
+
+    datetime_formats = (
+        "%Y-%m-%d %H:%M:%S",
+        "%Y/%m/%d %H:%M:%S",
+        "%Y%m%d%H%M%S",
+        "%Y-%m-%dT%H:%M:%S",
+    )
+    for fmt in datetime_formats:
+        try:
+            return datetime.strptime(value, fmt)
+        except ValueError:
+            continue
+
+    # Python ISO 형식(예: 2026-05-13T23:39:48.123456)도 지원
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00").replace("z", "+00:00"))
+    except ValueError:
+        pass
+
+    date_formats = ("%Y-%m-%d", "%Y/%m/%d", "%Y%m%d")
+    for fmt in date_formats:
+        try:
+            # 날짜만 있으면 당일 23:59:59까지 유효로 간주
+            dt = datetime.strptime(value, fmt)
+            return dt.replace(hour=23, minute=59, second=59)
+        except ValueError:
+            continue
+
+    print(f"  [DB 조회 경고] 만료일 형식을 해석할 수 없습니다: {value}")
+    return None
+
+
+def _is_token_expired(expired_at: str) -> bool:
+    parsed = _parse_token_expiry(expired_at)
+    if parsed is None:
+        return False
+    return parsed < datetime.now()
+
+
+def _is_revoke_success(data: dict[str, Any]) -> bool:
+    """토큰 폐기 응답의 성공 여부를 판정합니다."""
+    code = str(data.get("code", "") or "").strip()
+    message = str(data.get("message", "") or "").strip()
+
+    if code == "0":
+        return True
+    if message and ("성공" in message) and ("실패" not in message):
+        return True
+    return False
+
+
+def _is_blocking_revoke_result(code: str, message: str) -> bool:
+    """재사용을 막아야 하는 폐기 결과인지 판정합니다."""
+    normalized_code = (code or "").strip()
+    normalized_message = (message or "").strip()
+
+    if normalized_code == "0":
+        return True
+    if ("폐기" in normalized_message) and ("실패" in normalized_message):
+        return True
+    return False
+
+
+def _has_blocking_revoke_history(conn: Any, app_key: str, token: str) -> bool:
+    """해당 토큰의 최근 폐기 결과가 재사용 차단 대상인지 확인합니다."""
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+                SELECT code, message
+                FROM revokeP
+                WHERE req_appkey = %s
+                  AND req_token = %s
+                ORDER BY id DESC
+                LIMIT 1
+            """,
+            (app_key, token),
+        )
+        row = cur.fetchone()
+
+    if not row:
+        return False
+
+    code = str(row.get("code", "") or "")
+    message = str(row.get("message", "") or "")
+    return _is_blocking_revoke_result(code, message)
+
+
+def _get_valid_token(app_key: str, app_secret: str) -> str | None:
     """DB에서 appkey 기준으로 유효한(미폐기·미만료) 액세스 토큰을 반환합니다."""
     conn = None
     try:
         conn = db.get_connection()
         with conn.cursor() as cur:
             sql = """
-                SELECT t.access_token
+                SELECT t.access_token, t.access_token_token_expired
                 FROM tokenP t
                 LEFT JOIN revokeP r
                   ON r.req_appkey = t.req_appkey
@@ -37,16 +130,40 @@ def _get_valid_token(app_key: str) -> str | None:
                  AND r.code = '0'
                 WHERE t.req_appkey = %s
                   AND t.access_token <> ''
-                  AND STR_TO_DATE(t.access_token_token_expired, '%%Y-%%m-%%d %%H:%%i:%%s') > NOW()
                   AND r.id IS NULL
                 ORDER BY t.id DESC
-                LIMIT 1
+                LIMIT 50
             """
             cur.execute(sql, (app_key,))
-            row = cur.fetchone()
-        if row:
+            rows = cur.fetchall() or []
+
+        for row in rows:
+            token = str(row.get("access_token", "") or "")
+            expired_at = str(row.get("access_token_token_expired", "") or "")
+
+            if not token:
+                continue
+
+            if _has_blocking_revoke_history(conn, app_key, token):
+                print("  [DB 조회] 최근 폐기 이력으로 재사용이 차단된 토큰입니다. 다음 토큰을 확인합니다.")
+                continue
+
+            if _is_token_expired(expired_at):
+                print(f"  [DB 조회] 만료 토큰 감지(expires={expired_at}) -> 자동 폐기 이력을 저장합니다.")
+                _save_revoke(
+                    app_key,
+                    app_secret,
+                    token,
+                    {
+                        "code": "0",
+                        "message": f"AUTO_REVOKED_EXPIRED_TOKEN({expired_at})",
+                    },
+                )
+                continue
+
             print('  [DB 조회] 유효한 액세스 토큰이 DB에 존재합니다.')
-            return row['access_token']
+            return token
+
         print('  [DB 조회] 유효한 액세스 토큰이 없습니다. 신규 발급합니다.')
         return None
     except Exception as exc:
@@ -185,7 +302,7 @@ def get_cached_access_token(env_dv: str | None = None) -> dict[str, Any] | None:
     """DB에 저장된 유효한 액세스 토큰 정보를 반환합니다."""
     cfg = load_config()
     current_env = _resolve_env_dv(env_dv, cfg)
-    cached = _get_valid_token(cfg["my_app"])
+    cached = _get_valid_token(cfg["my_app"], cfg["my_sec"])
     if not cached:
         return None
     return {
@@ -292,6 +409,12 @@ def revoke_access_token(token: str, env_dv: str | None = None) -> dict[str, Any]
     _print_response(response, "ka10002")
     data = response.json()
     _save_revoke(cfg["my_app"], cfg["my_sec"], token, data)
+
+    if not _is_revoke_success(data):
+        code = str(data.get("code", "") or "")
+        message = str(data.get("message", "") or "")
+        raise RuntimeError(f"토큰 폐기 실패(code={code}, message={message})")
+
     return data
 
 

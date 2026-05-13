@@ -9,6 +9,7 @@ from typing import Any
 
 import requests
 
+from audit_db import save_http_exchange
 from db import get_connection
 from kis_config import load_config
 from logger import log_http_request, log_http_response
@@ -279,16 +280,53 @@ def _build_headers(token: str, tr_id: str, cfg: dict[str, Any]) -> dict[str, str
 
 
 def _issue_hashkey(base_url: str, cfg: dict[str, Any], payload: dict[str, str]) -> str:
+    url = base_url + "/uapi/hashkey"
+    headers = {
+        "content-type": "application/json; charset=utf-8",
+        "appkey": cfg["my_app"],
+        "appsecret": cfg["my_sec"],
+    }
+    body_text = json.dumps(payload, ensure_ascii=False)
+
+    _, req_id = log_http_request(
+        api_id="HASHKEY",
+        url=url,
+        request_headers=headers,
+        request_body=body_text,
+        log_name="koreainvestment",
+    )
+
     res = requests.post(
-        base_url + "/uapi/hashkey",
-        headers={
-            "content-type": "application/json; charset=utf-8",
-            "appkey": cfg["my_app"],
-            "appsecret": cfg["my_sec"],
-        },
-        data=json.dumps(payload, ensure_ascii=False),
+        url,
+        headers=headers,
+        data=body_text,
         timeout=20,
     )
+
+    log_http_response(
+        req_id=req_id,
+        response_status=res.status_code,
+        response_headers=res.headers,
+        response_body=res.text,
+        log_name="koreainvestment",
+    )
+
+    try:
+        save_http_exchange(
+            source="trading",
+            api_id="HASHKEY",
+            method="POST",
+            req_url=url,
+            request_headers=headers,
+            request_body=body_text,
+            response_status=res.status_code,
+            response_headers=dict(res.headers),
+            response_body=res.text,
+            direction="outbound",
+        )
+    except Exception:
+        pass
+
     res.raise_for_status()
     body = res.json()
     return str(body.get("HASH") or body.get("hash") or "")

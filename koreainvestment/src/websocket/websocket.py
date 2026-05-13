@@ -10,6 +10,7 @@ from typing import Any
 import requests
 import websockets
 
+from audit_db import save_ws_message
 from db import get_connection
 from kis_auth import issue_access_token, issue_ws_approval_key
 from kis_config import load_config
@@ -483,7 +484,24 @@ async def _run_ws_stream(subscriptions: list[tuple[dict[str, Any], str, str]], a
     async with websockets.connect(ws_url) as ws:
         for spec, tr_id, tr_key in subscriptions:
             payload = _build_ws_subscribe_payload(approval_key, tr_id, tr_key)
-            await ws.send(json.dumps(payload, ensure_ascii=False))
+            payload_text = json.dumps(payload, ensure_ascii=False)
+            await ws.send(payload_text)
+
+            try:
+                log_websocket_message(payload, direction="send")
+            except Exception:
+                pass
+
+            try:
+                save_ws_message(
+                    source="websocket_stream",
+                    direction="send",
+                    payload=payload,
+                    tr_id=tr_id,
+                    tr_key=tr_key,
+                )
+            except Exception:
+                pass
             await asyncio.sleep(0.05)
 
         print("\n  실시간 수신 시작. Enter를 누르면 종료합니다.")
