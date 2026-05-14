@@ -14,8 +14,8 @@ from datetime import datetime
 
 from app.core.exceptions import ApiError
 from app.schemas.ws import ACCOUNT_TYPES, ServerMode, WsSessionStatus
-from oauth2.kiwoom_oauth2 import HOST_MOC, HOST_REAL, load_api_keys
-from oauth2.oauth import get_unrevoked_token
+from oauth2.kiwoom_oauth2 import HOST_MOC, HOST_REAL
+from oauth2.oauth import get_current_unrevoked_token
 from websocket.client import WebSocketClient, SOCKET_URL_PROD, SOCKET_URL_MOCK
 from websocket.realtime import register, remove
 
@@ -64,7 +64,16 @@ class WsSessionManager:
     # ─────────────────────────────────────────────
     # 내부 토큰 헬퍼
     # ─────────────────────────────────────────────
-    def _resolve_token(self, server_mode: ServerMode) -> tuple[str, str]:
+    def _resolve_token(self) -> tuple[ServerMode, str, str]:
+        token_ctx = get_current_unrevoked_token()
+        if not token_ctx:
+            raise ApiError(
+                message="No valid access token found. Issue a token first via POST /api/v1/auth/token",
+                code="TOKEN_NOT_FOUND",
+                status_code=401,
+            )
+        server_mode = token_ctx[0]  # type: ignore[assignment]
+        token = token_ctx[1]
         host = _SERVER_HOSTS.get(server_mode)
         if not host:
             raise ApiError(
@@ -72,15 +81,7 @@ class WsSessionManager:
                 code="INVALID_SERVER_MODE",
                 status_code=400,
             )
-        app_key, _ = load_api_keys(host=host)
-        token = get_unrevoked_token(app_key)
-        if not token:
-            raise ApiError(
-                message="No valid access token found. Issue a token first via POST /api/v1/auth/token",
-                code="TOKEN_NOT_FOUND",
-                status_code=401,
-            )
-        return host, token
+        return server_mode, host, token
 
     # ─────────────────────────────────────────────
     # 백그라운드 async 루프
@@ -159,11 +160,10 @@ class WsSessionManager:
 
     def start(
         self,
-        server_mode: ServerMode,
         items: list[str],
         types: list[str],
         group_no: str = "1",
-    ) -> None:
+    ) -> ServerMode:
         with self._lock:
             if self.is_running():
                 raise ApiError(
@@ -172,7 +172,7 @@ class WsSessionManager:
                     status_code=409,
                 )
 
-            _, token = self._resolve_token(server_mode)
+            server_mode, _, token = self._resolve_token()
             ws_url = _SERVER_WS_URL[server_mode]
             stop_event = threading.Event()
             self._stop_event = stop_event
@@ -193,6 +193,7 @@ class WsSessionManager:
             thread = threading.Thread(target=_run, daemon=True, name="ws-bg")
             self._thread = thread
             thread.start()
+            return server_mode
 
     def stop(self) -> None:
         with self._lock:

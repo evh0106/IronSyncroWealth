@@ -7,6 +7,7 @@ import json
 import logging
 from logging.config import dictConfig
 from time import perf_counter
+from urllib.parse import urlparse
 from uuid import uuid4
 
 from fastapi import Request
@@ -152,6 +153,29 @@ def get_logger() -> logging.Logger:
     return logging.getLogger(LOGGER_NAME)
 
 
+def _is_local_swagger_request(request: Request) -> bool:
+    path = request.url.path or ""
+    if path == "/openapi.json" or path.startswith("/docs") or path.startswith("/redoc"):
+        return True
+
+    referer = (request.headers.get("referer") or "").strip()
+    host = (request.headers.get("host") or "").strip()
+    if not referer:
+        return False
+
+    parsed = urlparse(referer)
+    if "/docs" not in (parsed.path or ""):
+        return False
+
+    if not parsed.netloc:
+        return True
+
+    if host and parsed.netloc == host:
+        return True
+
+    return parsed.hostname in {"localhost", "127.0.0.1"}
+
+
 async def request_logging_middleware(request: Request, call_next):
     logger = get_logger()
     request_id = request.headers.get("x-request-id") or str(uuid4())
@@ -173,16 +197,18 @@ async def request_logging_middleware(request: Request, call_next):
     request.state.request_id = request_id
 
     req_id = ""
-    try:
-        _, req_id = log_http_request(
-            api_id="fastapi_inbound",
-            url=str(request.url),
-            request_headers=dict(request.headers),
-            request_body=req_body_text,
-            log_name="fastapi",
-        )
-    except Exception:
-        req_id = ""
+    skip_file_log = _is_local_swagger_request(request)
+    if not skip_file_log:
+        try:
+            _, req_id = log_http_request(
+                api_id="fastapi_inbound",
+                url=str(request.url),
+                request_headers=dict(request.headers),
+                request_body=req_body_text,
+                log_name="fastapi",
+            )
+        except Exception:
+            req_id = ""
 
     started = perf_counter()
     try:

@@ -61,7 +61,6 @@ async def call_ordr_api(
     svc: ServiceDep,
 ) -> OrdrApiResponse:
     return await svc.call(
-        server_mode=req.server_mode,
         api_id=api_id,
         body=req.body,
         confirm=req.confirm,

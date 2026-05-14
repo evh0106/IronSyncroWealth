@@ -28,7 +28,6 @@ class OrdrApiRequest(BaseModel):
     ``confirm=true`` 를 반드시 지정해야 합니다. 실수로 인한 실 매매 방지 장치입니다.
     """
 
-    server_mode: ServerMode = Field("real", description="서버 모드 (real/mock)")
     body: dict[str, Any] = Field(
         default_factory=dict,
         description="Kiwoom API 요청 바디. api_id에 따라 필요한 필드를 채워 넣습니다.",

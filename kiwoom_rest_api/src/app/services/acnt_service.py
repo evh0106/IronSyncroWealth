@@ -7,10 +7,10 @@
 from __future__ import annotations
 
 from app.core.exceptions import ApiError
-from app.schemas.acnt import AcntApiResponse, AcntApiSpec, ServerMode
+from app.schemas.acnt import AcntApiResponse, AcntApiSpec
 from app.services.kiwoom_client import kiwoom_post
-from oauth2.kiwoom_oauth2 import HOST_MOC, HOST_REAL, load_api_keys
-from oauth2.oauth import get_unrevoked_token
+from oauth2.kiwoom_oauth2 import HOST_MOC, HOST_REAL
+from oauth2.oauth import get_current_unrevoked_token
 from acnt.specs import ACCOUNT_API_SPECS
 
 _SERVER_HOSTS: dict[str, str] = {
@@ -25,7 +25,15 @@ _SPEC_INDEX: dict[str, dict] = {s["api_id"]: s for s in ACCOUNT_API_SPECS}
 
 
 class AcntService:
-    def _resolve_token(self, server_mode: ServerMode) -> tuple[str, str]:
+    def _resolve_token(self) -> tuple[str, str, str]:
+        token_ctx = get_current_unrevoked_token()
+        if not token_ctx:
+            raise ApiError(
+                message="No valid access token found. Issue a token first via POST /api/v1/auth/token",
+                code="TOKEN_NOT_FOUND",
+                status_code=401,
+            )
+        server_mode, token = token_ctx
         host = _SERVER_HOSTS.get(server_mode)
         if host is None:
             raise ApiError(
@@ -33,15 +41,7 @@ class AcntService:
                 code="INVALID_SERVER_MODE",
                 status_code=400,
             )
-        app_key, _ = load_api_keys(host=host)
-        token = get_unrevoked_token(app_key)
-        if not token:
-            raise ApiError(
-                message="No valid access token found. Issue a token first via POST /api/v1/auth/token",
-                code="TOKEN_NOT_FOUND",
-                status_code=401,
-            )
-        return host, token
+        return server_mode, host, token
 
     def list_specs(self) -> list[AcntApiSpec]:
         """사용 가능한 계좌 API 스펙 목록을 반환합니다."""
@@ -58,7 +58,6 @@ class AcntService:
 
     async def call(
         self,
-        server_mode: ServerMode,
         api_id: str,
         body: dict,
     ) -> AcntApiResponse:
@@ -70,7 +69,7 @@ class AcntService:
                 status_code=400,
                 detail={"api_id": api_id, "valid_ids": sorted(_SPEC_INDEX.keys())},
             )
-        host, token = self._resolve_token(server_mode)
+        server_mode, host, token = self._resolve_token()
         data = await kiwoom_post(
             host=host,
             url_path=_ACNT_URL_PATH,

@@ -18,15 +18,18 @@ def _spec_key(url: str, marker: str) -> str:
 
 
 def _build_description(spec: dict[str, Any]) -> str:
+    api_id = spec.get("api_id", "")
     tr_id = spec.get("tr_id", "")
     tr_id_demo = spec.get("tr_id_demo", "")
     url = spec.get("url", "")
     method = spec.get("method", "GET")
     fields: list[dict[str, Any]] = spec.get("fields", []) or []
 
-    lines: list[str] = [
-        f"**TR_ID**: `{tr_id}`",
-    ]
+    lines: list[str] = []
+    if api_id:
+        lines.append(f"**API_ID**: `{api_id}`")
+    if tr_id:
+        lines.append(f"**TR_ID**: `{tr_id}`")
     if tr_id_demo:
         lines.append(f"**TR_ID (모의)**: `{tr_id_demo}`")
     lines += [
@@ -86,14 +89,17 @@ def register_spec_routes(
             continue
         name = str(spec.get("name", "") or key)
         desc = _build_description(spec)
+        api_id = str(spec.get("api_id", "") or "")
         tr_id = str(spec.get("tr_id", "") or "")
+        identifier = api_id or tr_id
+        summary = f"{name} [{identifier}]" if identifier else name
 
         router.add_api_route(
             f"/{key}",
             _make_handler(key, service_dep),
             methods=["POST"],
             response_model=ApiCallResponse,
-            summary=name,
+            summary=summary,
             description=desc,
             operation_id=f"call_{key.replace('-', '_').replace('/', '_')}_{tags[0]}",
             tags=tags,
@@ -103,6 +109,7 @@ def register_spec_routes(
                 502: {"description": "KIS 서버 오류"},
             },
             openapi_extra={
+                "x-api-id": api_id,
                 "x-tr-id": tr_id,
                 "x-kis-url": url,
             },
