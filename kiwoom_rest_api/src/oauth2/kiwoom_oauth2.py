@@ -8,6 +8,7 @@ from pathlib import Path
 import json
 
 import requests
+from logger import log_http_request, log_http_response
 
 from .specs_request import OAUTH2_API_SPECS
 from .specs_response import OAUTH2_RESPONSE_SPECS
@@ -95,7 +96,30 @@ def get_access_token(app_key: str, app_secret: str, host: str = HOST) -> str:
         'secretkey': app_secret,
     })
 
+    req_id = ''
+    try:
+        _, req_id = log_http_request(
+            api_id='au10001',
+            url=url,
+            request_headers=headers,
+            request_body=json.dumps(data, ensure_ascii=False),
+            log_name='oauth2',
+        )
+    except Exception:
+        req_id = ''
+
     response = requests.post(url, headers=headers, json=data)
+    if req_id:
+        try:
+            log_http_response(
+                req_id=req_id,
+                response_status=response.status_code,
+                response_headers=response.headers,
+                response_body=response.text,
+                log_name='oauth2',
+            )
+        except Exception:
+            pass
     _print_response(response, 'au10001')
 
     result = response.json()
@@ -130,7 +154,30 @@ def revoke_access_token(app_key: str, app_secret: str, token: str, host: str = H
         'token': token,
     })
 
+    req_id = ''
+    try:
+        _, req_id = log_http_request(
+            api_id='au10002',
+            url=url,
+            request_headers=headers,
+            request_body=json.dumps(data, ensure_ascii=False),
+            log_name='oauth2',
+        )
+    except Exception:
+        req_id = ''
+
     response = requests.post(url, headers=headers, json=data)
+    if req_id:
+        try:
+            log_http_response(
+                req_id=req_id,
+                response_status=response.status_code,
+                response_headers=response.headers,
+                response_body=response.text,
+                log_name='oauth2',
+            )
+        except Exception:
+            pass
     _print_response(response, 'au10002')
 
     result = response.json()

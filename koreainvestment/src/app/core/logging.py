@@ -10,6 +10,7 @@ from uuid import uuid4
 from fastapi import Request
 from starlette.responses import Response
 
+from audit_db import save_http_exchange
 from logger import log_http_request, log_http_response
 
 
@@ -130,6 +131,22 @@ async def request_logging_middleware(request: Request, call_next):
             )
         except Exception:
             logger.exception("response_logging_failed id=%s", request_id)
+
+    try:
+        save_http_exchange(
+            source="fastapi",
+            api_id="fastapi_inbound",
+            method=request.method,
+            req_url=str(request.url),
+            request_headers=dict(request.headers),
+            request_body=req_body_text,
+            response_status=final_response.status_code,
+            response_headers=response_headers,
+            response_body=rsp_body_text,
+            direction="inbound",
+        )
+    except Exception:
+        logger.exception("response_db_logging_failed id=%s", request_id)
 
     logger.info(
         "request id=%s method=%s path=%s status=%s elapsed_ms=%.2f",

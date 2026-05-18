@@ -72,8 +72,7 @@ def get_ws_status(mgr: ManagerDep) -> WsSessionStatus:
     ),
 )
 def start_ws_session(req: WsStartRequest, mgr: ManagerDep) -> WsOperationResult:
-    mgr.start(
-        server_mode=req.server_mode,
+    resolved_server_mode = mgr.start(
         items=req.items,
         types=req.types,
         group_no=req.group_no,
@@ -82,7 +81,7 @@ def start_ws_session(req: WsStartRequest, mgr: ManagerDep) -> WsOperationResult:
         success=True,
         message="WebSocket background session started.",
         detail={
-            "server_mode": req.server_mode,
+            "server_mode": resolved_server_mode,
             "items": req.items,
             "types": req.types,
             "group_no": req.group_no,

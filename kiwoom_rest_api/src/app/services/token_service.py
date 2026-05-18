@@ -26,6 +26,40 @@ _SERVER_ACCOUNT = {
 }
 
 
+def _is_idempotent_revoke_message(message: str) -> bool:
+    """이미 폐기되었거나 만료/무효 토큰 케이스를 멱등 성공으로 판단합니다."""
+    text = (message or "").lower()
+    keywords = (
+        "already",
+        "revoked",
+        "expired",
+        "invalid token",
+        "not found",
+        "폐기",
+        "만료",
+        "유효하지",
+        "존재하지",
+        "없습니다",
+    )
+    return any(word in text for word in keywords)
+
+
+def _normalize_revoke_token(token: str | None) -> str | None:
+    """Swagger 기본 플레이스홀더 입력을 무시하고 실제 토큰만 반환합니다."""
+    if token is None:
+        return None
+
+    value = token.strip()
+    if not value:
+        return None
+
+    placeholders = {"string", "null", "none", "undefined", "-"}
+    if value.lower() in placeholders:
+        return None
+
+    return value
+
+
 class TokenService:
     def _host_for_mode(self, server_mode: str) -> str:
         host = _SERVER_HOSTS.get(server_mode)
@@ -169,7 +203,8 @@ class TokenService:
     def revoke_token(self, server_mode: str, token: str | None = None) -> TokenRevokeResponse:
         host = self._host_for_mode(server_mode)
         app_key, app_secret = load_api_keys(host=host)
-        revoke_target = token or get_unrevoked_token(app_key)
+        requested_token = _normalize_revoke_token(token)
+        revoke_target = requested_token or get_unrevoked_token(app_key)
         if not revoke_target:
             raise ApiError(
                 message="No token was provided and no cached token exists",
@@ -203,19 +238,7 @@ class TokenService:
 
         try:
             response = requests.post(url, headers=headers, json=payload, timeout=15)
-            response.raise_for_status()
         except requests.RequestException as exc:
-            if req_id and getattr(exc, "response", None) is not None:
-                try:
-                    log_http_response(
-                        req_id=req_id,
-                        response_status=exc.response.status_code,
-                        response_headers=exc.response.headers,
-                        response_body=exc.response.text,
-                        log_name="fastapi",
-                    )
-                except Exception:
-                    pass
             raise ApiError(
                 message="Failed to revoke Kiwoom access token",
                 code="TOKEN_REVOKE_REQUEST_FAILED",
@@ -235,7 +258,18 @@ class TokenService:
             except Exception:
                 pass
 
-        result = response.json()
+        try:
+            result = response.json()
+        except ValueError as exc:
+            raise ApiError(
+                message="Failed to parse revoke response as JSON",
+                code="TOKEN_REVOKE_RESPONSE_PARSE_FAILED",
+                status_code=502,
+                detail={
+                    "status_code": response.status_code,
+                    "response_text": response.text,
+                },
+            ) from exc
 
         try:
             save_au10002_response(app_key, revoke_target, result)
@@ -247,9 +281,37 @@ class TokenService:
                 detail={"reason": str(exc)},
             ) from exc
 
-        if result.get("return_code") != 0:
+        return_msg = str(result.get("return_msg", ""))
+        if response.status_code >= 400:
+            if _is_idempotent_revoke_message(return_msg):
+                return TokenRevokeResponse(
+                    server_mode=server_mode,
+                    host=host,
+                    revoked_token=revoke_target,
+                    return_code=result.get("return_code", response.status_code),
+                    return_msg=return_msg,
+                )
             raise ApiError(
-                message=result.get("return_msg", "Token revoke failed"),
+                message="Failed to revoke Kiwoom access token",
+                code="TOKEN_REVOKE_REQUEST_FAILED",
+                status_code=502,
+                detail={
+                    "status_code": response.status_code,
+                    "result": result,
+                },
+            )
+
+        if result.get("return_code") != 0:
+            if _is_idempotent_revoke_message(return_msg):
+                return TokenRevokeResponse(
+                    server_mode=server_mode,
+                    host=host,
+                    revoked_token=revoke_target,
+                    return_code=result.get("return_code", ""),
+                    return_msg=return_msg,
+                )
+            raise ApiError(
+                message=return_msg or "Token revoke failed",
                 code="TOKEN_REVOKE_FAILED",
                 status_code=502,
                 detail=result,
@@ -260,7 +322,7 @@ class TokenService:
             host=host,
             revoked_token=revoke_target,
             return_code=result.get("return_code", 0),
-            return_msg=result.get("return_msg", ""),
+            return_msg=return_msg,
         )
 
 

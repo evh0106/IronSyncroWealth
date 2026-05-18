@@ -16,7 +16,6 @@ class AcntApiRequest(BaseModel):
     ``body`` 에는 해당 API의 요청 필드를 넣습니다.  빈 바디(``{}``)도 허용됩니다.
     """
 
-    server_mode: ServerMode = Field("real", description="서버 모드 (real/mock)")
     body: dict[str, Any] = Field(
         default_factory=dict,
         description=(

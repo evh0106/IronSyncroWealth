@@ -96,6 +96,17 @@ class WebSocketClient:
             await self.websocket.send(payload)
             self._log(f'[송신] {payload}')
 
+            try:
+                log_path = log_websocket_message(message, direction='send')
+                self._log(f'[로그] {log_path}')
+            except Exception as exc:
+                self._log(f'[로그 저장 오류] {exc}')
+
+            try:
+                ws_db.save_websocket_message_log(message, direction='send')
+            except Exception as exc:
+                self._log(f'[DB 저장 오류] {exc}')
+
     async def wait_for_login(self, timeout: float = 5.0) -> bool:
         """LOGIN 응답을 timeout 내에 기다리고 성공 여부를 반환합니다."""
         try:
@@ -114,6 +125,18 @@ class WebSocketClient:
                 raw = await self.websocket.recv()
                 response = json.loads(raw)
                 trnm = response.get('trnm', '')
+
+                # 모든 수신 메시지(제어/실시간 포함) 파일+DB 원문 저장
+                try:
+                    log_path = log_websocket_message(response, direction='recv')
+                    self._log(f'[로그] {log_path}')
+                except Exception as exc:
+                    self._log(f'[로그 저장 오류] {exc}')
+
+                try:
+                    ws_db.save_websocket_message_log(response, direction='recv')
+                except Exception as exc:
+                    self._log(f'[DB 저장 오류] {exc}')
 
                 # 로그인 응답
                 if trnm == 'LOGIN':
@@ -138,10 +161,6 @@ class WebSocketClient:
                     else:
                         pretty = json.dumps(response, indent=2, ensure_ascii=False)
                         self._log(f'[수신] {pretty}')
-                    
-                    # 로그 저장
-                    log_path = log_websocket_message(response, direction='recv')
-                    self._log(f'[로그] {log_path}')
                     
                     # DB 저장
                     try:

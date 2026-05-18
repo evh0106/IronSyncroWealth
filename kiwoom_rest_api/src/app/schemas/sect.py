@@ -12,7 +12,6 @@ ServerMode = Literal["real", "mock"]
 class SectCurrentPriceRequest(BaseModel):
     """업종현재가요청 (ka20001) 파라미터."""
 
-    server_mode: ServerMode = Field("real", description="서버 모드 (real/mock)")
     mrkt_tp: str = Field(
         "0",
         description="시장구분: 0=코스피, 1=코스닥, 2=코스피200",

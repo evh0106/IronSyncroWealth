@@ -1,5 +1,21 @@
 # FastAPI 구조로 리펙토링
 
+## FastAPI 설명
+
+FastAPI는 Python 기반의 현대적인 웹 프레임워크로, 빠른 개발 속도와 자동 API 문서화를 특징으로 합니다.
+
+- **비동기 (Async)**: `async def` 와 `await` 를 통해 I/O 대기 중 다른 요청 처리 가능
+- **타입 힌팅**: Python 타입 주석을 활용해 요청/응답 자동 검증 (Pydantic 기반)
+- **자동 문서화**: Swagger UI (`/docs`), ReDoc (`/redoc`) 자동 생성
+- **의존성 주입**: FastAPI의 `Depends` 를 통해 깔끔한 의존성 관리
+- **빠른 성능**: Uvicorn ASGI 서버로 동시성 처리 우수
+- **OpenAPI 지원**: RESTful API 표준 준수로 클라이언트 생성 자동화 가능
+
+키움증권 REST API 호출을 FastAPI 엔드포인트로 래핑하면:
+1. CLI(`run_main.bat`)와 FastAPI(`run_fastapi.bat`) 두 모드 동시 지원
+2. HTTP 클라이언트(React, Postman 등)에서 직접 호출 가능
+3. 토큰/로그/DB를 통합 관리
+
 **권장 아키텍처**
 1. app/api  
 REST 엔드포인트 라우터 (sect, volume, acnt, order, ws-control)

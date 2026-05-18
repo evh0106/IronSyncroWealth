@@ -40,7 +40,6 @@ ACCOUNT_TYPES = frozenset({"00", "04", "0s", "0J", "0U", "0I", "0m", "0u"})
 class WsStartRequest(BaseModel):
     """WebSocket 백그라운드 세션 시작 요청."""
 
-    server_mode: ServerMode = Field("real", description="서버 모드 (real/mock)")
     items: list[str] = Field(
         default_factory=list,
         description=(
