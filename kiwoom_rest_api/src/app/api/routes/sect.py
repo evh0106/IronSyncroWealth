@@ -12,6 +12,17 @@ router = APIRouter(prefix="/sect", tags=["업종"])
 
 @router.get(
     "/current-price",
+    include_in_schema=False,
+    response_model=SectCurrentPriceResponse,
+    summary="업종현재가요청 (ka20001)",
+    description=(
+        "업종코드별 현재가·전일대비·등락률 등을 조회합니다.\n\n"
+        "- 유효한 액세스 토큰이 DB에 캐시되어 있어야 합니다.\n"
+        "- 토큰 미존재 시 먼저 `POST /api/v1/auth/token` 을 호출하세요."
+    ),
+)
+@router.post(
+    "/current-price",
     response_model=SectCurrentPriceResponse,
     summary="업종현재가요청 (ka20001)",
     description=(

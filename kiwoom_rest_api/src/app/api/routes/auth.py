@@ -33,8 +33,42 @@ def issue_token(
     )
 
 
+@router.post(
+    "/au10001",
+    response_model=TokenIssueResponse,
+    summary="접근토큰 발급 (au10001)",
+    description="Kiwoom OAuth2 접근토큰 발급 API 별칭 엔드포인트",
+    openapi_extra={"x-api-id": "au10001", "x-kiwoom-url": "/oauth2/token"},
+)
+def issue_token_au10001(
+    request: TokenIssueRequest,
+    service: TokenService = Depends(get_token_service),
+) -> TokenIssueResponse:
+    return service.issue_token(
+        server_mode=request.server_mode,
+        reuse_cached=request.reuse_cached,
+    )
+
+
 @router.post("/token/revoke", response_model=TokenRevokeResponse)
 def revoke_token(
+    request: TokenRevokeRequest,
+    service: TokenService = Depends(get_token_service),
+) -> TokenRevokeResponse:
+    return service.revoke_token(
+        server_mode=request.server_mode,
+        token=request.token,
+    )
+
+
+@router.post(
+    "/au10002",
+    response_model=TokenRevokeResponse,
+    summary="접근토큰 폐기 (au10002)",
+    description="Kiwoom OAuth2 접근토큰 폐기 API 별칭 엔드포인트",
+    openapi_extra={"x-api-id": "au10002", "x-kiwoom-url": "/oauth2/revoke"},
+)
+def revoke_token_au10002(
     request: TokenRevokeRequest,
     service: TokenService = Depends(get_token_service),
 ) -> TokenRevokeResponse:

@@ -6,6 +6,7 @@ from app.schemas.common import ApiCallRequest, ApiCallResponse, ApiSpecSummary
 from app.services.market_service import MarketApiService, get_quotations_service
 from app.api.routes._spec_router import register_spec_routes
 from quotations.specs_request import QUOTATIONS_API_SPECS
+from quotations.specs_response import QUOTATIONS_API_RESPONSE_SPECS_BY_TR_ID
 
 router = APIRouter(prefix="/quotations", tags=["quotations"])
 
@@ -22,4 +23,5 @@ register_spec_routes(
     marker="/quotations/",
     service_dep=get_quotations_service,
     tags=["quotations"],
+    response_specs_by_tr_id=QUOTATIONS_API_RESPONSE_SPECS_BY_TR_ID,
 )

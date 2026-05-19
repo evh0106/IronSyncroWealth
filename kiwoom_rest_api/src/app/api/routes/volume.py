@@ -25,6 +25,12 @@ router = APIRouter(prefix="/volume", tags=["거래량"])
 
 @router.get(
     "/surge",
+    include_in_schema=False,
+    response_model=VolumeApiResponse,
+    summary="거래량급증요청 (ka10023)",
+)
+@router.post(
+    "/surge",
     response_model=VolumeApiResponse,
     summary="거래량급증요청 (ka10023)",
 )
@@ -48,6 +54,12 @@ async def get_volume_surge(
 
 
 @router.get(
+    "/today-rank",
+    include_in_schema=False,
+    response_model=VolumeApiResponse,
+    summary="당일거래량상위요청 (ka10030)",
+)
+@router.post(
     "/today-rank",
     response_model=VolumeApiResponse,
     summary="당일거래량상위요청 (ka10030)",
@@ -74,6 +86,12 @@ async def get_today_volume_rank(
 
 @router.get(
     "/prev-rank",
+    include_in_schema=False,
+    response_model=VolumeApiResponse,
+    summary="전일거래량상위요청 (ka10031)",
+)
+@router.post(
+    "/prev-rank",
     response_model=VolumeApiResponse,
     summary="전일거래량상위요청 (ka10031)",
 )
@@ -93,6 +111,12 @@ async def get_prev_volume_rank(
 
 
 @router.get(
+    "/trade-amount-rank",
+    include_in_schema=False,
+    response_model=VolumeApiResponse,
+    summary="거래대금상위요청 (ka10032)",
+)
+@router.post(
     "/trade-amount-rank",
     response_model=VolumeApiResponse,
     summary="거래대금상위요청 (ka10032)",
@@ -115,6 +139,12 @@ async def get_trade_amount_rank(
 
 @router.get(
     "/update",
+    include_in_schema=False,
+    response_model=VolumeApiResponse,
+    summary="거래량갱신요청 (ka10024)",
+)
+@router.post(
+    "/update",
     response_model=VolumeApiResponse,
     summary="거래량갱신요청 (ka10024)",
 )
@@ -132,6 +162,12 @@ async def get_volume_update(
 
 
 @router.get(
+    "/broker-instant",
+    include_in_schema=False,
+    response_model=VolumeApiResponse,
+    summary="거래원순간거래량요청 (ka10052)",
+)
+@router.post(
     "/broker-instant",
     response_model=VolumeApiResponse,
     summary="거래원순간거래량요청 (ka10052)",
@@ -153,6 +189,12 @@ async def get_broker_instant_volume(
 
 
 @router.get(
+    "/today-prev-contracts",
+    include_in_schema=False,
+    response_model=VolumeApiResponse,
+    summary="당일전일체결량요청 (ka10055)",
+)
+@router.post(
     "/today-prev-contracts",
     response_model=VolumeApiResponse,
     summary="당일전일체결량요청 (ka10055)",

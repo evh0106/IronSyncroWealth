@@ -13,6 +13,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Path
 from fastapi import status as http_status
 
+from acnt.specs import ACCOUNT_API_SPECS
 from app.schemas.acnt import (
     AcntApiRequest,
     AcntApiResponse,
@@ -36,10 +37,48 @@ async def list_acnt_specs(svc: ServiceDep) -> AcntApiSpecListResponse:
     return AcntApiSpecListResponse(total=len(specs), specs=specs)
 
 
+def _make_acnt_spec_handler(api_id: str):
+    async def _handler(req: AcntApiRequest, svc: ServiceDep) -> AcntApiResponse:
+        return await svc.call(api_id=api_id, body=req.body)
+
+    _handler.__name__ = f"call_acnt_{api_id}"
+    return _handler
+
+
+for _spec in ACCOUNT_API_SPECS:
+    _api_id = str(_spec.get("api_id", "")).strip()
+    if not _api_id:
+        continue
+
+    _name = str(_spec.get("name", _api_id))
+    _overview = str(_spec.get("overview", "")).strip()
+    _description = (
+        (f"{_overview}\n\n" if _overview else "")
+        + f"- API ID: `{_api_id}`\n"
+        + "- Kiwoom URL: `/api/dostk/acnt`"
+    )
+
+    router.add_api_route(
+        f"/{_api_id}",
+        _make_acnt_spec_handler(_api_id),
+        methods=["POST"],
+        response_model=AcntApiResponse,
+        status_code=http_status.HTTP_200_OK,
+        summary=f"{_name} ({_api_id})",
+        description=_description,
+        operation_id=f"call_acnt_{_api_id}",
+        openapi_extra={
+            "x-api-id": _api_id,
+            "x-kiwoom-url": "/api/dostk/acnt",
+        },
+    )
+
+
 @router.post(
     "/{api_id}",
     response_model=AcntApiResponse,
     status_code=http_status.HTTP_200_OK,
+    include_in_schema=False,
     summary="계좌 API 범용 호출",
     description=(
         "``api_id`` 에 해당하는 계좌 조회 API를 호출합니다.  \n"

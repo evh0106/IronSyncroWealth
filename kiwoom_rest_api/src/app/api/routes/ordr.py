@@ -18,7 +18,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Path
 from fastapi import status as http_status
 
+from ordr.specs import ORDR_API_SPECS
 from app.schemas.ordr import (
+    ORDER_MUTATION_API_IDS,
     OrdrApiRequest,
     OrdrApiResponse,
     OrdrApiSpecListResponse,
@@ -44,10 +46,55 @@ async def list_ordr_specs(svc: ServiceDep) -> OrdrApiSpecListResponse:
     return OrdrApiSpecListResponse(total=len(specs), specs=specs)
 
 
+def _make_ordr_spec_handler(api_id: str):
+    async def _handler(req: OrdrApiRequest, svc: ServiceDep) -> OrdrApiResponse:
+        return await svc.call(api_id=api_id, body=req.body, confirm=req.confirm)
+
+    _handler.__name__ = f"call_ordr_{api_id}"
+    return _handler
+
+
+for _spec in ORDR_API_SPECS:
+    _api_id = str(_spec.get("api_id", "")).strip()
+    if not _api_id:
+        continue
+
+    _name = str(_spec.get("name", _api_id))
+    _overview = str(_spec.get("overview", "")).strip()
+    _is_mutation = _api_id in ORDER_MUTATION_API_IDS
+    _safety_note = (
+        "\n\n주의: 주문 변경 API이므로 요청 바디에 `\"confirm\": true` 가 필요합니다."
+        if _is_mutation
+        else ""
+    )
+    _description = (
+        (f"{_overview}\n\n" if _overview else "")
+        + f"- API ID: `{_api_id}`\n"
+        + "- Kiwoom URL: `/api/dostk/ordr`"
+        + _safety_note
+    )
+
+    router.add_api_route(
+        f"/{_api_id}",
+        _make_ordr_spec_handler(_api_id),
+        methods=["POST"],
+        response_model=OrdrApiResponse,
+        status_code=http_status.HTTP_200_OK,
+        summary=f"{_name} ({_api_id})",
+        description=_description,
+        operation_id=f"call_ordr_{_api_id}",
+        openapi_extra={
+            "x-api-id": _api_id,
+            "x-kiwoom-url": "/api/dostk/ordr",
+        },
+    )
+
+
 @router.post(
     "/{api_id}",
     response_model=OrdrApiResponse,
     status_code=http_status.HTTP_200_OK,
+    include_in_schema=False,
     summary="주문 API 범용 호출",
     description=(
         "``api_id`` 에 해당하는 주문 API를 호출합니다.  \n"
