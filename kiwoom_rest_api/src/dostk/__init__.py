@@ -1,5 +1,5 @@
 """
-volume 패키지 – 키움 거래량 관련 API
+dostk 패키지 – 키움 거래량 관련 API
 
 순위정보 (rank.py):
     print_volume_surge        – 거래량급증요청  (ka10023)

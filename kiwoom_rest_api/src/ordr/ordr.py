@@ -12,7 +12,7 @@ import db
 from logger import log_http_request, log_http_response
 from oauth2 import HOST
 from .specs import ORDR_API_SPECS, ORDR_RESPONSE_SPECS
-from volume._fmt import _ljust, _wcslen
+from dostk._fmt import _ljust, _wcslen
 
 
 _ORDR_URL = HOST + '/api/dostk/ordr'

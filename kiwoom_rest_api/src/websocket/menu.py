@@ -3,7 +3,7 @@
 websocket.main 모듈이 독립 실행될 때 사용합니다.
 """
 
-from volume._fmt import _ljust
+from dostk._fmt import _ljust
 
 REALTIME_TYPES = [
     ('0B', '주식체결'),

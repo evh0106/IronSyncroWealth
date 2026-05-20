@@ -1,6 +1,6 @@
 """거래량 조회 서비스 (ka10023/30/31/32/24/52/55).
 
-기존 volume.rank / volume.stkinfo 의 HTTP 호출 로직을 FastAPI 서비스 레이어로 이관합니다.
+기존 dostk.rank / dostk.stkinfo 의 HTTP 호출 로직을 FastAPI 서비스 레이어로 이관합니다.
 """
 
 from __future__ import annotations
@@ -22,8 +22,8 @@ from app.schemas.volume import (
 from app.services.kiwoom_client import kiwoom_post
 from oauth2.kiwoom_oauth2 import HOST_MOC, HOST_REAL
 from oauth2.oauth import get_current_unrevoked_token
-from volume.rank import save_ka10023, save_ka10030, save_ka10031, save_ka10032
-from volume.stkinfo import save_ka10024, save_ka10052, save_ka10055
+from dostk.rank import save_ka10023, save_ka10030, save_ka10031, save_ka10032
+from dostk.stkinfo import save_ka10024, save_ka10052, save_ka10055
 
 _SERVER_HOSTS: dict[str, str] = {
     "real": HOST_REAL,

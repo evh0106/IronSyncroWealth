@@ -8,10 +8,19 @@
 
 import sys
 from acnt import run_account_api_menu
+from chart import run_chart_api_menu
+from crdordr import run_crdordr_api_menu
+from elw import run_elw_api_menu
+from etf import run_etf_api_menu
+from frgnistt import run_frgnistt_api_menu
+from mrkcond import run_mrkcond_api_menu
 from ordr import run_order_api_menu
 from oauth2 import HOST, get_access_token, get_server_mode_label, load_api_keys, revoke_access_token
 from sect.sector_price import print_sector_price
-from volume import (
+from shsa import run_shsa_api_menu
+from slb import run_slb_api_menu
+from thme import run_thme_api_menu
+from dostk import (
     print_volume_surge,
     print_today_volume_rank,
     print_prev_volume_rank,
@@ -20,7 +29,7 @@ from volume import (
     print_broker_instant_volume,
     print_today_prev_contracts,
 )
-from volume._fmt import _ljust
+from dostk._fmt import _ljust
 from websocket.main import (
     run_realtime_quote_bg,
     run_account_realtime_bg,
@@ -47,7 +56,16 @@ MENU_CATEGORIES = [
         ('7', '당일전일체결량 조회   (ka10055)', print_today_prev_contracts),
     ]),
     ('4', '주문', run_order_api_menu),
-    ('5', '웹소켓', [
+    ('5', '차트', run_chart_api_menu),
+    ('6', '신용주문', run_crdordr_api_menu),
+    ('7', 'ELW', run_elw_api_menu),
+    ('8', 'ETF', run_etf_api_menu),
+    ('9', '외인기관', run_frgnistt_api_menu),
+    ('10', '시세', run_mrkcond_api_menu),
+    ('11', '공매도', run_shsa_api_menu),
+    ('12', '대차', run_slb_api_menu),
+    ('13', '테마', run_thme_api_menu),
+    ('14', '웹소켓', [
         ('1', '종목 실시간 시세 시작  (백그라운드)', run_realtime_quote_bg),
         ('2', '계좌/기타 실시간 시작  (백그라운드)', run_account_realtime_bg),
         ('3', '조건검색              (ka10171~74)', run_condition_search),

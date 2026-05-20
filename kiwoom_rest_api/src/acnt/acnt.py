@@ -12,7 +12,7 @@ import db
 from logger import log_http_request, log_http_response
 from oauth2 import HOST
 from .specs import ACCOUNT_API_SPECS, ACCOUNT_RESPONSE_SPECS
-from volume._fmt import _ljust, _rjust, _wcslen
+from dostk._fmt import _ljust, _rjust, _wcslen
 
 
 _ACNT_URL = HOST + '/api/dostk/acnt'
