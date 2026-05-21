@@ -3,6 +3,8 @@
 from fastapi import APIRouter, Depends
 
 from app.schemas.auth import (
+    Au10001Request,
+    Au10002Request,
     TokenIssueRequest,
     TokenIssueResponse,
     TokenRevokeRequest,
@@ -41,12 +43,13 @@ def issue_token(
     openapi_extra={"x-api-id": "au10001", "x-kiwoom-url": "/oauth2/token"},
 )
 def issue_token_au10001(
-    request: TokenIssueRequest,
+    request: Au10001Request,
     service: TokenService = Depends(get_token_service),
 ) -> TokenIssueResponse:
+    _ = request
     return service.issue_token(
-        server_mode=request.server_mode,
-        reuse_cached=request.reuse_cached,
+        server_mode="real",
+        reuse_cached=False,
     )
 
 
@@ -69,10 +72,11 @@ def revoke_token(
     openapi_extra={"x-api-id": "au10002", "x-kiwoom-url": "/oauth2/revoke"},
 )
 def revoke_token_au10002(
-    request: TokenRevokeRequest,
+    request: Au10002Request,
     service: TokenService = Depends(get_token_service),
 ) -> TokenRevokeResponse:
+    _ = (request.appkey, request.secretkey)
     return service.revoke_token(
-        server_mode=request.server_mode,
+        server_mode="real",
         token=request.token,
     )

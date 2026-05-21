@@ -13,6 +13,12 @@ class TokenIssueRequest(BaseModel):
     reuse_cached: bool = Field(default=True, description="Reuse non-revoked token from DB if available")
 
 
+class Au10001Request(BaseModel):
+    grant_type: str = Field(..., description="client_credentials")
+    appkey: str = Field(..., description="Kiwoom app key")
+    secretkey: str = Field(..., description="Kiwoom secret key")
+
+
 class TokenIssueResponse(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
@@ -30,6 +36,12 @@ class TokenIssueResponse(BaseModel):
 class TokenRevokeRequest(BaseModel):
     server_mode: ServerMode = Field(default="real", description="Kiwoom server mode")
     token: str | None = Field(default=None, description="Token to revoke; if omitted, try current cached token")
+
+
+class Au10002Request(BaseModel):
+    appkey: str = Field(..., description="Kiwoom app key")
+    secretkey: str = Field(..., description="Kiwoom secret key")
+    token: str = Field(..., description="Access token to revoke")
 
 
 class TokenRevokeResponse(BaseModel):

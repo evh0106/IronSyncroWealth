@@ -13,10 +13,12 @@ POST /api/v1/ordr/{api_id}       - 지정된 주문 API 범용 호출
 
 from __future__ import annotations
 
+from typing import Any
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Path
 from fastapi import status as http_status
+from pydantic import BaseModel, Field, create_model
 
 from ordr.specs import ORDR_API_SPECS
 from app.schemas.ordr import (
@@ -30,6 +32,27 @@ from app.services.ordr_service import OrdrService, get_ordr_service
 router = APIRouter(prefix="/ordr", tags=["ordr"])
 
 ServiceDep = Annotated[OrdrService, Depends(get_ordr_service)]
+
+
+def _create_ordr_request_model(api_id: str, spec: dict[str, Any]) -> type[BaseModel]:
+    field_defs: dict[str, tuple[Any, Field]] = {}
+    for field in spec.get("fields", []) or []:
+        name = str(field.get("element", "")).strip()
+        if not name:
+            continue
+
+        required = bool(field.get("required", False))
+        label = str(field.get("label", "")).strip()
+        desc = str(field.get("description", "")).strip()
+        field_desc = " / ".join(x for x in [label, desc] if x)
+
+        if required:
+            field_defs[name] = (str, Field(..., description=field_desc or None))
+        else:
+            field_defs[name] = (str | None, Field(None, description=field_desc or None))
+
+    model_name = f"OrdrReq_{api_id}"
+    return create_model(model_name, __base__=BaseModel, **field_defs)
 
 
 @router.get(
@@ -47,8 +70,10 @@ async def list_ordr_specs(svc: ServiceDep) -> OrdrApiSpecListResponse:
 
 
 def _make_ordr_spec_handler(api_id: str):
-    async def _handler(req: OrdrApiRequest, svc: ServiceDep) -> OrdrApiResponse:
-        return await svc.call(api_id=api_id, body=req.body, confirm=req.confirm)
+    async def _handler(req: BaseModel, svc: ServiceDep) -> OrdrApiResponse:
+        body = req.model_dump(exclude_none=True)
+        confirm = api_id in ORDER_MUTATION_API_IDS
+        return await svc.call(api_id=api_id, body=body, confirm=confirm)
 
     _handler.__name__ = f"call_ordr_{api_id}"
     return _handler
@@ -73,10 +98,13 @@ for _spec in ORDR_API_SPECS:
         + "- Kiwoom URL: `/api/dostk/ordr`"
         + _safety_note
     )
+    _req_model = _create_ordr_request_model(_api_id, _spec)
+    _handler = _make_ordr_spec_handler(_api_id)
+    _handler.__annotations__["req"] = _req_model
 
     router.add_api_route(
         f"/{_api_id}",
-        _make_ordr_spec_handler(_api_id),
+        _handler,
         methods=["POST"],
         response_model=OrdrApiResponse,
         status_code=http_status.HTTP_200_OK,

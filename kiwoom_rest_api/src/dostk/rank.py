@@ -428,7 +428,13 @@ def print_prev_volume_rank(token: str):
     _print_table(items, cols_disp, widths, left_set, row_num=True, row_fn=_row)
 
     try:
-        count = save_ka10031(items)
+        count = save_ka10031(items, {
+            'mrkt_tp': mrkt_tp,
+            'qry_tp': qry_tp,
+            'rank_strt': rank_strt,
+            'rank_end': rank_end,
+            'stex_tp': '3',
+        })
         print(f'  → {count}건 저장 완료.')
     except Exception as e:
         print(f'  [DB 오류] {e}')
@@ -587,10 +593,13 @@ _INSERT_KA10031 = """
 """
 
 
-def save_ka10031(items: list) -> int:
+def save_ka10031(items: list, request_params: dict | None = None) -> int:
     """전일거래량상위 리스트를 ka10031_pred_trde_qty_upper 테이블에 저장합니다."""
     if not items:
         return 0
+
+    request_params = request_params or {}
+    req_mrkt_tp = str(request_params.get('mrkt_tp', ''))
 
     header_id = int(datetime.now().timestamp() * 1000)
     rows = []
@@ -599,7 +608,8 @@ def save_ka10031(items: list) -> int:
             'header_id': header_id,
             'stk_cd': item.get('stk_cd', ''),
             'stk_nm': item.get('stk_nm', ''),
-            'mrkt_tp': item.get('mrkt_tp', ''),
+            # 응답 본문에 시장구분이 없을 수 있어 요청 파라미터를 우선 저장합니다.
+            'mrkt_tp': req_mrkt_tp or item.get('mrkt_tp', ''),
             'cur_prc': item.get('cur_prc', ''),
             'pred_pre_sig': item.get('pred_pre_sig', ''),
             'pred_pre': item.get('pred_pre', ''),

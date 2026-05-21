@@ -86,13 +86,21 @@ class VolumeService:
             # CLI 경로와 동일하게 저장 실패가 응답 자체를 막지 않도록 합니다.
             pass
 
-    async def _save_prev_volume_rank(self, data: dict) -> None:
+    async def _save_prev_volume_rank(self, req: PrevVolumeRankRequest, data: dict) -> None:
         items = data.get("pred_trde_qty_upper", [])
         if data.get("return_code") != 0 or not items:
             return
 
+        request_params = {
+            "mrkt_tp": req.mrkt_tp,
+            "qry_tp": req.qry_tp,
+            "rank_strt": req.rank_strt,
+            "rank_end": req.rank_end,
+            "stex_tp": req.stex_tp,
+        }
+
         try:
-            await asyncio.to_thread(save_ka10031, items)
+            await asyncio.to_thread(save_ka10031, items, request_params)
         except Exception:
             # CLI 경로와 동일하게 저장 실패가 응답 자체를 막지 않도록 합니다.
             pass
@@ -197,7 +205,7 @@ class VolumeService:
             "stex_tp": req.stex_tp,
         }
         data = await kiwoom_post(host, _RKINFO_URL_PATH, "ka10031", token, body)
-        await self._save_prev_volume_rank(data)
+        await self._save_prev_volume_rank(req, data)
         return self._wrap(server_mode, "ka10031", data)
 
     async def trade_amount_rank(self, req: TradeAmountRankRequest) -> VolumeApiResponse:

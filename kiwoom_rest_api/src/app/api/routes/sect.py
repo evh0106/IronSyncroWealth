@@ -33,7 +33,7 @@ router = APIRouter(prefix="/sect", tags=["업종"])
 )
 async def get_current_price(
     mrkt_tp: str = Query("0", description="시장구분: 0=코스피, 1=코스닥, 2=코스피200"),
-    sect_cd: str = Query(
+    inds_cd: str = Query(
         "001",
         description=(
             "업종코드: 001=종합(KOSPI), 002=대형주, 003=중형주, 004=소형주, "
@@ -44,5 +44,5 @@ async def get_current_price(
 ) -> SectCurrentPriceResponse:
     return await service.get_current_price(
         mrkt_tp=mrkt_tp,
-        sect_cd=sect_cd,
+        sect_cd=inds_cd,
     )
