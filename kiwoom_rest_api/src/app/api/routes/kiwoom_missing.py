@@ -85,7 +85,8 @@ def _build_request_model(spec: KiwoomRawApiSpec) -> type[BaseModel]:
 
 def _build_handler_signature(spec: KiwoomRawApiSpec) -> tuple[inspect.Signature, bool]:
     has_list_field = any(f.kind == "list" for f in spec.request_fields)
-    use_query_params = bool(spec.request_fields) and not has_list_field
+    is_chart_api = spec.url_path == "/api/dostk/chart"
+    use_query_params = bool(spec.request_fields) and (is_chart_api or not has_list_field)
 
     parameters: list[inspect.Parameter] = []
 

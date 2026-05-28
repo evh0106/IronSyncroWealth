@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 from dataclasses import dataclass
@@ -8,6 +9,7 @@ from typing import Any
 
 from app.core.exceptions import ApiError
 from app.services.kiwoom_client import kiwoom_post
+from chart.db import save_chart_api_response_with_meta
 from oauth2.kiwoom_oauth2 import HOST_MOC, HOST_REAL
 from oauth2.oauth import get_current_unrevoked_token
 
@@ -221,6 +223,32 @@ class KiwoomRawService:
             token=token,
             body=body,
         )
+
+        if spec.doc_rel_path.startswith("chart/"):
+            try:
+                save_meta = await asyncio.to_thread(
+                    save_chart_api_response_with_meta,
+                    spec.api_id,
+                    body,
+                    data,
+                )
+                if save_meta.get("rows", 0) > 0:
+                    list_table = save_meta.get("list_table", "")
+                    header_table = save_meta.get("header_table")
+                    if header_table:
+                        print(
+                            f"[CHART DB 저장] api_id={spec.api_id} "
+                            f"header_table={header_table}, list_table={list_table}, rows={save_meta['rows']}"
+                        )
+                    else:
+                        print(
+                            f"[CHART DB 저장] api_id={spec.api_id} "
+                            f"list_table={list_table}, rows={save_meta['rows']}"
+                        )
+            except Exception:
+                # 저장 실패가 API 응답 자체를 막지 않도록 무시
+                pass
+
         return {
             "server_mode": server_mode,
             "api_id": spec.api_id,
