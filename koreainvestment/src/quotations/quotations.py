@@ -45,6 +45,7 @@ TR_ID_TO_TABLE: dict[str, str] = {
 _TABLE_COLUMNS_CACHE: dict[str, set[str]] = {}
 _INSERT_SQL_CACHE: dict[str, tuple[str, list[str]]] = {}
 _RESP_SKIP_FIELDS = {"rt_cd", "msg_cd", "msg1", "output", "output1", "output2"}
+_RESPONSE_HEADERS_KEY = "_response_headers"
 
 
 def _infer_default(element: str, description: str) -> str:
@@ -253,7 +254,21 @@ def call_quotations_api(
         log_name="koreainvestment",
     )
     response.raise_for_status()
-    return response.json()
+    payload = response.json()
+    if isinstance(payload, dict):
+        gt_uid = response.headers.get("gt_uid") or response.headers.get("GT_UID") or ""
+        if gt_uid:
+            payload = dict(payload)
+            payload[_RESPONSE_HEADERS_KEY] = {"gt_uid": str(gt_uid)}
+    return payload
+
+
+def _extract_gt_uid(result: dict[str, Any]) -> str:
+    headers = result.get(_RESPONSE_HEADERS_KEY)
+    if not isinstance(headers, dict):
+        return ""
+    value = headers.get("gt_uid") or headers.get("GT_UID") or ""
+    return str(value) if value is not None else ""
 
 
 def _get_table_columns(cur: Any, table: str) -> set[str]:
@@ -290,18 +305,52 @@ def _extract_top_rsp_values(result: dict[str, Any]) -> dict[str, str]:
     return values
 
 
+def _extract_output1_values(result: dict[str, Any]) -> dict[str, str]:
+    output1 = result.get("output1")
+    if isinstance(output1, dict):
+        return {
+            k: ("" if v is None else str(v))
+            for k, v in output1.items()
+            if not isinstance(v, (dict, list))
+        }
+    if isinstance(output1, list) and output1 and isinstance(output1[0], dict):
+        first = output1[0]
+        return {
+            k: ("" if v is None else str(v))
+            for k, v in first.items()
+            if not isinstance(v, (dict, list))
+        }
+    return {}
+
+
 def _extract_array_rows(result: dict[str, Any]) -> list[dict[str, Any]]:
-    rows: list[dict[str, Any]] = []
-    for key in ("output", "output1", "output2"):
-        value = result.get(key)
-        if isinstance(value, dict):
-            rows.append(value)
-        elif isinstance(value, list):
-            rows.extend([row for row in value if isinstance(row, dict)])
-    return rows
+    # Prefer output2 rows when available; merge output1 fields later at insert time.
+    output2 = result.get("output2")
+    if isinstance(output2, list):
+        return [row for row in output2 if isinstance(row, dict)]
+    if isinstance(output2, dict):
+        return [output2]
+
+    output = result.get("output")
+    if isinstance(output, list):
+        return [row for row in output if isinstance(row, dict)]
+    if isinstance(output, dict):
+        return [output]
+
+    output1 = result.get("output1")
+    if isinstance(output1, list):
+        return [row for row in output1 if isinstance(row, dict)]
+    if isinstance(output1, dict):
+        return [output1]
+    return []
 
 
-def _collect_rsp_row_data(tr_id: str, top_values: dict[str, str], row_values: dict[str, Any] | None = None) -> dict[str, str]:
+def _collect_rsp_row_data(
+    tr_id: str,
+    top_values: dict[str, str],
+    output1_values: dict[str, str],
+    row_values: dict[str, Any] | None = None,
+) -> dict[str, str]:
     spec = QUOTATIONS_API_RESPONSE_SPECS_BY_TR_ID.get(tr_id, {})
 
     row_scalar: dict[str, str] = {}
@@ -321,7 +370,7 @@ def _collect_rsp_row_data(tr_id: str, top_values: dict[str, str], row_values: di
         if col in seen_cols:
             continue
         seen_cols.add(col)
-        row_data[col] = row_scalar.get(element, top_values.get(element, ""))
+        row_data[col] = row_scalar.get(element, output1_values.get(element, top_values.get(element, "")))
 
     return row_data
 
@@ -332,20 +381,24 @@ def save_quotations_result(spec: dict[str, Any], params: dict[str, str], result:
     if not table:
         return 0
 
+    gt_uid = _extract_gt_uid(result)
+    response_payload = {k: v for k, v in result.items() if k != _RESPONSE_HEADERS_KEY}
+
     base_row: dict[str, Any] = {
         "tr_id": tr_id,
-        "req_url": spec.get("url", ""),
+        "gt_uid": gt_uid,
         "rt_cd": str(result.get("rt_cd", "") or ""),
         "msg_cd": str(result.get("msg_cd", "") or ""),
         "msg1": str(result.get("msg1", "") or ""),
         "request_json": json.dumps(params, ensure_ascii=False),
-        "response_json": json.dumps(result, ensure_ascii=False),
+        "response_json": json.dumps(response_payload, ensure_ascii=False),
     }
 
     for key, value in params.items():
         base_row[f"req_{_norm_col(key)}"] = value
 
     top_rsp_values = _extract_top_rsp_values(result)
+    output1_values = _extract_output1_values(result)
     rsp_rows = _extract_array_rows(result)
     if not rsp_rows:
         rsp_rows = [{}]
@@ -353,7 +406,7 @@ def save_quotations_result(spec: dict[str, Any], params: dict[str, str], result:
     payload_rows: list[dict[str, Any]] = []
     for rsp_row in rsp_rows:
         row_data = dict(base_row)
-        row_data.update(_collect_rsp_row_data(tr_id, top_rsp_values, rsp_row))
+        row_data.update(_collect_rsp_row_data(tr_id, top_rsp_values, output1_values, rsp_row))
         payload_rows.append(row_data)
 
     conn = get_connection()

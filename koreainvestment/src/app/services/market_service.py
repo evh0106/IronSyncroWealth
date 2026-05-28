@@ -107,13 +107,21 @@ class MarketApiService:
         body = dict(body_params)
 
         try:
+            result: dict[str, Any] = {}
+            response_result: Any = {}
             if self.kind == "trading":
                 effective_tr_id = _resolve_trading_tr_id(spec, server_mode, tr_id)
                 result = self.caller(token, spec, effective_tr_id, query, body, server_mode)
                 saved_rows = self.saver(spec, effective_tr_id, query, body, result) if save_db else 0
+                response_result = result
                 response_tr_id = effective_tr_id
             else:
                 result = self.caller(token, spec, query, server_mode)
+                response_result = (
+                    {k: v for k, v in result.items() if k != "_response_headers"}
+                    if isinstance(result, dict)
+                    else result
+                )
                 saved_rows = self.saver(spec, query, result) if save_db else 0
                 response_tr_id = str(spec.get("tr_id", "") or "")
         except ApiError:
@@ -139,7 +147,7 @@ class MarketApiService:
                 "save_db": save_db,
             },
             saved_rows=saved_rows,
-            response=result,
+            response=response_result if self.kind != "trading" else result,
         )
 
 
