@@ -1,0 +1,11 @@
+.venv/
+log/
+
+__pycache__/
+**/__pycache__/
+*.py[cod]
+
+conf/*appkey.txt
+conf/*secretkey.txt
+
+~$*

@@ -152,7 +152,7 @@ type UiState = {
 6. 전략 설정/백테스트 결과 화면 확장
 
 ### 백엔드(현재 리포지토리)와의 매핑
-- kiwoom_rest_api FastAPI 엔드포인트를 BFF처럼 사용
+- kiwoom FastAPI 엔드포인트를 BFF처럼 사용
 - 이후 kis_rest_api가 추가되면 broker adapter만 확장
 - 프론트에서는 broker 파라미터만 변경하고 동일한 화면/유즈케이스 재사용
 

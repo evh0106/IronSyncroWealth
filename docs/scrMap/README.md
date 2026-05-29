@@ -32,7 +32,7 @@
 
 | 도메인 | 기준 증권사 | 기준 화면명 | 기준 MTS 메뉴 경로 | 비교 증권사 | 비교 화면명(앱) | 비교 MTS 메뉴 경로 | API 대응명 | API 식별자 | API URL | 근거 | 신뢰도 | 비고 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 수급(투자자) | 미래에셋증권 | 투자자별 매매동향 | M-STOCK > 종목상세 > 투자자(매매동향) | 키움증권 | 투자자별일별매매종목 | 영웅문S# > 종목상세 > 투자자(일별/누적) | 투자자별일별매매종목요청 | ka10058 | /api/dostk/stkinfo | 내부: kiwoom_rest_api/src/volume/specs_request.py, 외부: 검색 스니펫 | API 높음 / 메뉴 중간 | 메뉴 경로는 앱 버전에 따라 다를 수 있음 |
+| 수급(투자자) | 미래에셋증권 | 투자자별 매매동향 | M-STOCK > 종목상세 > 투자자(매매동향) | 키움증권 | 투자자별일별매매종목 | 영웅문S# > 종목상세 > 투자자(일별/누적) | 투자자별일별매매종목요청 | ka10058 | /api/dostk/stkinfo | 내부: kiwoom/src/volume/specs_request.py, 외부: 검색 스니펫 | API 높음 / 메뉴 중간 | 메뉴 경로는 앱 버전에 따라 다를 수 있음 |
 | 수급(투자자) | 미래에셋증권 | 투자자별 매매동향 | M-STOCK > 종목상세 > 투자자(매매동향) | 한국투자증권 | 종목별/시장별 투자자매매동향 | 한국투자 MTS > 종목상세 > 투자자 | 종목별 투자자매매동향(일별) / 시장별 투자자매매동향(일별) | FHPTJ04160001 / FHPTJ04040000 | /uapi/domestic-stock/v1/quotations/investor-trade-by-stock-daily, /uapi/domestic-stock/v1/quotations/inquire-investor-daily-by-market | 내부: koreainvestment/src/quotations/specs_request.py, 외부: 검색 스니펫 | API 높음 / 메뉴 중간 | 앱 화면명은 "투자자" 탭 중심으로 확인됨 |
 
 ## 확인 필요 항목
