@@ -21,7 +21,7 @@
 
 ### 폴더 구조(Feature-Sliced)
 ```
-iswApp/src/
+iswWeb/src/
 ├── app/
 │   ├── providers/
 │   ├── routes/
@@ -157,11 +157,12 @@ type UiState = {
 - 프론트에서는 broker 파라미터만 변경하고 동일한 화면/유즈케이스 재사용
 
 ## 빠른 시작
-1. iswApp 폴더로 이동
+1. iswWeb 폴더로 이동
 2. 패키지 설치: npm install
 3. 환경변수 파일 생성: .env.example 내용을 참고해 .env 작성
 4. 개발 서버 실행: npm run dev
 5. 배포 빌드: npm run build
+6. 접속 : http://localhost:5173/
 
 ## 이번에 생성된 초기 코드 범위
 - Vite + React + TypeScript 기본 프로젝트 파일
