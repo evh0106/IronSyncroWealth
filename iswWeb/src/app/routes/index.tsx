@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createBrowserRouter, NavLink, Outlet } from "react-router-dom";
+import { createBrowserRouter, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { HomePage } from "@/pages/home/ui/page";
 import { RealtimePage } from "@/pages/realtime/ui/page";
 import { OrdersPage } from "@/pages/orders/ui/page";
@@ -16,6 +16,7 @@ import { BrokerSwitch } from "@/features/broker-switch/ui/broker-switch";
 import { useUiStore } from "@/app/store/ui-store";
 
 function AppShell() {
+  const navigate = useNavigate();
   const sidebarOpen = useUiStore((state) => state.sidebarOpen);
   const toggleSidebar = useUiStore((state) => state.toggleSidebar);
   const [openGroups, setOpenGroups] = useState({
@@ -46,6 +47,11 @@ function AppShell() {
     });
   };
 
+  const handleStockMasterGroupClick = () => {
+    toggleGroup("stockMaster");
+    navigate("/stock-master/top");
+  };
+
   return (
     <div className={`app-shell ${sidebarOpen ? "" : "sidebar-collapsed"}`}>
       <aside className={`side-menu ${sidebarOpen ? "open" : "closed"}`}>
@@ -72,12 +78,13 @@ function AppShell() {
             <button
               type="button"
               className="nav-group-label nav-group-toggle"
-              onClick={() => toggleGroup("stockMaster")}
+              onClick={handleStockMasterGroupClick}
               aria-expanded={openGroups.stockMaster}
             >
               종목 마스터 조회
             </button>
             <div className={`nav-group-items ${openGroups.stockMaster ? "open" : "collapsed"}`}>
+              <NavLink to="/stock-master/top">TOP</NavLink>
               <NavLink to="/stock-master/kospi">KOSPI</NavLink>
               <NavLink to="/stock-master/kosdaq">KOSDAQ</NavLink>
               <NavLink to="/stock-master/konex">KONEX</NavLink>
@@ -170,6 +177,17 @@ export const appRouter = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "realtime", element: <RealtimePage /> },
+      {
+        path: "stock-master/top",
+        element: (
+          <StockMasterPage
+            title="종목 마스터 조회 TOP"
+            tableName="-"
+            summary="종목 마스터 세부 조회 메뉴를 선택하세요."
+            mode="top"
+          />
+        ),
+      },
       {
         path: "stock-master/kospi",
         element: (

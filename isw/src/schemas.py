@@ -27,6 +27,12 @@ class OrderResponse(BaseModel):
     status: str
 
 
+class StockMasterDownloadResponse(BaseModel):
+    status: str
+    message: str
+    requestedAt: str
+
+
 class RealtimePayload(BaseModel):
     price: float
     volume: int

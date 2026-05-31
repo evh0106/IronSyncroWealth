@@ -3,8 +3,16 @@ from __future__ import annotations
 import random
 import uuid
 from dataclasses import dataclass
+from datetime import datetime, timezone
 
-from schemas import AccountSummary, MarketQuote, OrderRequest, OrderResponse, RealtimePayload
+from schemas import (
+    AccountSummary,
+    MarketQuote,
+    OrderRequest,
+    OrderResponse,
+    RealtimePayload,
+    StockMasterDownloadResponse,
+)
 
 
 @dataclass
@@ -42,6 +50,14 @@ class MockTradingService:
 
     def create_order(self, payload: OrderRequest) -> OrderResponse:
         return OrderResponse(orderId=str(uuid.uuid4()), status="accepted")
+
+    def request_stock_master_download_all(self) -> StockMasterDownloadResponse:
+        requested_at = datetime.now(timezone.utc).isoformat()
+        return StockMasterDownloadResponse(
+            status="accepted",
+            message="모든 마스터 파일 다운로드 요청이 접수되었습니다.",
+            requestedAt=requested_at,
+        )
 
     def next_realtime(self, symbol: str) -> RealtimePayload:
         state = self._quotes.get(symbol)

@@ -215,6 +215,31 @@ h3,
   box-shadow: 0 10px 24px rgba(55, 84, 170, 0.08);
 }
 
+.stock-master-top-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.35rem;
+}
+
+.basic-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.75rem;
+  background: #fff;
+}
+
+.basic-table th,
+.basic-table td {
+  border: 1px solid var(--line);
+  padding: 0.65rem 0.75rem;
+  text-align: left;
+}
+
+.basic-table thead th {
+  background: rgba(79, 140, 255, 0.08);
+  font-weight: 700;
+}
+
 .kv-grid {
   display: grid;
   grid-template-columns: auto 1fr;
