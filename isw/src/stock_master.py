@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+from logger import error_logger
 
 # ── 저장 경로 ───────────────────────────────────────────────────────────
 MST_DIR = Path(__file__).resolve().parent.parent / "mst"
@@ -597,15 +598,38 @@ def download_all() -> list[dict[str, Any]]:
 
     각 시장별 결과(성공/오류)를 리스트로 반환한다.
     """
+    from db import get_conn
+    from stock_master_db import MARKET_SAVE_FN
+
     results: list[dict[str, Any]] = []
     for market, fn in _DOWNLOAD_TASKS:
         try:
-            results.append(fn())
+            result = fn()
+            result["db_rows"] = 0
+            if market in MARKET_SAVE_FN and result.get("file"):
+                try:
+                    csv_path = MST_DIR / result["file"]
+                    df = pd.read_csv(csv_path, encoding="utf-8-sig", dtype=str)
+                    conn = get_conn()
+                    try:
+                        result["db_rows"] = MARKET_SAVE_FN[market](df, conn)
+                    finally:
+                        conn.close()
+                except Exception as db_exc:
+                    result["db_error"] = str(db_exc)
+                    result["error"] = f"DB 저장 실패: {db_exc}"
+                    error_logger.exception(
+                        "stock-master db save failed market=%s file=%s",
+                        market,
+                        result.get("file") or "-",
+                    )
+            results.append(result)
         except Exception as exc:
             results.append({
                 "market": market,
                 "file": None,
                 "rows": 0,
+                "db_rows": 0,
                 "error": str(exc),
                 "savedAt": datetime.now(timezone.utc).isoformat(),
             })

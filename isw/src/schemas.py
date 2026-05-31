@@ -31,6 +31,7 @@ class StockMasterDownloadItem(BaseModel):
     market: str
     file: str | None
     rows: int
+    db_rows: int = 0
     error: str | None = None
     savedAt: str
 

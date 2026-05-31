@@ -5,11 +5,11 @@ import time
 from datetime import datetime, timezone
 from typing import Literal
 
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
 import stock_master
-from logger import access_logger
+from logger import access_logger, error_logger
 from schemas import AccountSummary, MarketQuote, OrderRequest, OrderResponse, StockMasterDownloadItem, StockMasterDownloadResponse
 from service import service
 
@@ -80,16 +80,29 @@ def submit_order(payload: OrderRequest) -> OrderResponse:
 @app.post("/api/v1/stock-master/download-all", response_model=StockMasterDownloadResponse)
 async def request_stock_master_download_all() -> StockMasterDownloadResponse:
     requested_at = datetime.now(timezone.utc).isoformat()
-    raw_results = await asyncio.to_thread(stock_master.download_all)
-    items = [StockMasterDownloadItem(**r) for r in raw_results]
-    has_error = any(item.error for item in items)
-    ok_count = sum(1 for item in items if not item.error)
-    return StockMasterDownloadResponse(
-        status="partial" if has_error else "ok",
-        message=f"{ok_count}/{len(items)}개 시장 마스터 파일 다운로드 완료.",
-        requestedAt=requested_at,
-        results=items,
-    )
+    try:
+        raw_results = await asyncio.to_thread(stock_master.download_all)
+        items = [StockMasterDownloadItem(**r) for r in raw_results]
+        has_error = any(item.error for item in items)
+        ok_count = sum(1 for item in items if not item.error)
+
+        if has_error:
+            failed_markets = [item.market for item in items if item.error]
+            error_logger.error(
+                "stock-master download partial failure requestedAt=%s failedMarkets=%s",
+                requested_at,
+                ",".join(failed_markets) or "-",
+            )
+
+        return StockMasterDownloadResponse(
+            status="partial" if has_error else "ok",
+            message=f"{ok_count}/{len(items)}개 시장 마스터 파일 다운로드 완료.",
+            requestedAt=requested_at,
+            results=items,
+        )
+    except Exception:
+        error_logger.exception("stock-master download-all failed requestedAt=%s", requested_at)
+        raise HTTPException(status_code=500, detail="다운로드 요청 중 오류가 발생했습니다.")
 
 
 @app.websocket("/ws/{broker}/{symbol}")

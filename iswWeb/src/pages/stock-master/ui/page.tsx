@@ -6,6 +6,7 @@ type DownloadResultItem = {
   market: string;
   file: string | null;
   rows: number;
+  db_rows: number;
   error?: string | null;
   savedAt: string;
 };
@@ -89,32 +90,34 @@ export function StockMasterPage({ title, tableName, summary, mode = "default" }:
                   <th scope="col">시장</th>
                   <th scope="col">파일명</th>
                   <th scope="col">행 수</th>
+                  <th scope="col">DB 저장</th>
                   <th scope="col">저장일시</th>
                   <th scope="col">상태</th>
                 </tr>
               </thead>
               <tbody>
-                {downloadResult && downloadResult.results.length > 0 ? (
-                  downloadResult.results.map((item) => (
-                    <tr key={item.market}>
-                      <td>{item.market}</td>
-                      <td>{item.file ?? "-"}</td>
-                      <td style={{ textAlign: "right" }}>{item.error ? "-" : item.rows.toLocaleString()}</td>
-                      <td>{formatSavedAt(item.savedAt)}</td>
-                      <td style={{ color: item.error ? "var(--err, #d33)" : "var(--ok, #2a7)" }}>
-                        {item.error ? `오류: ${item.error}` : "완료"}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
+                {downloadResult && downloadResult.results.length > 0
+                  ? downloadResult.results.map((item) => (
+                      <tr key={item.market}>
+                        <td>{item.market}</td>
+                        <td>{item.file ?? "-"}</td>
+                        <td style={{ textAlign: "right" }}>{item.error ? "-" : item.rows.toLocaleString()}</td>
+                        <td style={{ textAlign: "right" }}>{item.error ? "-" : (item.db_rows ?? 0).toLocaleString()}</td>
+                        <td>{formatSavedAt(item.savedAt)}</td>
+                        <td style={{ color: item.error ? "var(--err, #d33)" : "var(--ok, #2a7)" }}>
+                          {item.error ? `오류: ${item.error}` : "완료"}
+                        </td>
+                      </tr>
+                    ))
+                  : (
                   <tr>
-                    <td colSpan={5}>
+                    <td colSpan={6}>
                       {isDownloading
                         ? "마스터 파일 다운로드 중입니다..."
                         : "버튼을 눌러 마스터 파일을 다운로드하세요."}
                     </td>
                   </tr>
-                )}
+                    )}
               </tbody>
             </table>
           </>
