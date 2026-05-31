@@ -598,19 +598,32 @@ def download_all() -> list[dict[str, Any]]:
 
     각 시장별 결과(성공/오류)를 리스트로 반환한다.
     """
-    from db import get_conn
-    from stock_master_db import MARKET_SAVE_FN
+    db_enabled = True
+    db_init_error = ""
+    get_conn = None
+    MARKET_SAVE_FN: dict[str, Any] = {}
+    try:
+        from db import get_conn as _get_conn
+        from stock_master_db import MARKET_SAVE_FN as _market_save_fn
+
+        get_conn = _get_conn
+        MARKET_SAVE_FN = _market_save_fn
+    except Exception as exc:
+        db_enabled = False
+        db_init_error = str(exc)
+        print(f"[ERROR] stock-master db init failed: {exc}")
+        error_logger.exception("stock-master db init failed: %s", exc)
 
     results: list[dict[str, Any]] = []
     for market, fn in _DOWNLOAD_TASKS:
         try:
             result = fn()
             result["db_rows"] = 0
-            if market in MARKET_SAVE_FN and result.get("file"):
+            if db_enabled and market in MARKET_SAVE_FN and result.get("file"):
                 try:
                     csv_path = MST_DIR / result["file"]
                     df = pd.read_csv(csv_path, encoding="utf-8-sig", dtype=str)
-                    conn = get_conn()
+                    conn = get_conn()  # type: ignore[operator]
                     try:
                         result["db_rows"] = MARKET_SAVE_FN[market](df, conn)
                     finally:
@@ -618,13 +631,20 @@ def download_all() -> list[dict[str, Any]]:
                 except Exception as db_exc:
                     result["db_error"] = str(db_exc)
                     result["error"] = f"DB 저장 실패: {db_exc}"
+                    print(
+                        f"[ERROR] stock-master db save failed market={market} "
+                        f"file={result.get('file') or '-'} err={db_exc}"
+                    )
                     error_logger.exception(
                         "stock-master db save failed market=%s file=%s",
                         market,
                         result.get("file") or "-",
                     )
+            elif not db_enabled:
+                result["db_error"] = f"DB 비활성화: {db_init_error}"
             results.append(result)
         except Exception as exc:
+            print(f"[ERROR] stock-master download failed market={market} err={exc}")
             results.append({
                 "market": market,
                 "file": None,

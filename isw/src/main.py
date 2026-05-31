@@ -101,6 +101,7 @@ async def request_stock_master_download_all() -> StockMasterDownloadResponse:
             results=items,
         )
     except Exception:
+        print(f"[ERROR] stock-master download-all failed requestedAt={requested_at}")
         error_logger.exception("stock-master download-all failed requestedAt=%s", requested_at)
         raise HTTPException(status_code=500, detail="다운로드 요청 중 오류가 발생했습니다.")
 

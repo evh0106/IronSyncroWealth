@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS isw_mst_overseas_future CASCADE;
 -- KOSPI 종목 마스터 (kis_kospi_code_mst.py)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS isw_mst_kospi (
-	id                          BIGINT        NOT NULL AUTO_INCREMENT COMMENT 'PK',
+	base_date                   VARCHAR(8)    NOT NULL DEFAULT '' COMMENT '기준일자(YYYYMMDD)',
 	short_code                  VARCHAR(9)    NOT NULL DEFAULT '' COMMENT '단축코드',
 	standard_code               VARCHAR(12)   NOT NULL DEFAULT '' COMMENT '표준코드',
 	stock_name_kr               VARCHAR(200)  NOT NULL DEFAULT '' COMMENT '한글명',
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_kospi (
 	base_yyyymm                 VARCHAR(6)    NOT NULL DEFAULT '' COMMENT '기준년월',
 	prev_market_cap_100m        BIGINT        NOT NULL DEFAULT 0 COMMENT '전일기준 시가총액(억)',
 	fetched_at                  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수집일시',
-	PRIMARY KEY (id),
+	PRIMARY KEY (base_date, short_code),
 	UNIQUE KEY uq_kospi_short_code (short_code),
 	UNIQUE KEY uq_kospi_standard_code (standard_code),
 	INDEX idx_kospi_name (stock_name_kr),
@@ -59,7 +59,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_kospi (
 -- KOSDAQ 종목 마스터 (kis_kosdaq_code_mst.py)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS isw_mst_kosdaq (
-	id                          BIGINT        NOT NULL AUTO_INCREMENT COMMENT 'PK',
+	base_date                   VARCHAR(8)    NOT NULL DEFAULT '' COMMENT '기준일자(YYYYMMDD)',
 	short_code                  VARCHAR(9)    NOT NULL DEFAULT '' COMMENT '단축코드',
 	standard_code               VARCHAR(12)   NOT NULL DEFAULT '' COMMENT '표준코드',
 	stock_name_kr               VARCHAR(200)  NOT NULL DEFAULT '' COMMENT '한글종목명',
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_kosdaq (
 	base_yyyymm                 VARCHAR(6)    NOT NULL DEFAULT '' COMMENT '기준년월',
 	prev_market_cap_100m        BIGINT        NOT NULL DEFAULT 0 COMMENT '전일기준 시가총액 (억)',
 	fetched_at                  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수집일시',
-	PRIMARY KEY (id),
+	PRIMARY KEY (base_date, short_code),
 	UNIQUE KEY uq_kosdaq_short_code (short_code),
 	UNIQUE KEY uq_kosdaq_standard_code (standard_code),
 	INDEX idx_kosdaq_name (stock_name_kr),
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_kosdaq (
 -- KONEX 종목 마스터 (kis_konex_code_mst.py)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS isw_mst_konex (
-	id                          BIGINT        NOT NULL AUTO_INCREMENT COMMENT 'PK',
+	base_date                   VARCHAR(8)    NOT NULL DEFAULT '' COMMENT '기준일자(YYYYMMDD)',
 	short_code                  VARCHAR(9)    NOT NULL DEFAULT '' COMMENT '단축코드',
 	standard_code               VARCHAR(12)   NOT NULL DEFAULT '' COMMENT '표준코드',
 	stock_name_kr               VARCHAR(200)  NOT NULL DEFAULT '' COMMENT '종목명',
@@ -112,7 +112,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_konex (
 	base_yyyymm                 VARCHAR(6)    NOT NULL DEFAULT '' COMMENT '기준년월',
 	prev_market_cap_100m        BIGINT        NOT NULL DEFAULT 0 COMMENT '전일기준 시가총액(억)',
 	fetched_at                  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수집일시',
-	PRIMARY KEY (id),
+	PRIMARY KEY (base_date, short_code),
 	UNIQUE KEY uq_konex_short_code (short_code),
 	UNIQUE KEY uq_konex_standard_code (standard_code),
 	INDEX idx_konex_name (stock_name_kr),
@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_konex (
 -- 국내 ELW 종목 마스터 (domestic_elw_code.py)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS isw_mst_domestic_elw (
-	id                          BIGINT        NOT NULL AUTO_INCREMENT COMMENT 'PK',
+	base_date                   VARCHAR(8)    NOT NULL DEFAULT '' COMMENT '기준일자(YYYYMMDD)',
 	short_code                  VARCHAR(9)    NOT NULL DEFAULT '' COMMENT '단축코드',
 	standard_code               VARCHAR(12)   NOT NULL DEFAULT '' COMMENT '표준코드',
 	stock_name_kr               VARCHAR(200)  NOT NULL DEFAULT '' COMMENT '한글종목명',
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_domestic_elw (
 	prev_market_cap_100m        BIGINT        NOT NULL DEFAULT 0 COMMENT '전일시가총액(억)',
 	listed_shares_thousand      BIGINT        NOT NULL DEFAULT 0 COMMENT '상장주수(천)',
 	fetched_at                  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수집일시',
-	PRIMARY KEY (id),
+	PRIMARY KEY (base_date, short_code),
 	UNIQUE KEY uq_domestic_elw_short_code (short_code),
 	UNIQUE KEY uq_domestic_elw_standard_code (standard_code),
 	INDEX idx_domestic_elw_name (stock_name_kr),
@@ -156,7 +156,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_domestic_elw (
 -- 국내 지수선물옵션 종목 마스터 (domestic_index_future_code.py)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS isw_mst_domestic_index_future (
-	id                          BIGINT        NOT NULL AUTO_INCREMENT COMMENT 'PK',
+	base_date                   VARCHAR(8)    NOT NULL DEFAULT '' COMMENT '기준일자(YYYYMMDD)',
 	product_type                VARCHAR(1)    NOT NULL DEFAULT '' COMMENT '상품종류',
 	short_code                  VARCHAR(9)    NOT NULL DEFAULT '' COMMENT '단축코드',
 	standard_code               VARCHAR(12)   NOT NULL DEFAULT '' COMMENT '표준코드',
@@ -167,7 +167,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_domestic_index_future (
 	underlying_short_code       VARCHAR(9)    NOT NULL DEFAULT '' COMMENT '기초자산 단축코드',
 	underlying_name             VARCHAR(200)  NOT NULL DEFAULT '' COMMENT '기초자산 명',
 	fetched_at                  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수집일시',
-	PRIMARY KEY (id),
+	PRIMARY KEY (base_date, short_code),
 	UNIQUE KEY uq_domestic_index_future_short_code (short_code),
 	UNIQUE KEY uq_domestic_index_future_standard_code (standard_code),
 	INDEX idx_domestic_index_future_name (stock_name_kr),
@@ -178,7 +178,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_domestic_index_future (
 -- 국내 주식선물옵션 종목 마스터 (domestic_stock_future_code.py)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS isw_mst_domestic_stock_future (
-	id                          BIGINT        NOT NULL AUTO_INCREMENT COMMENT 'PK',
+	base_date                   VARCHAR(8)    NOT NULL DEFAULT '' COMMENT '기준일자(YYYYMMDD)',
 	product_type                VARCHAR(1)    NOT NULL DEFAULT '' COMMENT '상품종류',
 	short_code                  VARCHAR(9)    NOT NULL DEFAULT '' COMMENT '단축코드',
 	standard_code               VARCHAR(12)   NOT NULL DEFAULT '' COMMENT '표준코드',
@@ -189,7 +189,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_domestic_stock_future (
 	underlying_short_code       VARCHAR(9)    NOT NULL DEFAULT '' COMMENT '기초자산 단축코드',
 	underlying_name             VARCHAR(200)  NOT NULL DEFAULT '' COMMENT '기초자산 명',
 	fetched_at                  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수집일시',
-	PRIMARY KEY (id),
+	PRIMARY KEY (base_date, short_code),
 	UNIQUE KEY uq_domestic_stock_future_short_code (short_code),
 	UNIQUE KEY uq_domestic_stock_future_standard_code (standard_code),
 	INDEX idx_domestic_stock_future_name (stock_name_kr),
@@ -200,7 +200,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_domestic_stock_future (
 -- 국내 CME 연계 야간선물 종목 마스터 (domestic_cme_future_code.py)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS isw_mst_domestic_cme_future (
-	id                          BIGINT        NOT NULL AUTO_INCREMENT COMMENT 'PK',
+	base_date                   VARCHAR(8)    NOT NULL DEFAULT '' COMMENT '기준일자(YYYYMMDD)',
 	product_type                VARCHAR(1)    NOT NULL DEFAULT '' COMMENT '상품종류',
 	short_code                  VARCHAR(9)    NOT NULL DEFAULT '' COMMENT '단축코드',
 	standard_code               VARCHAR(12)   NOT NULL DEFAULT '' COMMENT '표준코드',
@@ -209,7 +209,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_domestic_cme_future (
 	underlying_short_code       VARCHAR(9)    NOT NULL DEFAULT '' COMMENT '기초자산 단축코드',
 	underlying_name             VARCHAR(200)  NOT NULL DEFAULT '' COMMENT '기초자산 명',
 	fetched_at                  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수집일시',
-	PRIMARY KEY (id),
+	PRIMARY KEY (base_date, short_code),
 	UNIQUE KEY uq_domestic_cme_future_short_code (short_code),
 	UNIQUE KEY uq_domestic_cme_future_standard_code (standard_code),
 	INDEX idx_domestic_cme_future_name (stock_name_kr),
@@ -220,7 +220,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_domestic_cme_future (
 -- 국내 상품선물옵션 종목 마스터 (domestic_commodity_future_code.py)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS isw_mst_domestic_commodity_future (
-	id                          BIGINT        NOT NULL AUTO_INCREMENT COMMENT 'PK',
+	base_date                   VARCHAR(8)    NOT NULL DEFAULT '' COMMENT '기준일자(YYYYMMDD)',
 	product_group               VARCHAR(1)    NOT NULL DEFAULT '' COMMENT '상품구분',
 	product_type                VARCHAR(1)    NOT NULL DEFAULT '' COMMENT '상품종류',
 	short_code                  VARCHAR(9)    NOT NULL DEFAULT '' COMMENT '단축코드',
@@ -230,7 +230,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_domestic_commodity_future (
 	underlying_short_code       VARCHAR(3)    NOT NULL DEFAULT '' COMMENT '기초자산 단축코드',
 	underlying_name             VARCHAR(200)  NOT NULL DEFAULT '' COMMENT '기초자산 명',
 	fetched_at                  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수집일시',
-	PRIMARY KEY (id),
+	PRIMARY KEY (base_date, short_code),
 	UNIQUE KEY uq_domestic_commodity_future_short_code (short_code),
 	UNIQUE KEY uq_domestic_commodity_future_standard_code (standard_code),
 	INDEX idx_domestic_commodity_future_name (stock_name_kr)
@@ -240,7 +240,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_domestic_commodity_future (
 -- 국내 EUREX 연계 야간옵션 종목 마스터 (domestic_eurex_option_code.py)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS isw_mst_domestic_eurex_option (
-	id                          BIGINT        NOT NULL AUTO_INCREMENT COMMENT 'PK',
+	base_date                   VARCHAR(8)    NOT NULL DEFAULT '' COMMENT '기준일자(YYYYMMDD)',
 	product_type                VARCHAR(1)    NOT NULL DEFAULT '' COMMENT '상품종류',
 	short_code                  VARCHAR(9)    NOT NULL DEFAULT '' COMMENT '단축코드',
 	standard_code               VARCHAR(12)   NOT NULL DEFAULT '' COMMENT '표준코드',
@@ -250,7 +250,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_domestic_eurex_option (
 	underlying_short_code       VARCHAR(8)    NOT NULL DEFAULT '' COMMENT '기초자산 단축코드',
 	underlying_name             VARCHAR(200)  NOT NULL DEFAULT '' COMMENT '기초자산 명',
 	fetched_at                  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수집일시',
-	PRIMARY KEY (id),
+	PRIMARY KEY (base_date, short_code),
 	UNIQUE KEY uq_domestic_eurex_option_short_code (short_code),
 	UNIQUE KEY uq_domestic_eurex_option_standard_code (standard_code),
 	INDEX idx_domestic_eurex_option_name (stock_name_kr)
@@ -260,7 +260,8 @@ CREATE TABLE IF NOT EXISTS isw_mst_domestic_eurex_option (
 -- 장내채권 종목 마스터 (domestic_bond_code.py)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS isw_mst_domestic_bond (
-	id                          BIGINT       NOT NULL AUTO_INCREMENT COMMENT 'PK',
+	base_date                   VARCHAR(8)   NOT NULL DEFAULT '' COMMENT '기준일자(YYYYMMDD)',
+	short_code                  VARCHAR(12)  NOT NULL DEFAULT '' COMMENT '단축코드',
 	bond_type                   VARCHAR(2)   NOT NULL DEFAULT '' COMMENT '유형',
 	bond_class_code             VARCHAR(2)   NOT NULL DEFAULT '' COMMENT '채권분류코드',
 	standard_code               VARCHAR(12)  NOT NULL DEFAULT '' COMMENT '표준코드',
@@ -270,7 +271,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_domestic_bond (
 	issue_date                  VARCHAR(8)   NOT NULL DEFAULT '' COMMENT '발행일',
 	redemption_date             VARCHAR(8)   NOT NULL DEFAULT '' COMMENT '상환일',
 	fetched_at                  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수집일시',
-	PRIMARY KEY (id),
+	PRIMARY KEY (base_date, short_code),
 	UNIQUE KEY uq_domestic_bond_standard_code (standard_code),
 	INDEX idx_domestic_bond_name (bond_name),
 	INDEX idx_domestic_bond_redemption_date (redemption_date)
@@ -280,7 +281,8 @@ CREATE TABLE IF NOT EXISTS isw_mst_domestic_bond (
 -- 해외주식 종목 마스터 (overseas_stock_code.py)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS isw_mst_overseas_stock (
-	id                          BIGINT        NOT NULL AUTO_INCREMENT COMMENT 'PK',
+	base_date                   VARCHAR(8)    NOT NULL DEFAULT '' COMMENT '기준일자(YYYYMMDD)',
+	short_code                  VARCHAR(32)   NOT NULL DEFAULT '' COMMENT '단축코드',
 	national_code               VARCHAR(8)    NOT NULL DEFAULT '' COMMENT 'National code',
 	exchange_id                 VARCHAR(20)   NOT NULL DEFAULT '' COMMENT 'Exchange id',
 	exchange_code               VARCHAR(20)   NOT NULL DEFAULT '' COMMENT 'Exchange code',
@@ -303,7 +305,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_overseas_stock (
 	tick_size_type              VARCHAR(20)   NOT NULL DEFAULT '' COMMENT 'Tick size Type',
 	etp_category_code           VARCHAR(3)    NOT NULL DEFAULT '' COMMENT '구분코드',
 	fetched_at                  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수집일시',
-	PRIMARY KEY (id),
+	PRIMARY KEY (base_date, short_code),
 	UNIQUE KEY uq_overseas_stock_symbol (exchange_code, symbol),
 	INDEX idx_overseas_stock_name_kr (stock_name_kr),
 	INDEX idx_overseas_stock_name_en (stock_name_en),
@@ -314,7 +316,8 @@ CREATE TABLE IF NOT EXISTS isw_mst_overseas_stock (
 -- 해외주식지수 종목 마스터 (overseas_index_code.py)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS isw_mst_overseas_index (
-	id                          BIGINT       NOT NULL AUTO_INCREMENT COMMENT 'PK',
+	base_date                   VARCHAR(8)   NOT NULL DEFAULT '' COMMENT '기준일자(YYYYMMDD)',
+	short_code                  VARCHAR(10)  NOT NULL DEFAULT '' COMMENT '단축코드',
 	category_code               VARCHAR(1)   NOT NULL DEFAULT '' COMMENT '구분코드',
 	symbol                      VARCHAR(10)  NOT NULL DEFAULT '' COMMENT '심볼',
 	stock_name_en               VARCHAR(200) NOT NULL DEFAULT '' COMMENT '영문명',
@@ -326,7 +329,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_overseas_index (
 	exchange_code               VARCHAR(4)   NOT NULL DEFAULT '' COMMENT '거래소코드',
 	national_code               VARCHAR(3)   NOT NULL DEFAULT '' COMMENT '국가구분코드',
 	fetched_at                  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수집일시',
-	PRIMARY KEY (id),
+	PRIMARY KEY (base_date, short_code),
 	UNIQUE KEY uq_overseas_index_symbol (symbol),
 	INDEX idx_overseas_index_name_kr (stock_name_kr),
 	INDEX idx_overseas_index_exchange (exchange_code)
@@ -336,7 +339,8 @@ CREATE TABLE IF NOT EXISTS isw_mst_overseas_index (
 -- 해외선물옵션 종목 마스터 (overseas_future_code.py)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS isw_mst_overseas_future (
-	id                          BIGINT         NOT NULL AUTO_INCREMENT COMMENT 'PK',
+	base_date                   VARCHAR(8)     NOT NULL DEFAULT '' COMMENT '기준일자(YYYYMMDD)',
+	short_code                  VARCHAR(32)    NOT NULL DEFAULT '' COMMENT '단축코드',
 	instrument_code             VARCHAR(32)    NOT NULL DEFAULT '' COMMENT '종목코드',
 	auto_orderable_yn           CHAR(1)        NOT NULL DEFAULT 'N' COMMENT '서버자동주문 가능 종목 여부',
 	auto_twap_orderable_yn      CHAR(1)        NOT NULL DEFAULT 'N' COMMENT '서버자동주문 TWAP 가능 종목 여부',
@@ -358,7 +362,7 @@ CREATE TABLE IF NOT EXISTS isw_mst_overseas_future (
 	spread_leg1_yn              CHAR(1)        NOT NULL DEFAULT 'N' COMMENT '스프레드기준종목 LEG1 여부',
 	sub_exchange_code           VARCHAR(3)     NOT NULL DEFAULT '' COMMENT '서브 거래소 코드',
 	fetched_at                  DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '수집일시',
-	PRIMARY KEY (id),
+	PRIMARY KEY (base_date, short_code),
 	UNIQUE KEY uq_overseas_future_instrument_code (instrument_code),
 	INDEX idx_overseas_future_name_kr (instrument_name_kr),
 	INDEX idx_overseas_future_exchange_item (exchange_code, item_code)

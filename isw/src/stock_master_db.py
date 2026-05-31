@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import math
+from datetime import datetime
 from typing import Any
 
 import pandas as pd
@@ -52,21 +53,31 @@ def _bulk_insert(
     if not rows:
         db_logger.info("db save table=%s rows=%d", table, 0)
         return 0
-    placeholders = ", ".join(["%s"] * len(cols))
-    col_list = ", ".join(cols)
+
+    # 모든 마스터 테이블 PK가 (base_date, short_code)이므로,
+    # 호출부가 base_date를 명시하지 않으면 저장 시점 기준일자를 자동 주입한다.
+    insert_cols = list(cols)
+    insert_rows = rows
+    if "base_date" not in insert_cols:
+        base_date = datetime.now().strftime("%Y%m%d")
+        insert_cols = ["base_date", *insert_cols]
+        insert_rows = [(base_date, *row) for row in rows]
+
+    placeholders = ", ".join(["%s"] * len(insert_cols))
+    col_list = ", ".join(insert_cols)
     sql = f"INSERT IGNORE INTO {table} ({col_list}) VALUES ({placeholders})"
     inserted_rows = 0
     with conn.cursor() as cur:
         cur.execute(f"TRUNCATE TABLE {table}")
-        cur.executemany(sql, rows)
+        cur.executemany(sql, insert_rows)
         inserted_rows = cur.rowcount
     conn.commit()
-    ignored_rows = len(rows) - inserted_rows
+    ignored_rows = len(insert_rows) - inserted_rows
     db_logger.info(
         "db save table=%s rows=%d requested=%d ignored=%d",
         table,
         inserted_rows,
-        len(rows),
+        len(insert_rows),
         ignored_rows,
     )
     return inserted_rows
@@ -355,13 +366,14 @@ def save_eurex_option(df: pd.DataFrame, conn: pymysql.connections.Connection) ->
 def save_domestic_bond(df: pd.DataFrame, conn: pymysql.connections.Connection) -> int:
     TABLE = "isw_mst_domestic_bond"
     COLS = [
-        "bond_type", "bond_class_code", "standard_code", "bond_name",
+        "short_code", "bond_type", "bond_class_code", "standard_code", "bond_name",
         "bond_interest_class_code", "listing_date", "issue_date", "redemption_date",
     ]
     rows = []
     for r in df.itertuples(index=False):
         d = r._asdict()
         rows.append((
+            _s(d.get("표준코드")),
             _s(d.get("유형")),
             _s(d.get("채권분류코드")),
             _s(d.get("표준코드")),
@@ -377,6 +389,7 @@ def save_domestic_bond(df: pd.DataFrame, conn: pymysql.connections.Connection) -
 def save_overseas_stock(df: pd.DataFrame, conn: pymysql.connections.Connection) -> int:
     TABLE = "isw_mst_overseas_stock"
     COLS = [
+        "short_code",
         "national_code", "exchange_id", "exchange_code", "exchange_name",
         "symbol", "realtime_symbol", "stock_name_kr", "stock_name_en",
         "security_type", "currency", "base_price",
@@ -389,6 +402,7 @@ def save_overseas_stock(df: pd.DataFrame, conn: pymysql.connections.Connection) 
     for r in df.itertuples(index=False):
         d = r._asdict()
         rows.append((
+            _s(d.get("심볼")),
             _s(d.get("국가코드")),
             _s(d.get("거래소ID")),
             _s(d.get("거래소코드")),
@@ -417,7 +431,7 @@ def save_overseas_stock(df: pd.DataFrame, conn: pymysql.connections.Connection) 
 def save_overseas_index(df: pd.DataFrame, conn: pymysql.connections.Connection) -> int:
     TABLE = "isw_mst_overseas_index"
     COLS = [
-        "category_code", "symbol", "stock_name_en", "stock_name_kr",
+        "short_code", "category_code", "symbol", "stock_name_en", "stock_name_kr",
         "issue_industry_code", "dow30_component_yn", "nasdaq100_component_yn",
         "sp500_component_yn", "exchange_code", "national_code",
     ]
@@ -425,6 +439,7 @@ def save_overseas_index(df: pd.DataFrame, conn: pymysql.connections.Connection) 
     for r in df.itertuples(index=False):
         d = r._asdict()
         rows.append((
+            _s(d.get("심볼")),
             _s(d.get("구분코드")),
             _s(d.get("심볼")),
             _s(d.get("영문명")),
@@ -442,6 +457,7 @@ def save_overseas_index(df: pd.DataFrame, conn: pymysql.connections.Connection) 
 def save_overseas_future(df: pd.DataFrame, conn: pymysql.connections.Connection) -> int:
     TABLE = "isw_mst_overseas_future"
     COLS = [
+        "short_code",
         "instrument_code", "auto_orderable_yn", "auto_twap_orderable_yn",
         "auto_macro_orderable_yn", "instrument_name_kr",
         "exchange_code", "item_code", "item_type",
@@ -455,6 +471,7 @@ def save_overseas_future(df: pd.DataFrame, conn: pymysql.connections.Connection)
     for r in df.itertuples(index=False):
         d = r._asdict()
         rows.append((
+            _s(d.get("종목코드")),
             _s(d.get("종목코드")),
             _s(d.get("서버자동주문가능여부")),
             _s(d.get("TWAP가능여부")),
