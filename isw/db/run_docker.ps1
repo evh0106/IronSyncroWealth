@@ -1,1 +1,1 @@
-docker compose -p kiwoom-db -f .\docker-compose.yml up -d
+docker compose -p isw_db -f .\docker-compose.yml up -d

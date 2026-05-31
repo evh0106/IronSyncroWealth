@@ -7,7 +7,7 @@ export function useRealtime(broker: Broker, symbol: string) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const ws = new WebSocket(`ws://localhost:8000/ws/${broker}/${symbol}`);
+    const ws = new WebSocket(`ws://localhost:8010/ws/${broker}/${symbol}`);
 
     ws.onmessage = (event) => {
       try {
