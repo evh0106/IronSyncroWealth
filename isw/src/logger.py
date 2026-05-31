@@ -8,6 +8,7 @@ _LOG_DIR = os.path.join(os.path.dirname(__file__), "..", "log")
 _LOG_FILE = os.path.join(_LOG_DIR, "access.log")
 _ERROR_LOG_FILE = os.path.join(_LOG_DIR, "error.log")
 _DB_LOG_FILE = os.path.join(_LOG_DIR, "db.log")
+_WEB_ERROR_LOG_FILE = os.path.join(_LOG_DIR, "webapp_error.log")
 
 os.makedirs(_LOG_DIR, exist_ok=True)
 
@@ -49,6 +50,17 @@ _db_file_handler.setFormatter(_fmt)
 _db_console_handler = logging.StreamHandler()
 _db_console_handler.setFormatter(_fmt)
 
+_web_error_file_handler = TimedRotatingFileHandler(
+    _WEB_ERROR_LOG_FILE,
+    when="midnight",
+    backupCount=30,
+    encoding="utf-8",
+)
+_web_error_file_handler.setFormatter(_fmt)
+
+_web_error_console_handler = logging.StreamHandler()
+_web_error_console_handler.setFormatter(_fmt)
+
 access_logger = logging.getLogger("isw.access")
 access_logger.setLevel(logging.INFO)
 access_logger.addHandler(_file_handler)
@@ -66,3 +78,9 @@ db_logger.setLevel(logging.INFO)
 db_logger.addHandler(_db_file_handler)
 db_logger.addHandler(_db_console_handler)
 db_logger.propagate = False
+
+web_error_logger = logging.getLogger("isw.web_error")
+web_error_logger.setLevel(logging.ERROR)
+web_error_logger.addHandler(_web_error_file_handler)
+web_error_logger.addHandler(_web_error_console_handler)
+web_error_logger.propagate = False

@@ -9,9 +9,11 @@ from fastapi import FastAPI, HTTPException, Query, Request, WebSocket, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 
 import stock_master
-from logger import access_logger, error_logger
+from logger import access_logger, error_logger, web_error_logger
 from schemas import (
     AccountSummary,
+    BasicStatusResponse,
+    ClientErrorLogRequest,
     MarketQuote,
     OrderRequest,
     OrderResponse,
@@ -84,6 +86,26 @@ async def log_requests(request: Request, call_next):  # type: ignore[type-arg]
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+@app.post("/api/v1/client-error-log", response_model=BasicStatusResponse)
+def log_client_error(payload: ClientErrorLogRequest, request: Request) -> BasicStatusResponse:
+    client_host = request.client.host if request.client else "-"
+    web_error_logger.error(
+        "client=%s type=%s broker=%s url=%s source=%s line=%s col=%s occurredAt=%s ua=%s msg=%s stack=%s",
+        client_host,
+        payload.type,
+        payload.broker or "-",
+        payload.url or "-",
+        payload.source or "-",
+        payload.line,
+        payload.column,
+        payload.occurredAt or "-",
+        payload.userAgent or "-",
+        payload.message,
+        payload.stack or "-",
+    )
+    return BasicStatusResponse(status="ok", message="웹 오류 로그 저장 완료")
 
 
 @app.get("/api/v1/account/{account_no}/summary", response_model=AccountSummary)

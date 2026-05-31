@@ -7,10 +7,12 @@ import { PortfolioPage } from "@/pages/portfolio/ui/page";
 import { AnalysisPage } from "@/pages/analysis/ui/page";
 import { TradePage } from "@/pages/trade/ui/page";
 import { TradeRegisterPage } from "@/pages/trade-register/ui/page";
+import { TradeAnalysisPage } from "@/pages/trade-analysis/ui/page";
 import { StrategiesPage } from "@/pages/strategies/ui/page";
 import { BacktestPage } from "@/pages/backtest/ui/page";
 import { SchedulerPage } from "@/pages/scheduler/ui/page";
 import { SettingsPage } from "@/pages/settings/ui/page";
+import { AccountManagementPage } from "@/pages/account-management/ui/page";
 import { NotificationsPage } from "@/pages/notifications/ui/page";
 import { LogsPage } from "@/pages/logs/ui/page";
 import { StockMasterPage } from "@/pages/stock-master/ui/page";
@@ -121,6 +123,7 @@ function AppShell() {
               <NavLink to="/trade/orders">주문 / 체결</NavLink>
               <NavLink to="/trade/portfolio">보유 종목</NavLink>
               <NavLink to="/trade/analysis">수익 분석</NavLink>
+              <NavLink to="/trade/trade-analysis">매매 분석</NavLink>
             </div>
           </div>
           <div className="nav-group">
@@ -148,6 +151,7 @@ function AppShell() {
               계정
             </button>
             <div className={`nav-group-items ${openGroups.account ? "open" : "collapsed"}`}>
+              <NavLink to="/account-management">계좌관리</NavLink>
               <NavLink to="/settings">API 설정</NavLink>
               <NavLink to="/notifications">알림 설정</NavLink>
               <NavLink to="/logs">시스템 로그</NavLink>
@@ -332,9 +336,11 @@ export const appRouter = createBrowserRouter([
       { path: "trade/orders", element: <OrdersPage /> },
       { path: "trade/portfolio", element: <PortfolioPage /> },
       { path: "trade/analysis", element: <AnalysisPage /> },
+      { path: "trade/trade-analysis", element: <TradeAnalysisPage /> },
       { path: "strategies", element: <StrategiesPage /> },
       { path: "backtest", element: <BacktestPage /> },
       { path: "scheduler", element: <SchedulerPage /> },
+      { path: "account-management", element: <AccountManagementPage /> },
       { path: "settings", element: <SettingsPage /> },
       { path: "notifications", element: <NotificationsPage /> },
       { path: "logs", element: <LogsPage /> },

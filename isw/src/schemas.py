@@ -60,3 +60,21 @@ class StockMasterTableResponse(BaseModel):
 class RealtimePayload(BaseModel):
     price: float
     volume: int
+
+
+class ClientErrorLogRequest(BaseModel):
+    type: str = Field(min_length=1)
+    message: str = Field(min_length=1)
+    stack: str = ""
+    url: str = ""
+    source: str = ""
+    line: int = 0
+    column: int = 0
+    userAgent: str = ""
+    broker: str = ""
+    occurredAt: str = ""
+
+
+class BasicStatusResponse(BaseModel):
+    status: str
+    message: str
