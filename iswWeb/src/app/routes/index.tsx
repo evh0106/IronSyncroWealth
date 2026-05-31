@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createBrowserRouter, NavLink, Outlet } from "react-router-dom";
 import { HomePage } from "@/pages/home/ui/page";
 import { RealtimePage } from "@/pages/realtime/ui/page";
@@ -17,50 +18,125 @@ import { useUiStore } from "@/app/store/ui-store";
 function AppShell() {
   const sidebarOpen = useUiStore((state) => state.sidebarOpen);
   const toggleSidebar = useUiStore((state) => state.toggleSidebar);
+  const [openGroups, setOpenGroups] = useState({
+    main: true,
+    stockMaster: true,
+    trade: true,
+    automation: true,
+    account: true,
+  });
+  const allGroupsOpen = Object.values(openGroups).every(Boolean);
+
+  const toggleGroup = (group: keyof typeof openGroups) => {
+    setOpenGroups((state) => ({
+      ...state,
+      [group]: !state[group],
+    }));
+  };
+
+  const toggleAllGroups = () => {
+    const nextOpen = !allGroupsOpen;
+
+    setOpenGroups({
+      main: nextOpen,
+      stockMaster: nextOpen,
+      trade: nextOpen,
+      automation: nextOpen,
+      account: nextOpen,
+    });
+  };
 
   return (
     <div className={`app-shell ${sidebarOpen ? "" : "sidebar-collapsed"}`}>
       <aside className={`side-menu ${sidebarOpen ? "open" : "closed"}`}>
         <div className="side-brand">IronSyncroWealth</div>
+        <button type="button" className="nav-all-toggle" onClick={toggleAllGroups}>
+          {allGroupsOpen ? "전체 접기" : "전체 펼치기"}
+        </button>
         <nav className="side-nav">
           <div className="nav-group">
-            <span className="nav-group-label">메인</span>
-            <NavLink to="/" end>대시보드</NavLink>
-            <NavLink to="/realtime">실시간 시세</NavLink>
+            <button
+              type="button"
+              className="nav-group-label nav-group-toggle"
+              onClick={() => toggleGroup("main")}
+              aria-expanded={openGroups.main}
+            >
+              메인
+            </button>
+            <div className={`nav-group-items ${openGroups.main ? "open" : "collapsed"}`}>
+              <NavLink to="/" end>대시보드</NavLink>
+              <NavLink to="/realtime">실시간 시세</NavLink>
+            </div>
           </div>
           <div className="nav-group">
-            <span className="nav-group-label">종목 마스터 조회</span>
-            <NavLink to="/stock-master/kospi">KOSPI</NavLink>
-            <NavLink to="/stock-master/kosdaq">KOSDAQ</NavLink>
-            <NavLink to="/stock-master/konex">KONEX</NavLink>
-            <NavLink to="/stock-master/domestic-elw">국내 ELW</NavLink>
-            <NavLink to="/stock-master/domestic-index-future">지수선물옵션</NavLink>
-            <NavLink to="/stock-master/domestic-stock-future">주식선물옵션</NavLink>
-            <NavLink to="/stock-master/domestic-cme-future">CME 연계 야간선물</NavLink>
-            <NavLink to="/stock-master/domestic-commodity-future">상품선물옵션</NavLink>
-            <NavLink to="/stock-master/domestic-eurex-option">EUREX 연계 야간옵션</NavLink>
-            <NavLink to="/stock-master/domestic-bond">장내채권</NavLink>
-            <NavLink to="/stock-master/overseas-stock">해외주식</NavLink>
-            <NavLink to="/stock-master/overseas-index">해외주식지수</NavLink>
-            <NavLink to="/stock-master/overseas-future">해외선물옵션</NavLink>
+            <button
+              type="button"
+              className="nav-group-label nav-group-toggle"
+              onClick={() => toggleGroup("stockMaster")}
+              aria-expanded={openGroups.stockMaster}
+            >
+              종목 마스터 조회
+            </button>
+            <div className={`nav-group-items ${openGroups.stockMaster ? "open" : "collapsed"}`}>
+              <NavLink to="/stock-master/kospi">KOSPI</NavLink>
+              <NavLink to="/stock-master/kosdaq">KOSDAQ</NavLink>
+              <NavLink to="/stock-master/konex">KONEX</NavLink>
+              <NavLink to="/stock-master/domestic-elw">국내 ELW</NavLink>
+              <NavLink to="/stock-master/domestic-index-future">지수선물옵션</NavLink>
+              <NavLink to="/stock-master/domestic-stock-future">주식선물옵션</NavLink>
+              <NavLink to="/stock-master/domestic-cme-future">CME 연계 야간선물</NavLink>
+              <NavLink to="/stock-master/domestic-commodity-future">상품선물옵션</NavLink>
+              <NavLink to="/stock-master/domestic-eurex-option">EUREX 연계 야간옵션</NavLink>
+              <NavLink to="/stock-master/domestic-bond">장내채권</NavLink>
+              <NavLink to="/stock-master/overseas-stock">해외주식</NavLink>
+              <NavLink to="/stock-master/overseas-index">해외주식지수</NavLink>
+              <NavLink to="/stock-master/overseas-future">해외선물옵션</NavLink>
+            </div>
           </div>
           <div className="nav-group">
-            <span className="nav-group-label">매매</span>
-            <NavLink to="/orders">주문 / 체결</NavLink>
-            <NavLink to="/portfolio">보유 종목</NavLink>
-            <NavLink to="/analysis">수익 분석</NavLink>
+            <button
+              type="button"
+              className="nav-group-label nav-group-toggle"
+              onClick={() => toggleGroup("trade")}
+              aria-expanded={openGroups.trade}
+            >
+              매매
+            </button>
+            <div className={`nav-group-items ${openGroups.trade ? "open" : "collapsed"}`}>
+              <NavLink to="/orders">주문 / 체결</NavLink>
+              <NavLink to="/portfolio">보유 종목</NavLink>
+              <NavLink to="/analysis">수익 분석</NavLink>
+            </div>
           </div>
           <div className="nav-group">
-            <span className="nav-group-label">자동화</span>
-            <NavLink to="/strategies">전략 관리</NavLink>
-            <NavLink to="/backtest">백테스트</NavLink>
-            <NavLink to="/scheduler">스케줄러</NavLink>
+            <button
+              type="button"
+              className="nav-group-label nav-group-toggle"
+              onClick={() => toggleGroup("automation")}
+              aria-expanded={openGroups.automation}
+            >
+              자동화
+            </button>
+            <div className={`nav-group-items ${openGroups.automation ? "open" : "collapsed"}`}>
+              <NavLink to="/strategies">전략 관리</NavLink>
+              <NavLink to="/backtest">백테스트</NavLink>
+              <NavLink to="/scheduler">스케줄러</NavLink>
+            </div>
           </div>
           <div className="nav-group">
-            <span className="nav-group-label">계정</span>
-            <NavLink to="/settings">API 설정</NavLink>
-            <NavLink to="/notifications">알림 설정</NavLink>
-            <NavLink to="/logs">시스템 로그</NavLink>
+            <button
+              type="button"
+              className="nav-group-label nav-group-toggle"
+              onClick={() => toggleGroup("account")}
+              aria-expanded={openGroups.account}
+            >
+              계정
+            </button>
+            <div className={`nav-group-items ${openGroups.account ? "open" : "collapsed"}`}>
+              <NavLink to="/settings">API 설정</NavLink>
+              <NavLink to="/notifications">알림 설정</NavLink>
+              <NavLink to="/logs">시스템 로그</NavLink>
+            </div>
           </div>
         </nav>
       </aside>

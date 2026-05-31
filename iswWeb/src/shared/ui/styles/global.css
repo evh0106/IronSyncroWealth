@@ -116,13 +116,50 @@ h3,
 }
 
 .nav-group-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  padding: 0 0.65rem 0.3rem;
-  opacity: 0.7;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--accent-2);
+  padding: 0.2rem 0.65rem 0.35rem;
+  opacity: 1;
+}
+
+.nav-group-toggle {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  color: var(--accent-2);
+  border: 0;
+  cursor: pointer;
+}
+
+.nav-group-toggle:hover {
+  color: var(--text);
+}
+
+.nav-all-toggle {
+  width: fit-content;
+  margin: 0 0 0.6rem 0.65rem;
+  padding: 0.35rem 0.7rem;
+  background: var(--accent-2);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+.nav-all-toggle:hover {
+  background: #155fca;
+}
+
+.nav-group-items {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.nav-group-items.collapsed {
+  display: none;
 }
 
 .side-nav a {
