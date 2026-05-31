@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { createBrowserRouter, NavLink, Outlet, useNavigate } from "react-router-dom";
+import { createBrowserRouter, Navigate, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { HomePage } from "@/pages/home/ui/page";
 import { RealtimePage } from "@/pages/realtime/ui/page";
 import { OrdersPage } from "@/pages/orders/ui/page";
 import { PortfolioPage } from "@/pages/portfolio/ui/page";
 import { AnalysisPage } from "@/pages/analysis/ui/page";
+import { TradePage } from "@/pages/trade/ui/page";
 import { StrategiesPage } from "@/pages/strategies/ui/page";
 import { BacktestPage } from "@/pages/backtest/ui/page";
 import { SchedulerPage } from "@/pages/scheduler/ui/page";
@@ -50,6 +51,11 @@ function AppShell() {
   const handleStockMasterGroupClick = () => {
     toggleGroup("stockMaster");
     navigate("/stock-master/top");
+  };
+
+  const handleTradeGroupClick = () => {
+    toggleGroup("trade");
+    navigate("/trade/top");
   };
 
   return (
@@ -104,15 +110,15 @@ function AppShell() {
             <button
               type="button"
               className="nav-group-label nav-group-toggle"
-              onClick={() => toggleGroup("trade")}
+              onClick={handleTradeGroupClick}
               aria-expanded={openGroups.trade}
             >
               매매
             </button>
             <div className={`nav-group-items ${openGroups.trade ? "open" : "collapsed"}`}>
-              <NavLink to="/orders">주문 / 체결</NavLink>
-              <NavLink to="/portfolio">보유 종목</NavLink>
-              <NavLink to="/analysis">수익 분석</NavLink>
+              <NavLink to="/trade/orders">주문 / 체결</NavLink>
+              <NavLink to="/trade/portfolio">보유 종목</NavLink>
+              <NavLink to="/trade/analysis">수익 분석</NavLink>
             </div>
           </div>
           <div className="nav-group">
@@ -318,9 +324,11 @@ export const appRouter = createBrowserRouter([
           />
         ),
       },
-      { path: "orders", element: <OrdersPage /> },
-      { path: "portfolio", element: <PortfolioPage /> },
-      { path: "analysis", element: <AnalysisPage /> },
+      { path: "trade", element: <Navigate to="/trade/top" replace /> },
+      { path: "trade/top", element: <TradePage /> },
+      { path: "trade/orders", element: <OrdersPage /> },
+      { path: "trade/portfolio", element: <PortfolioPage /> },
+      { path: "trade/analysis", element: <AnalysisPage /> },
       { path: "strategies", element: <StrategiesPage /> },
       { path: "backtest", element: <BacktestPage /> },
       { path: "scheduler", element: <SchedulerPage /> },
