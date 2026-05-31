@@ -592,6 +592,69 @@ _DOWNLOAD_TASKS = [
     ("해외선물옵션", download_overseas_future),
 ]
 
+_TOP_FILE_SPECS: list[tuple[str, str]] = [
+    ("KOSPI", "kospi_code.csv"),
+    ("KOSDAQ", "kosdaq_code.csv"),
+    ("KONEX", "konex_code.csv"),
+    ("국내ELW", "elw_code.csv"),
+    ("지수선물옵션", "fo_idx_code_mts.csv"),
+    ("주식선물옵션", "fo_stk_code_mts.csv"),
+    ("CME야간선물", "fo_cme_code.csv"),
+    ("상품선물옵션", "fo_com_code.csv"),
+    ("EUREX야간옵션", "fo_eurex_code.csv"),
+    ("장내채권", "bond_code.csv"),
+    ("해외주식", "overseas_stock_code.csv"),
+    ("해외주식지수", "frgn_code.csv"),
+    ("해외선물옵션", "ffcode.csv"),
+]
+
+
+def get_mst_file_statuses() -> list[dict[str, Any]]:
+    """isw/mst 폴더의 마스터 CSV 파일 상태를 반환한다."""
+    _ensure_mst_dir()
+
+    results: list[dict[str, Any]] = []
+    for market, filename in _TOP_FILE_SPECS:
+        csv_path = MST_DIR / filename
+        if not csv_path.exists():
+            results.append({
+                "market": market,
+                "file": filename,
+                "rows": 0,
+                "db_rows": 0,
+                "error": "파일 없음",
+                "savedAt": datetime.now(timezone.utc).isoformat(),
+            })
+            continue
+
+        try:
+            row_count = max(sum(1 for _ in csv_path.open("r", encoding="utf-8-sig")) - 1, 0)
+            saved_at = datetime.fromtimestamp(csv_path.stat().st_mtime, tz=timezone.utc).isoformat()
+            results.append({
+                "market": market,
+                "file": filename,
+                "rows": row_count,
+                "db_rows": 0,
+                "savedAt": saved_at,
+            })
+        except Exception as exc:
+            print(f"[ERROR] stock-master file status read failed market={market} file={filename} err={exc}")
+            error_logger.exception(
+                "stock-master file status read failed market=%s file=%s",
+                market,
+                filename,
+            )
+            results.append({
+                "market": market,
+                "file": filename,
+                "rows": 0,
+                "db_rows": 0,
+                "error": str(exc),
+                "savedAt": datetime.now(timezone.utc).isoformat(),
+            })
+
+    return results
+
 
 def download_all() -> list[dict[str, Any]]:
     """13개 시장 마스터 파일을 순차적으로 다운로드한다.

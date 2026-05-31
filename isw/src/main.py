@@ -106,6 +106,26 @@ async def request_stock_master_download_all() -> StockMasterDownloadResponse:
         raise HTTPException(status_code=500, detail="다운로드 요청 중 오류가 발생했습니다.")
 
 
+@app.get("/api/v1/stock-master/files", response_model=StockMasterDownloadResponse)
+def get_stock_master_files() -> StockMasterDownloadResponse:
+    requested_at = datetime.now(timezone.utc).isoformat()
+    try:
+        raw_results = stock_master.get_mst_file_statuses()
+        items = [StockMasterDownloadItem(**r) for r in raw_results]
+        has_error = any(item.error for item in items)
+        ok_count = sum(1 for item in items if not item.error)
+        return StockMasterDownloadResponse(
+            status="partial" if has_error else "ok",
+            message=f"{ok_count}/{len(items)}개 마스터 파일 정보를 불러왔습니다.",
+            requestedAt=requested_at,
+            results=items,
+        )
+    except Exception:
+        print(f"[ERROR] stock-master files fetch failed requestedAt={requested_at}")
+        error_logger.exception("stock-master files fetch failed requestedAt=%s", requested_at)
+        raise HTTPException(status_code=500, detail="마스터 파일 정보 조회 중 오류가 발생했습니다.")
+
+
 @app.websocket("/ws/{broker}/{symbol}")
 async def market_realtime_socket(websocket: WebSocket, broker: Broker, symbol: str) -> None:
     await websocket.accept()

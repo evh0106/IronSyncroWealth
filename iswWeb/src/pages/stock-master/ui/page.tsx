@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useUiStore } from "@/app/store/ui-store";
 import { apiClient } from "@/shared/api/client";
 
@@ -44,8 +44,32 @@ export function StockMasterPage({ title, tableName, summary, mode = "default" }:
   const isTopMode = mode === "top";
   const broker = useUiStore((state) => state.broker);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isLoadingFiles, setIsLoadingFiles] = useState(false);
   const [downloadResult, setDownloadResult] = useState<DownloadAllResponse | null>(null);
   const [downloadError, setDownloadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isTopMode) {
+      return;
+    }
+
+    const loadMstFiles = async () => {
+      setIsLoadingFiles(true);
+      setDownloadError(null);
+      try {
+        const { data } = await apiClient(broker).get<DownloadAllResponse>(
+          "/api/v1/stock-master/files"
+        );
+        setDownloadResult(data);
+      } catch {
+        setDownloadError("마스터 파일 정보 조회 중 오류가 발생했습니다.");
+      } finally {
+        setIsLoadingFiles(false);
+      }
+    };
+
+    loadMstFiles();
+  }, [broker, isTopMode]);
 
   const handleDownloadAll = async () => {
     setIsDownloading(true);
@@ -112,9 +136,11 @@ export function StockMasterPage({ title, tableName, summary, mode = "default" }:
                   : (
                   <tr>
                     <td colSpan={6}>
-                      {isDownloading
+                      {isLoadingFiles
+                        ? "마스터 파일 정보를 불러오는 중입니다..."
+                        : isDownloading
                         ? "마스터 파일 다운로드 중입니다..."
-                        : "버튼을 눌러 마스터 파일을 다운로드하세요."}
+                        : "표시할 마스터 파일 정보가 없습니다."}
                     </td>
                   </tr>
                     )}
