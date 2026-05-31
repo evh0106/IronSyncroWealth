@@ -6,6 +6,7 @@ import { OrdersPage } from "@/pages/orders/ui/page";
 import { PortfolioPage } from "@/pages/portfolio/ui/page";
 import { AnalysisPage } from "@/pages/analysis/ui/page";
 import { TradePage } from "@/pages/trade/ui/page";
+import { TradeRegisterPage } from "@/pages/trade-register/ui/page";
 import { StrategiesPage } from "@/pages/strategies/ui/page";
 import { BacktestPage } from "@/pages/backtest/ui/page";
 import { SchedulerPage } from "@/pages/scheduler/ui/page";
@@ -116,6 +117,7 @@ function AppShell() {
               매매
             </button>
             <div className={`nav-group-items ${openGroups.trade ? "open" : "collapsed"}`}>
+              <NavLink to="/trade/register">매매등록</NavLink>
               <NavLink to="/trade/orders">주문 / 체결</NavLink>
               <NavLink to="/trade/portfolio">보유 종목</NavLink>
               <NavLink to="/trade/analysis">수익 분석</NavLink>
@@ -326,6 +328,7 @@ export const appRouter = createBrowserRouter([
       },
       { path: "trade", element: <Navigate to="/trade/top" replace /> },
       { path: "trade/top", element: <TradePage /> },
+      { path: "trade/register", element: <TradeRegisterPage /> },
       { path: "trade/orders", element: <OrdersPage /> },
       { path: "trade/portfolio", element: <PortfolioPage /> },
       { path: "trade/analysis", element: <AnalysisPage /> },
