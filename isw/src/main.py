@@ -2,18 +2,42 @@ from __future__ import annotations
 
 import asyncio
 import time
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
 import stock_master
 from logger import access_logger, error_logger
-from schemas import AccountSummary, MarketQuote, OrderRequest, OrderResponse, StockMasterDownloadItem, StockMasterDownloadResponse
+from schemas import (
+    AccountSummary,
+    MarketQuote,
+    OrderRequest,
+    OrderResponse,
+    StockMasterDownloadItem,
+    StockMasterDownloadResponse,
+    StockMasterTableResponse,
+)
 from service import service
 
 Broker = Literal["kiwoom", "kis"]
+
+ALLOWED_STOCK_MASTER_TABLES = {
+    "isw_mst_kospi",
+    "isw_mst_kosdaq",
+    "isw_mst_konex",
+    "isw_mst_domestic_elw",
+    "isw_mst_domestic_index_future",
+    "isw_mst_domestic_stock_future",
+    "isw_mst_domestic_cme_future",
+    "isw_mst_domestic_commodity_future",
+    "isw_mst_domestic_eurex_option",
+    "isw_mst_domestic_bond",
+    "isw_mst_overseas_stock",
+    "isw_mst_overseas_index",
+    "isw_mst_overseas_future",
+}
 
 app = FastAPI(title="ISW Backend Skeleton", version="0.1.0")
 
@@ -124,6 +148,93 @@ def get_stock_master_files() -> StockMasterDownloadResponse:
         print(f"[ERROR] stock-master files fetch failed requestedAt={requested_at}")
         error_logger.exception("stock-master files fetch failed requestedAt=%s", requested_at)
         raise HTTPException(status_code=500, detail="마스터 파일 정보 조회 중 오류가 발생했습니다.")
+
+
+@app.get("/api/v1/stock-master/table/{table_name}", response_model=StockMasterTableResponse)
+def get_stock_master_table(
+    table_name: str,
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=50, ge=1, le=2000),
+    base_date: str | None = Query(default=None, pattern=r"^\d{8}$"),
+) -> StockMasterTableResponse:
+    if table_name not in ALLOWED_STOCK_MASTER_TABLES:
+        raise HTTPException(status_code=400, detail="허용되지 않은 테이블입니다.")
+
+    try:
+        from db import get_conn
+    except Exception as exc:
+        print(f"[ERROR] stock-master table db init failed table={table_name} err={exc}")
+        error_logger.exception("stock-master table db init failed table=%s", table_name)
+        raise HTTPException(status_code=500, detail="DB 연결 초기화에 실패했습니다.")
+
+    try:
+        conn = get_conn()
+        try:
+            offset = (page - 1) * limit
+            where_clause = " WHERE base_date = %s" if base_date else ""
+            where_params: tuple = (base_date,) if base_date else ()
+            with conn.cursor() as cur:
+                cur.execute(f"SELECT COUNT(*) FROM {table_name}{where_clause}", where_params)
+                total_count_row = cur.fetchone()
+                total_count = int(total_count_row[0]) if total_count_row else 0
+
+                cur.execute(
+                    f"SELECT * FROM {table_name}{where_clause} ORDER BY base_date DESC, short_code ASC LIMIT %s OFFSET %s",
+                    (*where_params, limit, offset),
+                )
+                raw_rows = cur.fetchall()
+                columns = [desc[0] for desc in (cur.description or [])]
+
+                cur.execute(
+                    """
+                    SELECT COLUMN_NAME, COLUMN_COMMENT
+                    FROM information_schema.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s
+                    ORDER BY ORDINAL_POSITION
+                    """,
+                    (table_name,),
+                )
+                comment_rows = cur.fetchall()
+
+            column_labels: dict[str, str] = {}
+            for col_name, col_comment in comment_rows:
+                label = (col_comment or "").strip() if isinstance(col_comment, str) else ""
+                column_labels[col_name] = label or col_name
+
+            rows: list[dict[str, str | int | float | None]] = []
+            for raw in raw_rows:
+                row: dict[str, str | int | float | None] = {}
+                for i, column in enumerate(columns):
+                    value = raw[i]
+                    if value is None or isinstance(value, (str, int, float)):
+                        row[column] = value
+                    elif isinstance(value, (datetime, date)):
+                        row[column] = value.isoformat()
+                    elif isinstance(value, (bytes, bytearray)):
+                        row[column] = value.decode("utf-8", errors="replace")
+                    else:
+                        row[column] = str(value)
+                rows.append(row)
+
+            return StockMasterTableResponse(
+                status="ok",
+                message=f"{len(rows)}건 조회되었습니다.",
+                tableName=table_name,
+                rowCount=len(rows),
+                totalCount=total_count,
+                page=page,
+                pageSize=limit,
+                totalPages=((total_count + limit - 1) // limit) if total_count > 0 else 1,
+                columns=columns,
+                columnLabels=column_labels,
+                rows=rows,
+            )
+        finally:
+            conn.close()
+    except Exception as exc:
+        print(f"[ERROR] stock-master table fetch failed table={table_name} err={exc}")
+        error_logger.exception("stock-master table fetch failed table=%s", table_name)
+        raise HTTPException(status_code=500, detail="종목 마스터 테이블 조회 중 오류가 발생했습니다.")
 
 
 @app.websocket("/ws/{broker}/{symbol}")

@@ -43,6 +43,20 @@ class StockMasterDownloadResponse(BaseModel):
     results: list[StockMasterDownloadItem] = []
 
 
+class StockMasterTableResponse(BaseModel):
+    status: str
+    message: str
+    tableName: str
+    rowCount: int
+    totalCount: int
+    page: int
+    pageSize: int
+    totalPages: int
+    columns: list[str]
+    columnLabels: dict[str, str] = {}
+    rows: list[dict[str, str | int | float | None]]
+
+
 class RealtimePayload(BaseModel):
     price: float
     volume: int
