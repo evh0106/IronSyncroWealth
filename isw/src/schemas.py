@@ -27,10 +27,19 @@ class OrderResponse(BaseModel):
     status: str
 
 
+class StockMasterDownloadItem(BaseModel):
+    market: str
+    file: str | None
+    rows: int
+    error: str | None = None
+    savedAt: str
+
+
 class StockMasterDownloadResponse(BaseModel):
     status: str
     message: str
     requestedAt: str
+    results: list[StockMasterDownloadItem] = []
 
 
 class RealtimePayload(BaseModel):

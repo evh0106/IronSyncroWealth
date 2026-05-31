@@ -2,13 +2,15 @@ from __future__ import annotations
 
 import asyncio
 import time
+from datetime import datetime, timezone
 from typing import Literal
 
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 
+import stock_master
 from logger import access_logger
-from schemas import AccountSummary, MarketQuote, OrderRequest, OrderResponse, StockMasterDownloadResponse
+from schemas import AccountSummary, MarketQuote, OrderRequest, OrderResponse, StockMasterDownloadItem, StockMasterDownloadResponse
 from service import service
 
 Broker = Literal["kiwoom", "kis"]
@@ -76,8 +78,18 @@ def submit_order(payload: OrderRequest) -> OrderResponse:
 
 
 @app.post("/api/v1/stock-master/download-all", response_model=StockMasterDownloadResponse)
-def request_stock_master_download_all() -> StockMasterDownloadResponse:
-    return service.request_stock_master_download_all()
+async def request_stock_master_download_all() -> StockMasterDownloadResponse:
+    requested_at = datetime.now(timezone.utc).isoformat()
+    raw_results = await asyncio.to_thread(stock_master.download_all)
+    items = [StockMasterDownloadItem(**r) for r in raw_results]
+    has_error = any(item.error for item in items)
+    ok_count = sum(1 for item in items if not item.error)
+    return StockMasterDownloadResponse(
+        status="partial" if has_error else "ok",
+        message=f"{ok_count}/{len(items)}개 시장 마스터 파일 다운로드 완료.",
+        requestedAt=requested_at,
+        results=items,
+    )
 
 
 @app.websocket("/ws/{broker}/{symbol}")
