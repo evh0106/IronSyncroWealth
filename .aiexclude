@@ -1,0 +1,51 @@
+# AI 분석을 위한 제외 파일 설정 (.aiexclude / .cursorignore 등)
+# 소스 코드 및 주요 설정 파일 외의 불필요한 파일들이 컨텍스트에 포함되지 않도록 제외합니다.
+
+# 1. 버전 관리 및 에디터/IDE 설정
+.git/
+.vscode/
+.idea/
+
+# 2. 가상환경 및 의존성 패키지 폴더
+.venv/
+venv/
+env/
+node_modules/
+__pycache__/
+.pytest_cache/
+*.egg-info/
+
+# 3. 빌드 결과물 및 캐시
+dist/
+build/
+out/
+.next/
+tsconfig.tsbuildinfo
+
+# 4. 로그 및 데이터베이스 파일
+log/
+logs/
+*.log
+db/
+mst/
+*.db
+*.sqlite
+*.sqlite3
+
+# 5. 용량이 크거나 AI 분석에 불필요한 패키지 잠금 파일
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# 6. 보안이 필요한 로컬 환경변수 파일 및 인증서 (참고용 example 파일은 분석할 수 있으나 실제 비밀키는 제외)
+*.pem
+*.key
+*.cert
+# .env 파일 등 중요한 정보가 담긴 파일 제외 (템플릿 제외하고 실제만)
+.env
+.env.local
+
+# 7. 기타 불필요한 자동 생성 파일들
+coverage/
+.DS_Store
+Thumbs.db
