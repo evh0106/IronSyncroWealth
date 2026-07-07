@@ -50,6 +50,9 @@ class TokenService:
 
     def revoke_token(self, server_mode: str = "real", token: str | None = None) -> TokenRevokeResponse:
         revoked_token = token or ((issue_cached_access_token(env_dv=server_mode) or {}).get("access_token"))
+
+        print(f"Revoking token: {revoked_token} for server_mode: {server_mode}")
+
         if not revoked_token:
             raise ApiError("폐기할 토큰이 없습니다.", code="TOKEN_NOT_FOUND", status_code=404)
 

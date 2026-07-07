@@ -122,12 +122,12 @@ def _get_valid_token(app_key: str, app_secret: str) -> str | None:
         conn = db.get_connection()
         with conn.cursor() as cur:
             sql = """
-                SELECT t.access_token, t.access_token_token_expired
+                SELECT t.access_token, t.access_token_token_expired, r.code, r.message
                 FROM tokenP t
                 LEFT JOIN revokeP r
                   ON r.req_appkey = t.req_appkey
                  AND r.req_token  = t.access_token
-                 AND r.code = '0'
+                 AND TRIM(r.code) = '0'
                 WHERE t.req_appkey = %s
                   AND t.access_token <> ''
                   AND r.id IS NULL
@@ -140,6 +140,8 @@ def _get_valid_token(app_key: str, app_secret: str) -> str | None:
         for row in rows:
             token = str(row.get("access_token", "") or "")
             expired_at = str(row.get("access_token_token_expired", "") or "")
+            code = str(row.get("code", "") or "")
+            message = str(row.get("message", "") or "")
 
             if not token:
                 continue
@@ -159,6 +161,10 @@ def _get_valid_token(app_key: str, app_secret: str) -> str | None:
                         "message": f"AUTO_REVOKED_EXPIRED_TOKEN({expired_at})",
                     },
                 )
+                continue
+
+            if code == "0":
+                print(f"  [DB 조회] 폐기 이력(code={code}, message={message})이 있는 토큰입니다. 다음 토큰을 확인합니다.")
                 continue
 
             print('  [DB 조회] 유효한 액세스 토큰이 DB에 존재합니다.')
@@ -257,6 +263,43 @@ def _save_approval(app_key: str, app_secret: str, grant_type: str, response: dic
         print(f'  [DB 저장 오류] Approval: {exc}')
         if conn is not None:
             conn.rollback()
+    finally:
+        if conn is not None:
+            conn.close()
+
+
+def _normalize_revoke_token(token: str | None) -> str:
+    """폐기 입력 토큰을 정규화합니다. Swagger 기본값 'string'은 미입력으로 취급합니다."""
+    value = str(token or "").strip()
+    if not value:
+        return ""
+    if value.lower() == "string":
+        return ""
+    return value
+
+
+def _get_last_access_token(app_key: str) -> str:
+    """tokenP에서 마지막으로 저장된 access_token을 반환합니다."""
+    conn = None
+    try:
+        conn = db.get_connection()
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                    SELECT access_token
+                    FROM tokenP
+                    WHERE req_appkey = %s
+                      AND access_token <> ''
+                    ORDER BY id DESC
+                    LIMIT 1
+                """,
+                (app_key,),
+            )
+            row = cur.fetchone()
+        return str((row or {}).get("access_token", "") or "")
+    except Exception as exc:
+        print(f"  [DB 조회 오류] 마지막 access_token 조회 실패: {exc}")
+        return ""
     finally:
         if conn is not None:
             conn.close()
@@ -372,7 +415,17 @@ def get_access_token(
 
 def revoke_access_token(token: str, env_dv: str | None = None) -> dict[str, Any]:
     """액세스 토큰을 폐기하고 결과를 DB에 저장합니다."""
+
     cfg = load_config()
+    normalized_token = _normalize_revoke_token(token)
+    if not normalized_token:
+        normalized_token = _get_last_access_token(cfg["my_app"])
+
+    if not normalized_token:
+        raise ValueError("폐기할 access_token이 없습니다. token 값을 입력하거나 tokenP 저장 이력을 확인하세요.")
+
+    print(f"revoke_access_token: Revoking token: {normalized_token} for env_dv: {env_dv}")
+
     current_env = _resolve_env_dv(env_dv, cfg)
     url = _base_url(current_env, cfg) + _REQ_SPEC["ka10002"]["url"]
 
@@ -381,7 +434,7 @@ def revoke_access_token(token: str, env_dv: str | None = None) -> dict[str, Any]
         {
             "appkey": cfg["my_app"],
             "appsecret": cfg["my_sec"],
-            "token": token,
+            "token": normalized_token,
         },
     )
     headers = {"content-type": "application/json; charset=UTF-8"}
@@ -408,7 +461,7 @@ def revoke_access_token(token: str, env_dv: str | None = None) -> dict[str, Any]
     response.raise_for_status()
     _print_response(response, "ka10002")
     data = response.json()
-    _save_revoke(cfg["my_app"], cfg["my_sec"], token, data)
+    _save_revoke(cfg["my_app"], cfg["my_sec"], normalized_token, data)
 
     if not _is_revoke_success(data):
         code = str(data.get("code", "") or "")
